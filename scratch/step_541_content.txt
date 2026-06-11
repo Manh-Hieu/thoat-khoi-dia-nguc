@@ -1,0 +1,1 @@
+﻿CĂ¡c sprite Ä‘ang ráº¥t nhá» (chá»‰ ~383 bytes), nghÄ©a lĂ  chĂºng Ä‘Æ°á»£c táº¡o báº±ng code á»Ÿ dáº¡ng pixel art Ä‘Æ¡n giáº£n. TĂ´i cáº§n xem `SpriteGenerator.cs` Ä‘á»ƒ hiá»ƒu cĂ¡ch váº½ nhĂ¢n váº­t hiá»‡n táº¡i:

@@ -1,0 +1,60 @@
+﻿Created At: 2026-06-11T17:47:21Z
+Completed At: 2026-06-11T17:47:22Z
+File Path: `file:///c:/code/thoat%20khoi%20dia%20nguc/Assets/Editor/SpriteGenerator.cs`
+Total Lines: 1766
+Total Bytes: 71276
+Showing lines 70 to 120
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+70:                 }
+71:             }
+72:             tex.Apply();
+73:             SaveTexture(tex, path);
+74:         }
+75: 
+76:         private static void GenerateMinhSprites()
+77:         {
+78:             var colorMap = new Dictionary<char, Color>
+79:             {
+80:                 { '.', Color.clear },
+81:                 { 'H', ColorFromHex("#1A0F0A") }, // Hair very dark
+82:                 { 'h', ColorFromHex("#3D2314") }, // Hair dark brown
+83:                 { 'i', ColorFromHex("#5C3520") }, // Hair highlight/sheen
+84:                 { 'S', ColorFromHex("#F5C99D") }, // Skin light
+85:                 { 's', ColorFromHex("#D4956A") }, // Skin shadow
+86:                 { 'f', ColorFromHex("#E8A878") }, // Skin mid-tone
+87:                 { 'E', ColorFromHex("#1A1A2E") }, // Eyes dark
+88:                 { 'e', ColorFromHex("#4A3728") }, // Eyebrow brown
+89:                 { 'n', ColorFromHex("#C07A55") }, // Nose/mouth shadow
+90:                 { 'L', ColorFromHex("#C0392B") }, // Mouth/lip red
+91:                 { 'T', ColorFromHex("#1B2A4A") }, // Hoodie main dark navy
+92:                 { 't', ColorFromHex("#253C6E") }, // Hoodie lighter blue
+93:                 { 'r', ColorFromHex("#0F1D34") }, // Hoodie very dark shadow
+94:                 { 'w', ColorFromHex("#E8EDF5") }, // Hoodie trim white
+95:                 { 'c', ColorFromHex("#A8B4CC") }, // Hoodie pocket/strings gray
+96:                 { 'J', ColorFromHex("#1A3A5C") }, // Jeans main blue
+97:                 { 'j', ColorFromHex("#0D2238") }, // Jeans shadow/seam
+98:                 { 'q', ColorFromHex("#2E5880") }, // Jeans highlight
+99:                 { 'W', ColorFromHex("#E8E8E8") }, // Shoe white
+100:                 { 'G', ColorFromHex("#B0B8C8") }, // Shoe gray
+101:                 { 'g', ColorFromHex("#7A8598") }, // Shoe dark gray sole
+102:                 { 'Z', ColorFromHex("#1A1A1A") }, // Belt dark
+103:             };
+104: 
+105:             // IDLE DOWN - facing camera
+106:             string[] down = {
+107:                 "........................",
+108:                 "........................",
+109:                 "........hhHHHHhh........",
+110:                 "......HHHHHHHHHHHHhh....",
+111:                 ".....HHhhhiiiihhhHHHH...",
+112:                 ".....HHiSSSSSSSSifHHH...",
+113:                 ".....HSSSSSSSSSSSSfH....",
+114:                 ".....HSeeSSSSSSeeefH....",
+115:                 ".....HSEESSSSSSEESfH....",
+116:                 ".....HSSSSSSSSSSSSfH....",
+117:                 ".....HfSSSnnSSSSSfH.....",
+118:                 ".....HfSSSSLSSSSsf......",
+119:                 "......sSSSSSSSSSs.......",
+120:                 ".......SSSSSSSSS........",
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+

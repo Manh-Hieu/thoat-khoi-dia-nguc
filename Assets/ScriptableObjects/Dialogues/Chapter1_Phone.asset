@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 774a8757c51ee8b4788e5669d3278ab1, type: 3}
+  m_Name: Chapter1_Phone
+  m_EditorClassIdentifier: Assembly-CSharp::EscapeFromHell.Systems.DialogueData
+  lines:
+  - speakerName: Minh
+    speakerPortrait: {fileID: 0}
+    text: "M\u1EDF \u0111i\u1EC7n tho\u1EA1i l\xEAn xem n\xE0o... C\xF3 tin nh\u1EAFn
+      m\u1EDBi t\u1EEB M\u1EB9."
+  - speakerName: "M\u1EB9"
+    speakerPortrait: {fileID: 0}
+    text: "Minh \u01A1i, th\xE1ng n\xE0y d\u01B0\u1EDBi qu\xEA m\u1EA5t m\xF9a qu\xE1,
+      b\u1ED1 con l\u1EA1i \u0111au ch\xE2n. Con xem c\xF3 g\u1EEDi v\u1EC1 cho m\u1EB9
+      \xEDt ti\u1EC1n thu\u1ED1c thang cho b\u1ED1 \u0111\u01B0\u1EE3c kh\xF4ng?"
+  - speakerName: Minh
+    speakerPortrait: {fileID: 0}
+    text: "L\u1EA1i l\xE0 tin nh\u1EAFn xin ti\u1EC1n... M\xECnh \u0111\u1EBFn ti\u1EC1n
+      nh\xE0 c\xF2n ch\u01B0a \u0111\xF3ng n\u1ED5i, l\u1EA5y \u0111\xE2u ra ti\u1EC1n
+      g\u1EEDi v\u1EC1 qu\xEA b\xE2y gi\u1EDD?"
+  choices: []

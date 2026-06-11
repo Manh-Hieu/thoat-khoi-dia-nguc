@@ -1,0 +1,98 @@
+﻿Created At: 2026-06-11T18:55:02Z
+Completed At: 2026-06-11T18:55:02Z
+File Path: `file:///c:/code/thoat%20khoi%20dia%20nguc/scratch/gen_sprites.py`
+Total Lines: 87
+Total Bytes: 3248
+Showing lines 1 to 87
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: import os
+2: import re
+3: from PIL import Image
+4: 
+5: def hex_to_rgba(hex_str):
+6:     hex_str = hex_str.lstrip('#')
+7:     if len(hex_str) == 6:
+8:         r = int(hex_str[0:2], 16)
+9:         g = int(hex_str[2:4], 16)
+10:         b = int(hex_str[4:6], 16)
+11:         return (r, g, b, 255)
+12:     elif len(hex_str) == 8:
+13:         r = int(hex_str[0:2], 16)
+14:         g = int(hex_str[2:4], 16)
+15:         b = int(hex_str[4:6], 16)
+16:         a = int(hex_str[6:8], 16)
+17:         return (r, g, b, a)
+18:     return (0, 0, 0, 0)
+19: 
+20: def parse_and_generate():
+21:     cs_path = r'c:\code\thoat khoi dia nguc\Assets\Editor\SpriteGenerator.cs'
+22:     with open(cs_path, 'r', encoding='utf-8') as f:
+23:         content = f.read()
+24: 
+25:     # Find colorMap section in GenerateMinhSprites
+26:     # Match the block containing colorMap dictionary definition
+27:     color_map = {'.': (0, 0, 0, 0)}
+28:     # Find colorMap block specifically inside GenerateMinhSprites
+29:     minh_start = content.find("void GenerateMinhSprites()")
+30:     if minh_start == -1:
+31:         print("Could not find GenerateMinhSprites")
+32:         return
+33:     
+34:     # Extract colorMap entries
+35:     colormap_entries = re.findall(r"\{\s*'([^'])'\s*,\s*ColorFromHex\(\"([^\"]+)\"\)\s*\}", content[minh_start:minh_start+5000])
+36:     for char, hex_val in colormap_entries:
+37:         color_map[char] = hex_to_rgba(hex_val)
+38: 
+39:     print("Color map parsed:", color_map)
+40: 
+41:     # Find all grid definitions in the GenerateMinhSprites section
+42:     # Let's extract grid definitions like: strin
+<truncated 18 bytes>
+;
+43:     grids = {}
+44:     grid_matches = re.finditer(r'string\[\]\s+(\w+)\s*=\s*\{(.*?)\};', content[minh_start:minh_start+20000], re.DOTALL)
+45:     for gm in grid_matches:
+46:         grid_name = gm.group(1)
+47:         grid_data = gm.group(2)
+48:         rows = []
+49:         for line in grid_data.strip().split('\n'):
+50:             line_m = re.search(r'"([^"]+)"', line)
+51:             if line_m:
+52:                 rows.append(line_m.group(1))
+53:         grids[grid_name] = rows
+54:         print(f"Parsed grid {grid_name} with {len(rows)} rows, width {len(rows[0]) if rows else 0}")
+55: 
+56:     # Find GenerateSpriteFromGrid calls for Minh
+57:     calls = re.finditer(r'GenerateSpriteFromGrid\(\"([^\"]+)\"\s*,\s*(\w+)\s*,\s*colorMap\s*,\s*(\d+)\s*,\s*(\d+)\)', content[minh_start:minh_start+25000])
+58:     for call in calls:
+59:         dest_path = call.group(1)
+60:         grid_var = call.group(2)
+61:         width = int(call.group(3))
+62:         height = int(call.group(4))
+63: 
+64:         full_dest = os.path.join(r'c:\code\thoat khoi dia nguc', dest_path.replace('/', '\\'))
+65:         os.makedirs(os.path.dirname(full_dest), exist_ok=True)
+66: 
+67:         if grid_var not in grids:
+68:             print(f"Grid variable {grid_var} not found in parsed grids")
+69:             continue
+70: 
+71:         grid = grids[grid_var]
+72:         # Create image
+73:         img = Image.new('RGBA', (width, height), (0, 0, 0, 0))
+74:         for y in range(height):
+75:             # C# row 0 matches python row 0, because row 0 in C# grid array is top of sprite
+76:             row = grid[y]
+77:             for x in range(width):
+78:                 char = row[x]
+79:                 color = color_map.get(char, (0, 0, 0, 0))
+80:                 img.putpixel((x, y), color)
+81: 
+82:         img.save(full_dest)
+83:         print(f"Generated sprite: {dest_path} -> {img.size}")
+84: 
+85: if __name__ == '__main__':
+86:     parse_and_generate()
+87: 
+The above content shows the entire, complete file contents of the requested file.
+

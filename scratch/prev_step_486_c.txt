@@ -1,0 +1,84 @@
+﻿Created At: 2026-06-11T17:14:29Z
+Completed At: 2026-06-11T17:14:29Z
+File Path: `file:///c:/code/thoat%20khoi%20dia%20nguc/Assets/Editor/Chapter1SceneBuilder.cs`
+Total Lines: 2306
+Total Bytes: 124687
+Showing lines 1 to 80
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: #if UNITY_EDITOR
+2: using UnityEngine;
+3: using UnityEngine.UI;
+4: using UnityEditor;
+5: using UnityEditor.SceneManagement;
+6: using UnityEngine.SceneManagement;
+7: using TMPro;
+8: using System.IO;
+9: using System.Collections.Generic;
+10: using EscapeFromHell.Core;
+11: using EscapeFromHell.Player;
+12: using EscapeFromHell.Systems;
+13: using EscapeFromHell.Chapter;
+14: 
+15: namespace EscapeFromHell.Editor
+16: {
+17:     public class Chapter1SceneBuilder : EditorWindow
+18:     {
+19:         [MenuItem("Escape From Hell/Build Chapter 1 Scene")]
+20:         public static void BuildScene()
+21:         {
+22:             Debug.Log("Starting Chapter 1 Scene Build...");
+23: 
+24:             // Refresh asset database first to ensure all imported changes are captured
+25:             AssetDatabase.Refresh();
+26: 
+27:             // Check if sprites exist and load correctly
+28:             Sprite testSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Tiles/Room/Floor.png");
+29: 
+30:             // 1. Ensure Sprite Assets exist and are loaded correctly
+31:             if (!File.Exists("Assets/Sprites/Characters/Minh/Minh_Idle_Down.png") || 
+32:                 !File.Exists("Assets/Sprites/Items/Trash.png") ||
+33:                 !File.Exists("Assets/Sprites/UI/NotesIcon.png") ||
+34:                 !File.Exists("Assets/Sprites/UI/WinLogo.png") ||
+35:                 testSprite == null)
+36:             {
+37:                 Debug.LogWarning("Sprites not found or not imported correctly. Generating sprites...");
+38:                 SpriteGenerator.GenerateAll();
+
+<truncated 282 bytes>
+            DialogueData bills = CreateBillsDialogue();
+47:             DialogueData laptop = CreateLaptopDialogue();
+48:             DialogueData jobOffer = CreateJobOfferDialogue();
+49: 
+50:             // 3. Create a new Scene
+51:             Scene newScene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+52:             newScene.name = "Chapter1_Room";
+53: 
+54:             // 4. Configure Camera
+55:             Camera mainCam = Camera.main;
+56:             if (mainCam != null)
+57:             {
+58:                 mainCam.transform.position = new Vector3(0, 0, -10);
+59:                 mainCam.transform.rotation = Quaternion.identity;
+60:                 mainCam.orthographic = true;
+61:                 mainCam.orthographicSize = 4f;
+62:                 mainCam.backgroundColor = Color.black;
+63:                 mainCam.clearFlags = CameraClearFlags.SolidColor;
+64:                 
+65:                 // Add CameraFollow
+66:                 CameraFollow camFollow = mainCam.gameObject.AddComponent<CameraFollow>();
+67:             }
+68: 
+69:             // Add URP 2D Global Light with a dim cool blue tint for a gloomy, damp atmosphere
+70:             GameObject globalLightObj = new GameObject("GlobalLight2D");
+71:             var globalLight = globalLightObj.AddComponent<UnityEngine.Rendering.Universal.Light2D>();
+72:             globalLight.lightType = UnityEngine.Rendering.Universal.Light2D.LightType.Global;
+73:             globalLight.color = new Color(0.55f, 0.62f, 0.75f, 1f); // Moody cool blue/gray
+74:             globalLight.intensity = 0.35f;
+75: 
+76:             // Find and dim the Directional Light for Built-in Pipeline
+77:             Light dirLight = FindAnyObjectByType<Light>();
+78:             if (dirLight != null)
+79:             {
+80:                 dirLight.intensity = 0.35f;
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+

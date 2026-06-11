@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 774a8757c51ee8b4788e5669d3278ab1, type: 3}
+  m_Name: Chapter1_Laptop
+  m_EditorClassIdentifier: Assembly-CSharp::EscapeFromHell.Systems.DialogueData
+  lines:
+  - speakerName: Minh
+    speakerPortrait: {fileID: 0}
+    text: "M\u1EDF laptop l\xEAn t\xECm vi\u1EC7c l\xE0m..."
+  - speakerName: "Tuy\u1EC3n D\u1EE5ng"
+    speakerPortrait: {fileID: 0}
+    text: "Tuy\u1EC3n d\u1EE5ng L\u1EADp tr\xECnh vi\xEAn Web m\u1EDBi ra tr\u01B0\u1EDDng.\nY\xEAu
+      c\u1EA7u: 2 n\u0103m kinh nghi\u1EC7m th\u1EF1c t\u1EBF, th\xE0nh th\u1EA1o
+      React, Node, AWS, Docker.\nL\u01B0\u01A1ng: 6 - 8 tri\u1EC7u."
+  - speakerName: Minh
+    speakerPortrait: {fileID: 0}
+    text: "Th\u1ECB tr\u01B0\u1EDDng IT b\xE2y gi\u1EDD n\xE1t qu\xE1... M\u1EDBi
+      ra tr\u01B0\u1EDDng \u0111\xF2i 2 n\u0103m kinh nghi\u1EC7m m\xE0 l\u01B0\u01A1ng
+      kh\xF4ng \u0111\u1EE7 tr\u1EA3 ti\u1EC1n nh\xE0 S\xE0i G\xF2n. Bi\u1EBFt s\u1ED1ng
+      sao \u0111\xE2y?"
+  choices: []

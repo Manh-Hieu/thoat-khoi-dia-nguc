@@ -1,0 +1,16 @@
+﻿Created At: 2026-06-11T09:55:13Z
+Completed At: 2026-06-11T09:55:13Z
+File Path: `file:///C:/Users/hieua/.gemini/antigravity/brain/98871e4d-8463-4de3-9b6e-e8e5d4ff6662/task.md`
+Total Lines: 7
+Total Bytes: 472
+Showing lines 1 to 7
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: # Task List - Restyling and Rebuilding Phone UI
+2: 
+3: - `[x]` Update `SpriteGenerator.cs` to generate procedural rounded gradient backgrounds, dock backgrounds, and full-screen gradient wallpaper
+4: - `[x]` Update `Chapter1SceneBuilder.cs` with the new app layout, full-width dock, status bar elements, and page indicators (removing emoji warnings)
+5: - `[ ]` Regenerate sprites and rebuild scene in Unity (Play Mode stopped)
+6: - `[ ]` Confirm everything builds and compiles perfectly
+7: 
+The above content shows the entire, complete file contents of the requested file.
+

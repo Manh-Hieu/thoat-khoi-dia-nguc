@@ -1,0 +1,1 @@
+﻿"            GenerateRoundedGradientTexture(\"Assets/Sprites/UI/AppIconBg_Cyan.png\", ColorFromHex(\"#64d8ff\"), ColorFromHex(\"#1ca0f0\"), 64, 64, 12f);\n            GenerateRoundedGradientTexture(\"Assets/Sprites/UI/AppIconBg_Grey.png\", ColorFromHex(\"#bdc3c7\"), ColorFromHex(\"#8e9eab\"), 64, 64, 12f);\n        }"

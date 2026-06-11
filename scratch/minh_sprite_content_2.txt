@@ -1,0 +1,39 @@
+﻿Created At: 2026-06-11T10:57:06Z
+Completed At: 2026-06-11T10:57:06Z
+File Path: `file:///c:/code/thoat%20khoi%20dia%20nguc/Assets/Editor/SpriteGenerator.cs`
+Total Lines: 1530
+Total Bytes: 57624
+Showing lines 57 to 86
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+57:         private static void GenerateSpriteFromGrid(string path, string[] grid, Dictionary<char, Color> colorMap, int width = 16, int height = 16)
+58:         {
+59:             Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+60:             for (int y = 0; y < height; y++)
+61:             {
+62:                 // Invert y because texture coordinates start at bottom left (y=0 is bottom)
+63:                 // but our grid array row 0 represents the top of the sprite (y=height-1)
+64:                 string row = grid[height - 1 - y];
+65:                 for (int x = 0; x < width; x++)
+66:                 {
+67:                     char c = row[x];
+68:                     Color col = colorMap.ContainsKey(c) ? colorMap[c] : Color.clear;
+69:                     tex.SetPixel(x, y, col);
+70:                 }
+71:             }
+72:             tex.Apply();
+73:             SaveTexture(tex, path);
+74:         }
+75: 
+76:         private static void GenerateMinhSprites()
+77:         {
+78:             var colorMap = new Dictionary<char, Color>
+79:             {
+80:                 { '.', Color.clear },
+81:                 { 'H', ColorFromHex("#1F1610") }, // Hair (Dark Brown)
+82:                 { 'h', ColorFromHex("#3D2E25") }, // Hair Highlight
+83:                 { 'S', ColorFromHex("#FAD2B0") }, // Skin (Peach)
+84:                 { 's', ColorFromHex("#DCA382") }, // Skin Shadow
+85:                 { 'E', ColorFromHex("#1A1A1A") }, // Eyes (Dark Gray)
+86:                 { 'B', ColorFromHex("#3B5998") }, // Shirt (Blue)
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+

@@ -1,0 +1,84 @@
+﻿Created At: 2026-06-11T08:47:41Z
+Completed At: 2026-06-11T08:47:41Z
+File Path: `file:///c:/code/thoat%20khoi%20dia%20nguc/Assets/Editor/Chapter1SceneBuilder.cs`
+Total Lines: 845
+Total Bytes: 44196
+Showing lines 1 to 800
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: #if UNITY_EDITOR
+2: using UnityEngine;
+3: using UnityEngine.UI;
+4: using UnityEditor;
+5: using UnityEditor.SceneManagement;
+6: using UnityEngine.SceneManagement;
+7: using TMPro;
+8: using System.IO;
+9: using System.Collections.Generic;
+10: using EscapeFromHell.Core;
+11: using EscapeFromHell.Player;
+12: using EscapeFromHell.Systems;
+13: using EscapeFromHell.Chapter;
+14: 
+15: namespace EscapeFromHell.Editor
+16: {
+17:     public class Chapter1SceneBuilder : EditorWindow
+18:     {
+19:         [MenuItem("Escape From Hell/Build Chapter 1 Scene")]
+20:         public static void BuildScene()
+21:         {
+22:             Debug.Log("Starting Chapter 1 Scene Build...");
+23: 
+24:             // Refresh asset database first to ensure all imported changes are captured
+25:             AssetDatabase.Refresh();
+26: 
+27:             // Check if sprites exist and load correctly
+28:             Sprite testSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Tiles/Room/Floor.png");
+29: 
+30:             // 1. Ensure Sprite Assets exist and are loaded correctly
+31:             if (!File.Exists("Assets/Sprites/Characters/Minh/Minh_Idle_Down.png") || testSprite == null)
+32:             {
+33:                 Debug.LogWarning("Sprites not found or not imported correctly. Generating sprites...");
+34:                 SpriteGenerator.GenerateAll();
+35:                 AssetDatabase.Refresh();
+36:             }
+37: 
+38:             // 2. Create Dialogue Assets
+39:             EnsureDialogueDirectories();
+40:             DialogueData intro = CreateIntroDialogue();
+41:           
+<truncated 42803 bytes>
+e.transform.parent = header.transform;
+769:             RectTransform tRect = title.AddComponent<RectTransform>();
+770:             tRect.anchorMin = new Vector2(0f, 0f);
+771:             tRect.anchorMax = new Vector2(0.8f, 1f);
+772:             tRect.sizeDelta = new Vector2(-10, 0);
+773:             tRect.anchoredPosition = new Vector2(10, 0);
+774:             TextMeshProUGUI titleTxt = title.AddComponent<TextMeshProUGUI>();
+775:             titleTxt.text = titleText;
+776:             titleTxt.fontSize = 12;
+777:             titleTxt.color = Color.white;
+778:             titleTxt.fontStyle = FontStyles.Bold;
+779:             titleTxt.verticalAlignment = VerticalAlignmentOptions.Middle;
+780: 
+781:             // Close button [X]
+782:             GameObject closeObj = new GameObject("CloseButton");
+783:             closeObj.transform.parent = header.transform;
+784:             RectTransform cRect = closeObj.AddComponent<RectTransform>();
+785:             cRect.anchorMin = new Vector2(1f, 0.5f);
+786:             cRect.anchorMax = new Vector2(1f, 0.5f);
+787:             cRect.pivot = new Vector2(1f, 0.5f);
+788:             cRect.sizeDelta = new Vector2(22, 22);
+789:             cRect.anchoredPosition = new Vector2(-5, 0);
+790: 
+791:             Image closeImg = closeObj.AddComponent<Image>();
+792:             closeImg.color = new Color(0.75f, 0.75f, 0.75f, 1f);
+793:             Button closeBtn = closeObj.AddComponent<Button>();
+794:             closeBtn.onClick.AddListener(onClose);
+795:             Outline closeOutline = closeObj.AddComponent<Outline>();
+796:             closeOutline.effectColor = Color.black;
+797: 
+798:             GameObject closeTextObj = new GameObject("Text");
+799:             closeTextObj.transform.parent = closeObj.transform;
+800:             RectTransform ctRect = closeTextObj.AddComponent<RectTransform>();
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+

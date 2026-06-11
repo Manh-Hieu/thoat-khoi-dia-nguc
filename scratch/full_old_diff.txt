@@ -1,0 +1,83 @@
+﻿Created At: 2026-06-11T10:32:20Z
+Completed At: 2026-06-11T10:32:20Z
+The following changes were made by the replace_file_content tool to: C:\code\thoat khoi dia nguc\Assets\Editor\SpriteGenerator.cs. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -88,145 +88,426 @@
+                 { 'D', ColorFromHex("#1D2E54") }, // Dark Blue shadow
+                 { 'P', ColorFromHex("#34495E") }, // Jeans (Blue-Gray)
+                 { 'p', ColorFromHex("#1F2E3E") }, // Jeans Shadow
+-                { 'K', ColorFromHex("#5D4037") }  // Shoes (Brown)
+-            };
+-
+-            string[] down = {
+-                "................",
+-                "................",
+-                "......HHHHHH....",
+-                "....HHHHHHHHHH..",
+-                "....HHhHHHhHHH..",
+-                "....HSSSSSSSSSH.",
+-                "....HSEESSEESSH.",
+-                "....HSSSSSSSSSH.",
+-                ".....sSSSSSSs...",
+-                "......SSSSSS....",
+-                "....BBBBBBBBBB..",
+-                "...BBbBBBBBBbBB.",
+-                "...BBBBBBBBBBBB.",
+-                "...BBDDDDDDDDBB.",
+-                "...BBDDDDDDDDBB.",
+-                "....BDDDDDDDDB..",
+-                "....BDDDDDDDDB..",
+-                ".....PPPPPPPP...",
+-                ".....PPPPPPPP...",
+-                "....PPPPPPPPPP..",
+-                "....PPpPPPPpPP..",
+-                "....PPpPPPPpPP..",
+-                "....PPpPPPPpPP..",
+-                "....PP.PPPP.PP..",
+-                "....PP.PPPP.PP..",
+-                "....PP.PPPP.PP..",
+-                "....PP.PPPP.PP..",
+-                "....PP.PPPP.PP..",
+-                "....KK.KKKK.KK..",
+-                "....KKK.KKK.KKK.",
+-                "................",
+-                "................"
+-            };
+-
+-            string[] up = {
+-                "................",
+-                "................",
+-                "......HHHHHH....",
+-                "....HHHHHHHHHH
+<truncated 18935 bytes>
+.....PP..pp.....",
++                ".....PP..pp.....",
++                "....PP....pp....",
++                "....PP....pp....",
++                "....PP....pp....",
++                "....PP....pp....",
++                "....KK....kk....",
++                "....KK....kk....",
++                "...KKK....kkk...",
+                 "................",
+                 "................"
+             };
+@@ -234,6 +234,15 @@
+             GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Idle_Up.png", up, colorMap, 16, 32);
+             GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Idle_Left.png", left, colorMap, 16, 32);
+             GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Idle_Right.png", right, colorMap, 16, 32);
++
++            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Walk_Down_1.png", down_walk1, colorMap, 16, 32);
++            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Walk_Down_2.png", down_walk2, colorMap, 16, 32);
++            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Walk_Up_1.png", up_walk1, colorMap, 16, 32);
++            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Walk_Up_2.png", up_walk2, colorMap, 16, 32);
++            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Walk_Left_1.png", left_walk1, colorMap, 16, 32);
++            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Walk_Left_2.png", left_walk2, colorMap, 16, 32);
++            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Walk_Right_1.png", right_walk1, colorMap, 16, 32);
++            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Walk_Right_2.png", right_walk2, colorMap, 16, 32);
+         }
+ 
+         private static void GenerateGuardSprites()
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

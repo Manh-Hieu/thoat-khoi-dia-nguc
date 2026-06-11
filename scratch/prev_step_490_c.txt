@@ -1,0 +1,50 @@
+﻿Created At: 2026-06-11T17:14:51Z
+Completed At: 2026-06-11T17:14:51Z
+File Path: `file:///c:/code/thoat%20khoi%20dia%20nguc/Assets/Editor/Chapter1SceneBuilder.cs`
+Total Lines: 2306
+Total Bytes: 124687
+Showing lines 120 to 160
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+120:             }
+121:             else
+122:             {
+123:                 Debug.LogError("Failed to load Room Background Sprite! Path: " + bgPath);
+124:             }
+125: 
+126:             // Create invisible boundary colliders
+127:             // Left boundary: x = -5.0, y = -1 (moved out to match wall edge)
+128:             CreateBoundary(environment.transform, new Vector3(-5.0f, -1.0f, 0f), new Vector2(1f, 8f));
+129:             // Right boundary: x = 5.0, y = -1
+130:             CreateBoundary(environment.transform, new Vector3(5.0f, -1.0f, 0f), new Vector2(1f, 8f));
+131:             // Bottom boundary: x = 0, y = -5.2 (moved down to allow walking all the way to the bottom floorboards)
+132:             CreateBoundary(environment.transform, new Vector3(0f, -5.2f, 0f), new Vector2(10f, 1f));
+133:             // Top boundary: x = 0, y = 1.3 (prevent walking up onto back walls, window, or bookshelves)
+134:             CreateBoundary(environment.transform, new Vector3(0f, 1.3f, 0f), new Vector2(10f, 1f));
+135: 
+136:             // Furniture boundaries (invisible obstacles matching background items)
+137:             // Desk obstacle at top-left (blocks desk bottom area)
+138:             CreateBoundary(environment.transform, new Vector3(-2.2f, 0.8f, 0f), new Vector2(2.2f, 1.5f));
+139:             // Bed obstacle at right (blocks main bed area)
+140:             CreateBoundary(environment.transform, new Vector3(2.6f, -1.0f, 0f), new Vector2(1.6f, 4.4f));
+141: 
+142: 
+143:             // 6. Create Player
+144:             GameObject playerObj = new GameObject("Player");
+145:             playerObj.tag = "Player";
+146:             playerObj.transform.position = new Vector3(0, -1, 0);
+147: 
+148:             SpriteRenderer playerSR = playerObj.AddComponent<SpriteRenderer>();
+149:             Sprite playerSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Characters/Minh/Minh_Idle_Down.png");
+150:             if (playerSprite == null) Debug.LogError("Player sprite is NULL! Path: Assets/Sprites/Characters/Minh/Minh_Idle_Down.png");
+151:             playerSR.sprite = playerSprite;
+152:             playerSR.sortingOrder = 5;
+153: 
+154:             Rigidbody2D playerRB = playerObj.AddComponent<Rigidbody2D>();
+155:             playerRB.gravityScale = 0f;
+156:             playerRB.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+157:             playerRB.interpolation = RigidbodyInterpolation2D.Interpolate;
+158:             playerRB.freezeRotation = true;
+159: 
+160:             BoxCollider2D playerCollider = playerObj.AddComponent<BoxCollider2D>();
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+

@@ -1,0 +1,87 @@
+﻿Created At: 2026-06-11T16:45:18Z
+Completed At: 2026-06-11T16:45:18Z
+File Path: `file:///c:/code/thoat%20khoi%20dia%20nguc/Assets/Editor/SpriteGenerator.cs`
+Total Lines: 1557
+Total Bytes: 59238
+Showing lines 355 to 520
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+355:                 "....BBDDDDDDBB..",
+356:                 "....SSDDDDDDSS..", // Skin hands
+357:                 ".....sDDDDDDs...", // Skin hand shadows
+358:                 "......PPPPPP....",
+359:                 "......PPPPPP....",
+360:                 "......PPPPPP....",
+361:                 "......PPpp......",
+362:                 ".....PP..PP.....",
+363:                 ".....PP..PP.....",
+364:                 "....PP....PP....",
+365:                 "....PP....PP....",
+366:                 "....PP....PP....",
+367:                 "....PP....PP....",
+368:                 "....PP....PP....",
+369:                 "....KK....KK....",
+370:                 "...KKK....KKK...",
+371:                 "...KKK..........",
+372:                 "................"
+373:             };
+374: 
+375:             string[] left_walk2 = {
+376:                 "................",
+377:                 "................",
+378:                 "................",
+379:                 "......HHHHHH....",
+380:                 ".....HHHHHHHH...",
+381:                 "....HHhHHhHHH...",
+382:                 "....HHSSHHHHHH..",
+383:                 "....HSESSSHHHH..",
+384:                 "....HSSSSSSHH...",
+385:                 ".....sSSSSSsH...",
+386:                 "......SSSSS.....",
+387:                 ".....BBBBBBBB...",
+388:                 "....BBbBBBBbBB..",
+389:                 "....BBBBBBBBBB..",
+390:                 "....BBDDDDDDBB..",
+391:                 "....SSDDDDDDSS..", // Skin hands
+392:                 ".....sDDDDDDs...", // Skin hand shadows
+393:             
+<truncated 3597 bytes>
+........",
+484:                 "....HHHHHH......",
+485:                 "...HHHHHHHH.....",
+486:                 "...HHHhHHhHH....",
+487:                 "..HHHHHHSSHH....",
+488:                 "..HHHHSSSESs....",
+489:                 "...HHSSSSSSH....",
+490:                 "...HsSSSSSs.....",
+491:                 ".....SSSSS......",
+492:                 "...BBBBBBBB.....",
+493:                 "..BBbBBBBbBB....",
+494:                 "..BBBBBBBBBB....",
+495:                 "..BBDDDDDDBB....",
+496:                 "..SSDDDDDDSS....", // Skin hands
+497:                 "...sDDDDDDs.....", // Skin hand shadows
+498:                 "....PPPPPP......",
+499:                 "....PPPPPP......",
+500:                 "....PPPPPP......",
+501:                 "......PPpp......",
+502:                 ".....PP..PP.....",
+503:                 ".....PP..PP.....",
+504:                 "....PP....PP....",
+505:                 "....PP....PP....",
+506:                 "....PP....PP....",
+507:                 "....PP....PP....",
+508:                 "....PP....PP....",
+509:                 "....KK....KK....",
+510:                 "...KKK....KKK...",
+511:                 "...KKK..........",
+512:                 "................"
+513:             };
+514: 
+515:             GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Idle_Down.png", down, colorMap, 16, 32);
+516:             GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Idle_Up.png", up, colorMap, 16, 32);
+517:             GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Idle_Left.png", left, colorMap, 16, 32);
+518:             GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Idle_Right.png", right, colorMap, 16, 32);
+519: 
+520:             GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Walk_Down_1.png", down_walk1, colorMap, 16, 32);
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+

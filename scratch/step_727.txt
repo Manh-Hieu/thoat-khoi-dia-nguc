@@ -1,0 +1,71 @@
+﻿Created At: 2026-06-11T18:55:35Z
+Completed At: 2026-06-11T18:55:35Z
+File Path: `file:///c:/code/thoat%20khoi%20dia%20nguc/scratch/prev_minh_sprite_code_0.txt`
+Total Lines: 61
+Total Bytes: 3369
+Showing lines 1 to 61
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: Created At: 2026-06-11T17:47:21Z
+2: Completed At: 2026-06-11T17:47:22Z
+3: File Path: `file:///c:/code/thoat%20khoi%20dia%20nguc/Assets/Editor/SpriteGenerator.cs`
+4: Total Lines: 1766
+5: Total Bytes: 71276
+6: Showing lines 70 to 120
+7: The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+8: 70:                 }
+9: 71:             }
+10: 72:             tex.Apply();
+11: 73:             SaveTexture(tex, path);
+12: 74:         }
+13: 75: 
+14: 76:         private static void GenerateMinhSprites()
+15: 77:         {
+16: 78:             var colorMap = new Dictionary<char, Color>
+17: 79:             {
+18: 80:                 { '.', Color.clear },
+19: 81:                 { 'H', ColorFromHex("#1A0F0A") }, // Hair very dark
+20: 82:                 { 'h', ColorFromHex("#3D2314") }, // Hair dark brown
+21: 83:                 { 'i', ColorFromHex("#5C3520") }, // Hair highlight/sheen
+22: 84:                 { 'S', ColorFromHex("#F5C99D") }, // Skin light
+23: 85:                 { 's', ColorFromHex("#D4956A") }, // Skin shadow
+24: 86:                 { 'f', ColorFromHex("#E8A878") }, // Skin mid-tone
+25: 87:                 { 'E', ColorFromHex("#1A1A2E") }, // Eyes dark
+26: 88:                 { 'e', ColorFromHex("#4A3728") }, // Eyebrow brown
+27: 89:                 { 'n', ColorFromHex("#C07A55") }, // Nose/mouth shadow
+28: 90:                 { 'L', ColorFromHex("#C0392B") }, // Mouth/lip red
+<truncated 48 bytes>
+B2A4A") }, // Hoodie main dark navy
+30: 92:                 { 't', ColorFromHex("#253C6E") }, // Hoodie lighter blue
+31: 93:                 { 'r', ColorFromHex("#0F1D34") }, // Hoodie very dark shadow
+32: 94:                 { 'w', ColorFromHex("#E8EDF5") }, // Hoodie trim white
+33: 95:                 { 'c', ColorFromHex("#A8B4CC") }, // Hoodie pocket/strings gray
+34: 96:                 { 'J', ColorFromHex("#1A3A5C") }, // Jeans main blue
+35: 97:                 { 'j', ColorFromHex("#0D2238") }, // Jeans shadow/seam
+36: 98:                 { 'q', ColorFromHex("#2E5880") }, // Jeans highlight
+37: 99:                 { 'W', ColorFromHex("#E8E8E8") }, // Shoe white
+38: 100:                 { 'G', ColorFromHex("#B0B8C8") }, // Shoe gray
+39: 101:                 { 'g', ColorFromHex("#7A8598") }, // Shoe dark gray sole
+40: 102:                 { 'Z', ColorFromHex("#1A1A1A") }, // Belt dark
+41: 103:             };
+42: 104: 
+43: 105:             // IDLE DOWN - facing camera
+44: 106:             string[] down = {
+45: 107:                 "........................",
+46: 108:                 "........................",
+47: 109:                 "........hhHHHHhh........",
+48: 110:                 "......HHHHHHHHHHHHhh....",
+49: 111:                 ".....HHhhhiiiihhhHHHH...",
+50: 112:                 ".....HHiSSSSSSSSifHHH...",
+51: 113:                 ".....HSSSSSSSSSSSSfH....",
+52: 114:                 ".....HSeeSSSSSSeeefH....",
+53: 115:                 ".....HSEESSSSSSEESfH....",
+54: 116:                 ".....HSSSSSSSSSSSSfH....",
+55: 117:                 ".....HfSSSnnSSSSSfH.....",
+56: 118:                 ".....HfSSSSLSSSSsf......",
+57: 119:                 "......sSSSSSSSSSs.......",
+58: 120:                 ".......SSSSSSSSS........",
+59: The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+60: 
+61: 
+The above content shows the entire, complete file contents of the requested file.
+

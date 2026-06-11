@@ -1,0 +1,63 @@
+﻿Created At: 2026-06-11T10:00:54Z
+Completed At: 2026-06-11T10:00:54Z
+File Path: `file:///C:/Users/hieua/.gemini/antigravity/brain/98871e4d-8463-4de3-9b6e-e8e5d4ff6662/implementation_plan.md`
+Total Lines: 55
+Total Bytes: 3529
+Showing lines 1 to 55
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: # Restructuring and Restyling the Phone UI to match iOS 7 Aesthetics
+2: 
+3: The goal of this task is to restyle and restructure the mobile phone UI in *Escape From Hell* to look exactly like the clean, modern iOS 7 user interface shown in the reference image. This involves procedurally generating premium rounded gradient app background sprites, adjusting grid and dock layouts, adding page indicators, and cleaning up status bar presentation.
+4: 
+5: ## Proposed Changes
+6: 
+7: ### Assets/Editor/SpriteGenerator.cs
+8: 
+9: #### [MODIFY] [SpriteGenerator.cs](file:///c:/code/thoat%20khoi%20dia%20nguc/Assets/Editor/SpriteGenerator.cs)
+10: - Add a helper method `GenerateRoundedGradientTexture` to procedurally draw smooth rounded rectangle gradient app background textures (Green, Blue, Orange, Light, Cyan, Grey).
+11: - Add a helper method `GenerateDockBgTexture` to procedurally draw a translucent white rounded background.
+12: - Integrate the asset creation into `GenerateUISprites` so all UI assets are generated together.
+13: - Add `SaveUITexture` to import these UI assets with `FilterMode.Bilinear` and standard UI Pixels Per Unit (PPU) setting (100).
+14: 
+15: ### Assets/Editor/Chapter1SceneBuilder.cs
+16: 
+17: #### [MODIFY] [Chapter1SceneBuilder.cs](file:///c:/code/thoat%20khoi%20dia%20nguc/Assets/Editor/Chapter1SceneBuilder.cs)
+18: - Load the generated rounded gradient sprites (`AppIconBg_Green`, `AppIconBg_Blue`, etc.).
+19: - Update `CreatePhoneAppIconButton` hierarchy:
+20:   - Make the button container transparent and size-appropriate (e.g.
+<truncated 215 bytes>
+3:   - Place the `Label` text container below the background icon rather than inside it, using white text with a black outline.
+24: - Re-layout the home screen **Apps Grid**:
+25:   - Shrink cell size to `60x80`, change padding and spacing to form a clean 4-column layout that fits Notes, Photos, Weather, and Settings in a single row.
+26: - Re-layout the bottom **Dock**:
+27:   - Make it span the full width of the screen (`360`).
+28:   - Change color to translucent white (`new Color(1f, 1f, 1f, 0.22f)`).
+29:   - Add a thin separation line at the top (`1px` height, translucent white) to create a premium frosted glass divider effect.
+30:   - Space out the dock apps beautifully.
+31: - Add **Page Indicators**:
+32:   - Add dot indicators (`â—‹  â—  â—‹  â—‹`) just above the dock representing the active page.
+33: - Clean up the **Status Bar**:
+34:   - Make status bar background transparent.
+35:   - Split it into 3 clear text layers: Left (`â—â—â—â—â—‹ Viettel đŸ“¶`), Center (`16:02`), and Right (`84% đŸ”‹`).
+36: 
+37: ---
+38: 
+39: ## Verification Plan
+40: 
+41: ### Automated Tests
+42: - Build the scene using Unity's command-line batch runner:
+43:   ```powershell
+44:   C:\unity\6000.4.9f1\Editor\Unity.com -batchmode -projectPath "c:\code\thoat khoi dia nguc" -executeMethod EscapeFromHell.Editor.Chapter1SceneBuilder.BuildScene -logFile build_scene_log.txt -quit
+45:   ```
+46: - Check the contents of `build_scene_log.txt` to ensure compilation and scene building finish without errors.
+47: 
+48: ### Manual Verification
+49: - Launch the project in Unity and inspect the Chapter 1 scene.
+50: - Press Space/E to open the phone UI and verify that:
+51:   - The wallpaper and layout look clean and spaced correctly like iOS 7.
+52:   - App icons have beautiful smooth rounded corners and colorful gradients.
+53:   - The status bar is transparent with signal circles and battery icons.
+54:   - The page indicator dots appear above the frosted glass dock.
+55: 
+The above content shows the entire, complete file contents of the requested file.
+

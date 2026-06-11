@@ -1,0 +1,1 @@
+﻿"            // Procedural iOS 7 Style Phone Wallpaper (replaces old narrow phone_wallpaper.png)\n            GenerateWallpaperTexture(\"Assets/Sprites/UI/phone_wallpaper.png\", ColorFromHex(\"#70d2f6\"), ColorFromHex(\"#1c3b70\"), 360, 640);\n        }"
