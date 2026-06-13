@@ -59,9 +59,9 @@ namespace EscapeFromHell.Player
                     InteractableObject interactable = hitCollider.GetComponent<InteractableObject>();
                     if (interactable != null)
                     {
-                        // Allow clicking if player is within 5 units (most of the room)
+                        // Allow clicking if player is close (within 1.5 units)
                         float distance = Vector2.Distance(transform.position, interactable.transform.position);
-                        if (distance <= 5.0f)
+                        if (distance <= 1.5f)
                         {
                             interactable.Interact();
                             break; // Interact with the first valid interactable found

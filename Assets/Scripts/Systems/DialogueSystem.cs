@@ -29,6 +29,7 @@ namespace EscapeFromHell.Systems
 
         public event Action OnDialogueStart;
         public event Action OnDialogueEnd;
+        public event Action<string> OnChoiceSelectedText;
 
         private Queue<DialogueLine> dialogueLinesQueue = new Queue<DialogueLine>();
         private List<DialogueChoice> currentChoices = new List<DialogueChoice>();
@@ -36,6 +37,7 @@ namespace EscapeFromHell.Systems
         private string activeText = "";
         private Coroutine typingCoroutine;
         private DialogueData activeDialogueData;
+        private GameObject dialogueBlocker;
 
         private void Awake()
         {
@@ -46,10 +48,66 @@ namespace EscapeFromHell.Systems
             }
             Instance = this;
 
-            // Hide panels initially
-            if (dialoguePanel != null) dialoguePanel.SetActive(false);
+            // Initially create the click blocker panel and hide dialogue panels
+            if (dialoguePanel != null)
+            {
+                CreateDialogueBlocker();
+                SetDialogueUIVisible(false);
+            }
             if (choicesPanel != null) choicesPanel.SetActive(false);
             if (continueIndicator != null) continueIndicator.SetActive(false);
+        }
+
+        private void CreateDialogueBlocker()
+        {
+            if (dialoguePanel == null || dialogueBlocker != null) return;
+
+            Transform canvasTrans = dialoguePanel.transform.parent;
+            if (canvasTrans == null) return;
+
+            dialogueBlocker = new GameObject("DialogueBlocker");
+            dialogueBlocker.transform.SetParent(canvasTrans, false);
+
+            RectTransform rect = dialogueBlocker.AddComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+
+            Image img = dialogueBlocker.AddComponent<Image>();
+            img.color = new Color(0f, 0f, 0f, 0.05f); // 5% black tint
+            img.raycastTarget = true;
+        }
+
+        private void SetDialogueUIVisible(bool visible)
+        {
+            if (dialoguePanel != null)
+            {
+                dialoguePanel.SetActive(visible);
+                if (visible)
+                {
+                    dialoguePanel.transform.SetAsLastSibling();
+                    // Fix dialogue panel height dynamically to prevent overflow and look premium
+                    RectTransform panelRect = dialoguePanel.GetComponent<RectTransform>();
+                    if (panelRect != null)
+                    {
+                        panelRect.sizeDelta = new Vector2(panelRect.sizeDelta.x, 150);
+                    }
+                }
+            }
+
+            if (dialogueBlocker != null)
+            {
+                dialogueBlocker.SetActive(visible);
+                if (visible)
+                {
+                    dialogueBlocker.transform.SetAsLastSibling();
+                    if (dialoguePanel != null)
+                    {
+                        dialoguePanel.transform.SetAsLastSibling();
+                    }
+                }
+            }
         }
 
         private void Update()
@@ -95,11 +153,50 @@ namespace EscapeFromHell.Systems
                 GameManager.Instance.ChangeState(GameState.Cutscene);
             }
 
-            if (dialoguePanel != null) dialoguePanel.SetActive(true);
+            SetDialogueUIVisible(true);
             if (choicesPanel != null) choicesPanel.SetActive(false);
 
             OnDialogueStart?.Invoke();
             DisplayNextLine();
+        }
+
+        private void AdjustTextLayout(bool hasPortrait)
+        {
+            if (speakerNameText != null)
+            {
+                RectTransform nameRect = speakerNameText.GetComponent<RectTransform>();
+                if (nameRect != null)
+                {
+                    if (hasPortrait)
+                    {
+                        nameRect.anchoredPosition = new Vector2(140, -15);
+                        nameRect.sizeDelta = new Vector2(-160, 30);
+                    }
+                    else
+                    {
+                        nameRect.anchoredPosition = new Vector2(25, -15);
+                        nameRect.sizeDelta = new Vector2(-45, 30);
+                    }
+                }
+            }
+
+            if (dialogueText != null)
+            {
+                RectTransform bodyRect = dialogueText.GetComponent<RectTransform>();
+                if (bodyRect != null)
+                {
+                    if (hasPortrait)
+                    {
+                        bodyRect.anchoredPosition = new Vector2(140, -45);
+                        bodyRect.sizeDelta = new Vector2(-160, -60);
+                    }
+                    else
+                    {
+                        bodyRect.anchoredPosition = new Vector2(25, -45);
+                        bodyRect.sizeDelta = new Vector2(-45, -60);
+                    }
+                }
+            }
         }
 
         private void DisplayNextLine()
@@ -127,11 +224,17 @@ namespace EscapeFromHell.Systems
                 {
                     portraitImage.gameObject.SetActive(true);
                     portraitImage.sprite = line.speakerPortrait;
+                    AdjustTextLayout(true);
                 }
                 else
                 {
                     portraitImage.gameObject.SetActive(false);
+                    AdjustTextLayout(false);
                 }
+            }
+            else
+            {
+                AdjustTextLayout(false);
             }
 
             if (typingCoroutine != null)
@@ -178,6 +281,7 @@ namespace EscapeFromHell.Systems
             }
 
             choicesPanel.SetActive(true);
+            choicesPanel.transform.SetAsLastSibling();
             if (continueIndicator != null) continueIndicator.SetActive(false);
 
             // Clear old choice buttons
@@ -208,7 +312,8 @@ namespace EscapeFromHell.Systems
         private void OnChoiceSelected(DialogueChoice choice)
         {
             choicesPanel.SetActive(false);
-
+            OnChoiceSelectedText?.Invoke(choice.choiceText);
+            
             if (choice.nextDialogue != null)
             {
                 StartDialogue(choice.nextDialogue);
@@ -219,15 +324,30 @@ namespace EscapeFromHell.Systems
             }
         }
 
+        public bool IsDialogueActive => dialoguePanel != null && dialoguePanel.activeSelf;
+
         private void EndDialogue()
         {
-            if (dialoguePanel != null) dialoguePanel.SetActive(false);
+            SetDialogueUIVisible(false);
             if (choicesPanel != null) choicesPanel.SetActive(false);
             if (continueIndicator != null) continueIndicator.SetActive(false);
 
             if (GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.Cutscene)
             {
-                GameManager.Instance.ChangeState(GameState.Playing);
+                bool keepCutscene = false;
+                if (PhoneUI.Instance != null && PhoneUI.Instance.IsPhoneOpen)
+                {
+                    keepCutscene = true;
+                }
+                if (ComputerUI.Instance != null && ComputerUI.Instance.IsComputerOpen)
+                {
+                    keepCutscene = true;
+                }
+
+                if (!keepCutscene)
+                {
+                    GameManager.Instance.ChangeState(GameState.Playing);
+                }
             }
 
             OnDialogueEnd?.Invoke();

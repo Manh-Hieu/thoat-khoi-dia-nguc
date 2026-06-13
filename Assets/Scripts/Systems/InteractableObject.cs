@@ -24,7 +24,7 @@ namespace EscapeFromHell.Systems
             }
         }
 
-        public string PromptMessage => promptMessage;
+        public string PromptMessage { get => promptMessage; set => promptMessage = value; }
 
         // Abstract method to be implemented by child classes (e.g. door, laptop, chest)
         public abstract void Interact();

@@ -7,13 +7,20 @@ namespace EscapeFromHell.Chapter
     {
         Phone,
         Laptop,
-        Bills
+        Bills,
+        Door
     }
 
     public class Chapter1Prop : InteractableObject
     {
         [Header("Prop Configuration")]
         [SerializeField] private Chapter1PropType propType;
+
+        public void Initialize(Chapter1PropType type, string prompt)
+        {
+            propType = type;
+            PromptMessage = prompt;
+        }
 
         public override void Interact()
         {
@@ -33,6 +40,9 @@ namespace EscapeFromHell.Chapter
                     break;
                 case Chapter1PropType.Bills:
                     Chapter1Controller.Instance.ReadBills();
+                    break;
+                case Chapter1PropType.Door:
+                    Chapter1Controller.Instance.InteractWithDoor();
                     break;
             }
         }

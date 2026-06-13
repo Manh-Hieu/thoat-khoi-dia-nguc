@@ -24,7 +24,8 @@ MonoBehaviour:
       \xEDt ti\u1EC1n thu\u1ED1c thang cho b\u1ED1 \u0111\u01B0\u1EE3c kh\xF4ng?"
   - speakerName: Minh
     speakerPortrait: {fileID: 0}
-    text: "L\u1EA1i l\xE0 tin nh\u1EAFn xin ti\u1EC1n... M\xECnh \u0111\u1EBFn ti\u1EC1n
-      nh\xE0 c\xF2n ch\u01B0a \u0111\xF3ng n\u1ED5i, l\u1EA5y \u0111\xE2u ra ti\u1EC1n
-      g\u1EEDi v\u1EC1 qu\xEA b\xE2y gi\u1EDD?"
+    text: "B\u1ED1 m\u1EB9 \u1EDF qu\xEA \u0111ang kh\xF3 kh\u0103n nh\u01B0 th\u1EBF...
+      M\xE0 m\xECnh v\xF4 d\u1EE5ng qu\xE1, ngay c\u1EA3 ti\u1EC1n ph\xF2ng tr\u1ECD
+      c\xF2n ch\u01B0a \u0111\xF3ng n\u1ED5i, l\u1EA5y \u0111\xE2u ra ti\u1EC1n g\u1EEDi
+      v\u1EC1 lo thu\u1ED1c thang cho b\u1ED1 b\xE2y gi\u1EDD..."
   choices: []

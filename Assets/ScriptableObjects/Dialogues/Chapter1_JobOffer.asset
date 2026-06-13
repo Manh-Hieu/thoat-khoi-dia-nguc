@@ -13,29 +13,20 @@ MonoBehaviour:
   m_Name: Chapter1_JobOffer
   m_EditorClassIdentifier: Assembly-CSharp::EscapeFromHell.Systems.DialogueData
   lines:
-  - speakerName: "\u0110i\u1EC7n tho\u1EA1i"
-    speakerPortrait: {fileID: 0}
-    text: "*Rung rung... B\xEDp b\xEDp... C\xF3 tin nh\u1EAFn t\u1EEB s\u1ED1 l\u1EA1.*"
-  - speakerName: "Tin nh\u1EAFn l\u1EA1"
-    speakerPortrait: {fileID: 0}
-    text: "Ch\xE0o b\u1EA1n, ch\xFAng t\xF4i \u0111ang tuy\u1EC3n nh\xE2n vi\xEAn
-      v\u0103n ph\xF2ng ch\u0103m s\xF3c kh\xE1ch h\xE0ng l\xE0m vi\u1EC7c t\u1EA1i
-      Campuchia.\nC\xF4ng vi\u1EC7c g\xF5 m\xE1y t\xEDnh \u0111\u01A1n gi\u1EA3n,
-      kh\xF4ng y\xEAu c\u1EA7u kinh nghi\u1EC7m.\nL\u01B0\u01A1ng c\u1EE9ng $1500
-      + hoa h\u1ED3ng. Bao chi ph\xED \u0111i l\u1EA1i, \u0103n \u1EDF, visa."
   - speakerName: Minh
     speakerPortrait: {fileID: 0}
-    text: "L\u01B0\u01A1ng $1500? \u0110\u1ED5i ra ti\u1EC1n Vi\u1EC7t l\xE0 g\u1EA7n
-      40 tri\u1EC7u m\u1ED9t th\xE1ng! L\u1EA1i c\xF2n bao \u0103n \u1EDF n\u1EEFa..."
+    text: "\u1EE6a... Tuy\u1EC3n nh\xE2n vi\xEAn v\u0103n ph\xF2ng \u1EDF Campuchia
+      l\u01B0\u01A1ng 38 \u0111\u1EBFn 50 tri\u1EC7u/th\xE1ng c\u01A1 \xE1? L\u01B0\u01A1ng
+      cao b\u1EA5t th\u01B0\u1EDDng v\u1EADy?"
   - speakerName: Minh
     speakerPortrait: {fileID: 0}
-    text: "L\xE0m 3 th\xE1ng l\xE0 m\xECnh tr\u1EA3 h\u1EBFt n\u1EE3 v\xE0 g\u1EEDi
-      \u0111\u01B0\u1EE3c ti\u1EC1n v\u1EC1 cho b\u1ED1 m\u1EB9 r\u1ED3i. D\xF9 c\xF3
-      \u0111i h\u01A1i xa nh\u01B0ng c\xF2n h\u01A1n l\xE0 ch\u1EBFt \u0111\xF3i
-      \u1EDF \u0111\xE2y."
+    text: "Khoan \u0111\xE3... Campuchia? Bavet? M\xECnh nghe b\u1EA1n b\xE8 c\u1EA3nh
+      b\xE1o khu \u0111\xF3 to\xE0n casino l\u1EEBa \u0111\u1EA3o v\xE0 bu\xF4n b\xE1n
+      ng\u01B0\u1EDDi th\xF4i."
   - speakerName: Minh
     speakerPortrait: {fileID: 0}
-    text: "Quy\u1EBFt \u0111\u1ECBnh th\u1EBF \u0111i! M\xECnh s\u1EBD nh\u1EAFn
-      tin \u0111\u1ED3ng \xFD v\xE0 x\u1EBFp \u0111\u1ED3 xu\u1EA5t ph\xE1t ngay
-      ng\xE0y mai."
+    text: "S\u1ED1 l\u1EA1, l\u01B0\u01A1ng kh\xF4ng t\u01B0\u1EDFng, \u0111\u1ECBa
+      \u0111i\u1EC3m \u0111\xE1ng nghi... \u0110\xE2y ch\u1EAFc ch\u1EAFn l\xE0 b\u1EABy
+      l\u1EEBa \u0111\u1EA3o r\u1ED3i. M\xECnh ph\u1EA3i x\xF3a tin nh\u1EAFn n\xE0y
+      \u0111i."
   choices: []

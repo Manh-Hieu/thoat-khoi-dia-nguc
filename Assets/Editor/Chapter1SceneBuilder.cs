@@ -16,6 +16,60 @@ namespace EscapeFromHell.Editor
 {
     public class Chapter1SceneBuilder : EditorWindow
     {
+        private static void PrepareSprites()
+        {
+            string[] paths = new string[] {
+                "Assets/Sprites/UI/NotificationDot.png",
+                "Assets/Sprites/UI/AppIconBg_Grey.png",
+                "Assets/Sprites/UI/NotesIcon.png",
+                "Assets/Sprites/UI/PhotosIcon.png",
+                "Assets/Sprites/UI/WeatherIcon.png",
+                "Assets/Sprites/UI/SettingsIcon.png",
+                "Assets/Sprites/UI/MessagesIcon.png",
+                "Assets/Sprites/UI/BrowserIcon.png",
+                "Assets/Sprites/UI/TikTokIcon.png",
+                "Assets/Sprites/UI/FacebookIcon.png",
+                "Assets/Sprites/UI/MapsIcon.png",
+                "Assets/Sprites/UI/BankIcon.png",
+                "Assets/Sprites/UI/FinCreditIcon.png",
+                "Assets/Sprites/UI/phone_mask.png",
+                "Assets/Sprites/UI/phone_frame.png",
+                "Assets/Sprites/UI/RoundedRect.png"
+            };
+
+            bool changed = false;
+            foreach (string p in paths)
+            {
+                if (File.Exists(p))
+                {
+                    TextureImporter ti = AssetImporter.GetAtPath(p) as TextureImporter;
+                    if (ti != null)
+                    {
+                        bool tiChanged = false;
+                        if (ti.textureType != TextureImporterType.Sprite)
+                        {
+                            ti.textureType = TextureImporterType.Sprite;
+                            tiChanged = true;
+                        }
+                        if (p.EndsWith("RoundedRect.png") && ti.spriteBorder == Vector4.zero)
+                        {
+                            ti.spriteBorder = new Vector4(16, 16, 16, 16);
+                            tiChanged = true;
+                        }
+                        if (tiChanged)
+                        {
+                            ti.SaveAndReimport();
+                            changed = true;
+                        }
+                    }
+                }
+            }
+            if (changed)
+            {
+                AssetDatabase.Refresh();
+            }
+        }
+
         [MenuItem("Escape From Hell/Build Chapter 1 Scene")]
         public static void BuildScene()
         {
@@ -23,6 +77,7 @@ namespace EscapeFromHell.Editor
 
             // Refresh asset database first to ensure all imported changes are captured
             AssetDatabase.Refresh();
+            PrepareSprites();
 
             // Check if sprites exist and load correctly
             Sprite testSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Tiles/Room/Floor.png");
@@ -32,6 +87,9 @@ namespace EscapeFromHell.Editor
                 !File.Exists("Assets/Sprites/Items/Trash.png") ||
                 !File.Exists("Assets/Sprites/UI/NotesIcon.png") ||
                 !File.Exists("Assets/Sprites/UI/WinLogo.png") ||
+                !File.Exists("Assets/Sprites/UI/phone_mask.png") ||
+                !File.Exists("Assets/Sprites/UI/phone_frame.png") ||
+                !File.Exists("Assets/Sprites/UI/RoundedRect.png") ||
                 testSprite == null)
             {
                 Debug.LogWarning("Sprites not found or not imported correctly. Generating sprites...");
@@ -46,6 +104,9 @@ namespace EscapeFromHell.Editor
             DialogueData bills = CreateBillsDialogue();
             DialogueData laptop = CreateLaptopDialogue();
             DialogueData jobOffer = CreateJobOfferDialogue();
+            DialogueData thanh = CreateThanhDialogue();
+            DialogueData hung = CreateHungDialogue();
+            DialogueData finCredit = CreateFinCreditDialogue();
 
             // 3. Create a new Scene
             Scene newScene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
@@ -229,7 +290,7 @@ namespace EscapeFromHell.Editor
             dialRect.anchorMax = new Vector2(1f, 0f);
             dialRect.pivot = new Vector2(0.5f, 0f);
             dialRect.anchoredPosition = new Vector2(0, 20);
-            dialRect.sizeDelta = new Vector2(-40, 140); // 20px padding left/right
+            dialRect.sizeDelta = new Vector2(-40, 150); // 20px padding left/right
 
             Image panelImg = dialPanel.AddComponent<Image>();
             panelImg.color = new Color(0f, 0f, 0f, 0.85f); // Beautiful dark glass look
@@ -338,7 +399,7 @@ namespace EscapeFromHell.Editor
             GameObject phoneObj = CreateProp(propsParent.transform, "Phone", new Vector3(2.0f, -1.0f, 0), Chapter1PropType.Phone);
             GameObject phoneSpriteObj = new GameObject("Sprite");
             phoneSpriteObj.transform.SetParent(phoneObj.transform, false);
-            phoneSpriteObj.transform.localScale = new Vector3(0.6f, 0.6f, 1f);
+            phoneSpriteObj.transform.localScale = new Vector3(0.16f, 0.22f, 1f); // Small and slightly elongated like a modern phone
             SpriteRenderer phoneSR = phoneSpriteObj.AddComponent<SpriteRenderer>();
             phoneSR.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/Phone.png");
             phoneSR.sortingOrder = 1; // Render on top of background sheets, below player
@@ -350,7 +411,10 @@ namespace EscapeFromHell.Editor
             SetPrivateField(c1, "phoneDialogue", phone);
             SetPrivateField(c1, "billsDialogue", bills);
             SetPrivateField(c1, "laptopDialogue", laptop);
-            SetPrivateField(c1, "jobOffer", jobOffer);
+            SetPrivateField(c1, "jobOfferDialogue", jobOffer);
+            SetPrivateField(c1, "thanhDialogue", thanh);
+            SetPrivateField(c1, "hungDialogue", hung);
+            SetPrivateField(c1, "finCreditDialogue", finCredit);
 
             // 10. GameManager setup in scene (so it exists)
             GameObject gmObj = new GameObject("GameManager");
@@ -430,9 +494,47 @@ namespace EscapeFromHell.Editor
             {
                 new DialogueLine { speakerName = "Minh", text = "Mở điện thoại lên xem nào... Có tin nhắn mới từ Mẹ." },
                 new DialogueLine { speakerName = "Mẹ", text = "Minh ơi, tháng này dưới quê mất mùa quá, bố con lại đau chân. Con xem có gửi về cho mẹ ít tiền thuốc thang cho bố được không?" },
-                new DialogueLine { speakerName = "Minh", text = "Lại là tin nhắn xin tiền... Mình đến tiền nhà còn chưa đóng nổi, lấy đâu ra tiền gửi về quê bây giờ?" }
+                new DialogueLine { speakerName = "Minh", text = "Bố mẹ ở quê đang khó khăn như thế... Mà mình vô dụng quá, ngay cả tiền phòng trọ còn chưa đóng nổi, lấy đâu ra tiền gửi về lo thuốc thang cho bố bây giờ..." }
             };
             AssetDatabase.CreateAsset(data, "Assets/ScriptableObjects/Dialogues/Chapter1_Phone.asset");
+            return data;
+        }
+
+        private static DialogueData CreateThanhDialogue()
+        {
+            DialogueData data = ScriptableObject.CreateInstance<DialogueData>();
+            data.lines = new List<DialogueLine>
+            {
+                new DialogueLine { speakerName = "Minh", text = "Đến cả Thành cũng nhắn tin đòi tiền..." },
+                new DialogueLine { speakerName = "Minh", text = "Lúc trước kẹt quá vay nó 1 triệu... giờ nó cần gấp mà mình không có một xu để trả." },
+                new DialogueLine { speakerName = "Minh", text = "Nhìn tin nhắn của nó mà thấy tội lỗi quá... Thôi, giờ có trả lời cũng chẳng giải quyết được gì, mình còn không biết ngày mai lấy gì ăn." }
+            };
+            AssetDatabase.CreateAsset(data, "Assets/ScriptableObjects/Dialogues/Chapter1_Thanh.asset");
+            return data;
+        }
+
+        private static DialogueData CreateHungDialogue()
+        {
+            DialogueData data = ScriptableObject.CreateInstance<DialogueData>();
+            data.lines = new List<DialogueLine>
+            {
+                new DialogueLine { speakerName = "Minh", text = "Hỏi thăm Hùng xem có xoay sở được ít tiền không, ai ngờ nó cũng đang cực khổ..." },
+                new DialogueLine { speakerName = "Minh", text = "Công ty nợ lương, mọi người ai cũng đang phải vật lộn. Hỏi mượn tiền lúc này thật sự không đúng chút nào..." }
+            };
+            AssetDatabase.CreateAsset(data, "Assets/ScriptableObjects/Dialogues/Chapter1_Hung.asset");
+            return data;
+        }
+
+        private static DialogueData CreateFinCreditDialogue()
+        {
+            DialogueData data = ScriptableObject.CreateInstance<DialogueData>();
+            data.lines = new List<DialogueLine>
+            {
+                new DialogueLine { speakerName = "Minh", text = "Lại là tin nhắn đòi nợ từ bên app vay tiền..." },
+                new DialogueLine { speakerName = "Minh", text = "Họ dọa sẽ liên hệ với gia đình và người thân nếu không trả nợ trước chiều nay." },
+                new DialogueLine { speakerName = "Minh", text = "Nếu mẹ biết chuyện mình vay nợ app thế này, mẹ chắc sẽ sốc lắm... Mình phải làm sao đây?" }
+            };
+            AssetDatabase.CreateAsset(data, "Assets/ScriptableObjects/Dialogues/Chapter1_FinCredit.asset");
             return data;
         }
 
@@ -467,11 +569,9 @@ namespace EscapeFromHell.Editor
             DialogueData data = ScriptableObject.CreateInstance<DialogueData>();
             data.lines = new List<DialogueLine>
             {
-                new DialogueLine { speakerName = "Điện thoại", text = "*Rung rung... Bíp bíp... Có tin nhắn từ số lạ.*" },
-                new DialogueLine { speakerName = "Tin nhắn lạ", text = "Chào bạn, chúng tôi đang tuyển nhân viên văn phòng chăm sóc khách hàng làm việc tại Campuchia.\nCông việc gõ máy tính đơn giản, không yêu cầu kinh nghiệm.\nLương cứng $1500 + hoa hồng. Bao chi phí đi lại, ăn ở, visa." },
-                new DialogueLine { speakerName = "Minh", text = "Lương $1500? Đổi ra tiền Việt là gần 40 triệu một tháng! Lại còn bao ăn ở nữa..." },
-                new DialogueLine { speakerName = "Minh", text = "Làm 3 tháng là mình trả hết nợ và gửi được tiền về cho bố mẹ rồi. Dù có đi hơi xa nhưng còn hơn là chết đói ở đây." },
-                new DialogueLine { speakerName = "Minh", text = "Quyết định thế đi! Mình sẽ nhắn tin đồng ý và xếp đồ xuất phát ngay ngày mai." }
+                new DialogueLine { speakerName = "Minh", text = "Ủa... Tuyển nhân viên văn phòng ở Campuchia lương 38 đến 50 triệu/tháng cơ á? Lương cao bất thường vậy?" },
+                new DialogueLine { speakerName = "Minh", text = "Khoan đã... Campuchia? Bavet? Mình nghe bạn bè cảnh báo khu đó toàn casino lừa đảo và buôn bán người thôi." },
+                new DialogueLine { speakerName = "Minh", text = "Số lạ, lương không tưởng, địa điểm đáng nghi... Đây chắc chắn là bẫy lừa đảo rồi. Mình phải xóa tin nhắn này đi." }
             };
             AssetDatabase.CreateAsset(data, "Assets/ScriptableObjects/Dialogues/Chapter1_JobOffer.asset");
             return data;
@@ -1158,12 +1258,12 @@ namespace EscapeFromHell.Editor
             crtRect.offsetMax = new Vector2(-12, -10);
             TextMeshProUGUI crtTxt = chromeText.AddComponent<TextMeshProUGUI>();
             crtTxt.text = "<size=11><color=#9aa0a6>Khoảng 124.000 kết quả (0,32 giây)</color></size><br><br>" +
-                          "<color=#8ab4f8><size=13><b>1. Thực Tập Sinh Lập Trình Unity - G-Star Studio</b></size></color><br>" +
-                          "<color=#9aa0a6><size=10>https://gstarstudio.vn/tuyen-dung/intern-unity</size></color><br>" +
+                          "<color=#8ab4f8><size=13><b>1. Thực Tập Sinh Lập Trình Unity - JoyGame Studio</b></size></color><br>" +
+                          "<color=#9aa0a6><size=10>https://joygamestudio.vn/tuyen-dung/intern-unity</size></color><br>" +
                           "• Yêu cầu: Có sản phẩm game tự làm, hiểu rõ C# và cấu trúc dữ liệu.<br>" +
                           "• Lương hỗ trợ: 1.000.000đ/tháng. Thử việc không lương 2 tháng.<br><br>" +
-                          "<color=#8ab4f8><size=13><b>2. Lập Trình Viên Web (Fresher) - VinaTech Group</b></size></color><br>" +
-                          "<color=#9aa0a6><size=10>https://vinatech.com/careers/web-fresher</size></color><br>" +
+                          "<color=#8ab4f8><size=13><b>2. Lập Trình Viên Web (Fresher) - NovaTech Group</b></size></color><br>" +
+                          "<color=#9aa0a6><size=10>https://novatech.com/careers/web-fresher</size></color><br>" +
                           "• Yêu cầu: Có tối thiểu 1 năm kinh nghiệm làm việc thực tế tại doanh nghiệp.<br>" +
                           "• Mức lương: 6.000.000đ - 8.000.000đ. Phỏng vấn kỹ thuật 3 vòng.<br><br>" +
                           "<color=#33cc66><size=13><b>3. [HOT] Việc Làm Nước Ngoài Lương Cao - Tuyển Kỹ Thuật Viên Máy Tính (Campuchia)</b></size></color><br>" +
@@ -1527,6 +1627,15 @@ namespace EscapeFromHell.Editor
             ConfigureSpriteImportSettings(phoneWallpaperPath);
             Sprite phoneWallpaperSprite = AssetDatabase.LoadAssetAtPath<Sprite>(phoneWallpaperPath);
 
+            // Load phone mask and frame overlay sprites
+            string phoneMaskPath = "Assets/Sprites/UI/phone_mask.png";
+            ConfigureSpriteImportSettings(phoneMaskPath);
+            Sprite phoneMaskSprite = AssetDatabase.LoadAssetAtPath<Sprite>(phoneMaskPath);
+
+            string phoneFramePath = "Assets/Sprites/UI/phone_frame.png";
+            ConfigureSpriteImportSettings(phoneFramePath);
+            Sprite phoneFrameSprite = AssetDatabase.LoadAssetAtPath<Sprite>(phoneFramePath);
+
             // Load phone app icon background sprites
             Sprite bgGreen = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/AppIconBg_Green.png");
             Sprite bgBlue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/AppIconBg_Blue.png");
@@ -1587,8 +1696,8 @@ namespace EscapeFromHell.Editor
             
             TextMeshProUGUI ehText = exitHint.AddComponent<TextMeshProUGUI>();
             ehText.text = "Nhấp chuột bên ngoài điện thoại hoặc nhấn ESC để thoát";
-            ehText.fontSize = 11;
-            ehText.color = new Color(1f, 1f, 1f, 0.5f);
+            ehText.fontSize = 12;
+            ehText.color = new Color(1f, 1f, 1f, 0.7f);
             ehText.alignment = TextAlignmentOptions.Center;
             ehText.verticalAlignment = VerticalAlignmentOptions.Middle;
 
@@ -1602,15 +1711,21 @@ namespace EscapeFromHell.Editor
             bodyRect.anchoredPosition = Vector2.zero;
 
             Image bodyImg = phoneBody.AddComponent<Image>();
-            bodyImg.color = new Color(0.05f, 0.05f, 0.05f, 1f); // Sleek modern dark phone body
-            
-            Outline bodyOutline = phoneBody.AddComponent<Outline>();
-            bodyOutline.effectColor = new Color(0.18f, 0.18f, 0.2f, 1f); // Titanium bezel
-            bodyOutline.effectDistance = new Vector2(3, 3);
+            // Use rounded-corner mask sprite so corners appear rounded
+            if (phoneMaskSprite != null)
+            {
+                bodyImg.sprite = phoneMaskSprite;
+                bodyImg.type = Image.Type.Simple;
+            }
+            bodyImg.color = new Color(0.06f, 0.06f, 0.08f, 1f); // Near-black modern phone body
+
+            // Mask clips children to the rounded corner shape of the sprite
+            Mask bodyMask = phoneBody.AddComponent<Mask>();
+            bodyMask.showMaskGraphic = true; // Show the dark body color behind the masked children
 
             // Dedicated Close (✕) button at the top-right of the phone body
             GameObject phoneCloseBtnObj = new GameObject("PhoneCloseButton");
-            phoneCloseBtnObj.transform.SetParent(phonePanel.transform, false);
+            phoneCloseBtnObj.transform.SetParent(phoneBody.transform, false);
             RectTransform pcbRect = phoneCloseBtnObj.AddComponent<RectTransform>();
             pcbRect.anchorMin = new Vector2(0.5f, 0.5f);
             pcbRect.anchorMax = new Vector2(0.5f, 0.5f);
@@ -1653,31 +1768,31 @@ namespace EscapeFromHell.Editor
             pcbtText.alignment = TextAlignmentOptions.Center;
             pcbtText.verticalAlignment = VerticalAlignmentOptions.Middle;
 
-            // Top Status Bar
+            // Top Status Bar — pushed 10px below the top edge to stay clear of the rounded corners
             GameObject statusBar = new GameObject("StatusBar");
             statusBar.transform.parent = phoneBody.transform;
             RectTransform statusRect = statusBar.AddComponent<RectTransform>();
             statusRect.anchorMin = new Vector2(0f, 1f);
             statusRect.anchorMax = new Vector2(1f, 1f);
             statusRect.pivot = new Vector2(0.5f, 1f);
-            statusRect.sizeDelta = new Vector2(0, 30);
-            statusRect.anchoredPosition = Vector2.zero;
+            statusRect.sizeDelta = new Vector2(-32, 30); // narrow 16px each side to avoid left/right rounded corners
+            statusRect.anchoredPosition = new Vector2(0, -10); // 10px below top = inside safe area
 
             Image statusImg = statusBar.AddComponent<Image>();
             statusImg.color = Color.clear; // Transparent iOS status bar
 
-            // Status Bar Left: Carrier / Signal
+            // Status Bar Left: Carrier / Signal — push inward 16px from left edge (avoid rounded corner clipping)
             GameObject statusLeft = new GameObject("StatusLeft");
             statusLeft.transform.parent = statusBar.transform;
             RectTransform slRect = statusLeft.AddComponent<RectTransform>();
             slRect.anchorMin = new Vector2(0f, 0f);
-            slRect.anchorMax = new Vector2(0.35f, 1f);
+            slRect.anchorMax = new Vector2(0.45f, 1f);
             slRect.pivot = new Vector2(0f, 0.5f);
-            slRect.anchoredPosition = new Vector2(10, 0);
+            slRect.anchoredPosition = new Vector2(16, 0); // 16px from left — clear of rounded corner
             slRect.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI slText = statusLeft.AddComponent<TextMeshProUGUI>();
-            slText.text = "Viettel  4G";
+            slText.text = "Viettel  ▂▄▆";
             slText.fontSize = 10;
             slText.color = Color.white;
             slText.alignment = TextAlignmentOptions.Left;
@@ -1701,31 +1816,32 @@ namespace EscapeFromHell.Editor
             scText.alignment = TextAlignmentOptions.Center;
             scText.verticalAlignment = VerticalAlignmentOptions.Middle;
 
-            // Status Bar Right: Battery
+            // Status Bar Right: Battery percentage + icon
             GameObject statusRight = new GameObject("StatusRight");
             statusRight.transform.parent = statusBar.transform;
             RectTransform srRect = statusRight.AddComponent<RectTransform>();
-            srRect.anchorMin = new Vector2(0.65f, 0f);
+            srRect.anchorMin = new Vector2(0.55f, 0f);
             srRect.anchorMax = new Vector2(1f, 1f);
             srRect.pivot = new Vector2(1f, 0.5f);
-            srRect.anchoredPosition = new Vector2(-10, 0);
+            srRect.anchoredPosition = new Vector2(-16, 0); // 16px from right — clear of rounded corner
             srRect.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI srText = statusRight.AddComponent<TextMeshProUGUI>();
-            srText.text = "84%";
+            srText.text = "84% <color=#aaffaa>▌</color>";
             srText.fontSize = 10;
             srText.color = Color.white;
             srText.alignment = TextAlignmentOptions.Right;
             srText.verticalAlignment = VerticalAlignmentOptions.Middle;
 
             // --- HOME SCREEN ---
+            // Starts at 38px from top (clear of rounded corner + status bar) and extends to bottom
             GameObject homeScreen = new GameObject("HomeScreen");
             homeScreen.transform.parent = phoneBody.transform;
             RectTransform homeRect = homeScreen.AddComponent<RectTransform>();
-            homeRect.anchorMin = Vector2.zero;
-            homeRect.anchorMax = Vector2.one;
-            homeRect.sizeDelta = new Vector2(0, -30);
-            homeRect.anchoredPosition = new Vector2(0, -15); // below status bar
+            homeRect.anchorMin = new Vector2(0f, 0f);
+            homeRect.anchorMax = new Vector2(1f, 1f);
+            homeRect.sizeDelta = new Vector2(0, -38); // leave 38px at top for status bar inside rounded corners
+            homeRect.anchoredPosition = new Vector2(0, -19); // shift down 19px so top gap = 38px, bottom gap = 0px
 
             Image homeImg = homeScreen.AddComponent<Image>();
             if (phoneWallpaperSprite != null)
@@ -1739,19 +1855,49 @@ namespace EscapeFromHell.Editor
             }
 
             // Grid for Apps Container (HomeScreen)
+            // homeScreen height ≈ 610px (640 - 30 status bar).
+            // Dock at bottom = 95px → dock occupies anchor y 0..0.156 of homeScreen.
+            // Grid goes from just above dock to 30px below the top.
             GameObject appsGrid = new GameObject("AppsGrid");
             appsGrid.transform.parent = homeScreen.transform;
             RectTransform gridRect = appsGrid.AddComponent<RectTransform>();
-            gridRect.anchorMin = new Vector2(0f, 0.2f);
-            gridRect.anchorMax = new Vector2(1f, 0.92f);
-            gridRect.sizeDelta = new Vector2(-34, 0); // Width is 360 - 34 = 326
-            gridRect.anchoredPosition = new Vector2(0, -10);
+            gridRect.anchorMin = new Vector2(0.02f, 0.16f); // 0.16 * 610 ≈ 98px above bottom = just above dock
+            gridRect.anchorMax = new Vector2(0.98f, 0.96f); // top: leave ~24px for status bar shadow
+            gridRect.sizeDelta = Vector2.zero; // fill the anchor area exactly
+            gridRect.anchoredPosition = Vector2.zero;
 
-            GridLayoutGroup glg = appsGrid.AddComponent<GridLayoutGroup>();
-            glg.cellSize = new Vector2(60, 80);
-            glg.spacing = new Vector2(22, 25);
-            glg.padding = new RectOffset(10, 10, 20, 10);
-            glg.childAlignment = TextAnchor.UpperCenter;
+            VerticalLayoutGroup vlg = appsGrid.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 8f;
+            vlg.padding = new RectOffset(4, 4, 8, 4);
+            vlg.childAlignment = TextAnchor.UpperCenter;
+            vlg.childControlWidth = false;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = false;
+            vlg.childForceExpandHeight = false;
+
+            // Row 1
+            GameObject row1Obj = new GameObject("Row1");
+            row1Obj.transform.SetParent(appsGrid.transform, false);
+            RectTransform r1Rt = row1Obj.AddComponent<RectTransform>();
+            r1Rt.sizeDelta = new Vector2(310, 72);
+            HorizontalLayoutGroup hlg1 = row1Obj.AddComponent<HorizontalLayoutGroup>();
+            hlg1.spacing = 12f;
+            hlg1.childAlignment = TextAnchor.MiddleCenter;
+            hlg1.childControlWidth = false;
+            hlg1.childControlHeight = false;
+
+            // Row 2
+            GameObject row2Obj = new GameObject("Row2");
+            row2Obj.transform.SetParent(appsGrid.transform, false);
+            RectTransform r2Rt = row2Obj.AddComponent<RectTransform>();
+            r2Rt.sizeDelta = new Vector2(310, 72);
+            HorizontalLayoutGroup hlg2 = row2Obj.AddComponent<HorizontalLayoutGroup>();
+            hlg2.spacing = 12f;
+            hlg2.childAlignment = TextAnchor.MiddleCenter;
+            hlg2.childControlWidth = false;
+            hlg2.childControlHeight = false;
+
+
 
             // Load phone app icon sprites
             Sprite notesIconSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/NotesIcon.png");
@@ -1762,11 +1908,26 @@ namespace EscapeFromHell.Editor
             Sprite messagesIconSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/MessagesIcon.png");
             Sprite browserIconSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/BrowserIcon.png");
 
-            // Grid App Buttons
-            CreatePhoneAppIconButton(appsGrid.transform, "NotesAppButton", notesIconSprite, bgOrange, "Ghi Chú", () => phoneUI.OpenNotes());
-            CreatePhoneAppIconButton(appsGrid.transform, "PhotosAppButton", photosIconSprite, bgLight, "Thư Viện", () => phoneUI.OpenPhotos());
-            CreatePhoneAppIconButton(appsGrid.transform, "WeatherAppButton", weatherIconSprite, bgCyan, "Thời Tiết", () => phoneUI.OpenWeather());
-            CreatePhoneAppIconButton(appsGrid.transform, "SettingsAppButton", settingsIconSprite, bgGrey, "Cài Đặt", () => phoneUI.OpenSettings());
+            Sprite tiktokIconSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/TikTokIcon.png");
+            Sprite facebookIconSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/FacebookIcon.png");
+            Sprite mapsIconSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/MapsIcon.png");
+            Sprite bankIconSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/BankIcon.png");
+            Sprite finCreditIconSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/FinCreditIcon.png");
+
+            // Row 1: Notes, Photos, Weather, Settings
+            CreatePhoneAppIconButton(row1Obj.transform, "NotesAppButton", notesIconSprite, bgOrange, "Ghi Chú", () => phoneUI.OpenNotes());
+            CreatePhoneAppIconButton(row1Obj.transform, "PhotosAppButton", photosIconSprite, bgLight, "Thư Viện", () => phoneUI.OpenPhotos());
+            CreatePhoneAppIconButton(row1Obj.transform, "WeatherAppButton", weatherIconSprite, bgCyan, "Thời Tiết", () => phoneUI.OpenWeather());
+            CreatePhoneAppIconButton(row1Obj.transform, "SettingsAppButton", settingsIconSprite, bgGrey, "Cài Đặt", () => phoneUI.OpenSettings());
+
+            // Row 2: TikTok, Facebook, Maps, FinCredit
+            CreatePhoneAppIconButton(row2Obj.transform, "TikTokAppButton", tiktokIconSprite, bgGrey, "TikTok", () => phoneUI.OpenTikTok());
+            CreatePhoneAppIconButton(row2Obj.transform, "FacebookAppButton", facebookIconSprite, bgBlue, "Facebook", () => phoneUI.OpenFacebook());
+            CreatePhoneAppIconButton(row2Obj.transform, "MapsAppButton", mapsIconSprite, bgGreen, "Bản Đồ", () => phoneUI.OpenMaps());
+            CreatePhoneAppIconButton(row2Obj.transform, "FinCreditAppButton", finCreditIconSprite, bgOrange, "FinCredit", () => phoneUI.OpenFinCreditApp());
+
+
+
 
             // Page Indicator dots
             GameObject pageIndicator = new GameObject("PageIndicator");
@@ -1784,7 +1945,7 @@ namespace EscapeFromHell.Editor
             piText.alignment = TextAlignmentOptions.Center;
             piText.verticalAlignment = VerticalAlignmentOptions.Middle;
 
-            // Bottom Smartphone Dock (holds Telefon, Messages, Browser)
+            // Bottom Smartphone Dock (holds Điện Thoại, Tin Nhắn, Trình Duyệt, MB Bank)
             GameObject dock = new GameObject("Dock");
             dock.transform.parent = homeScreen.transform;
             RectTransform dockRect = dock.AddComponent<RectTransform>();
@@ -1792,7 +1953,7 @@ namespace EscapeFromHell.Editor
             dockRect.anchorMax = new Vector2(1f, 0f);
             dockRect.pivot = new Vector2(0.5f, 0f);
             dockRect.sizeDelta = new Vector2(0, 95);
-            dockRect.anchoredPosition = new Vector2(0, 15); // slightly above the home bar
+            dockRect.anchoredPosition = new Vector2(0, 0); // flush to bottom, no overlap with apps
 
             Image dockImg = dock.AddComponent<Image>();
             dockImg.color = new Color(1f, 1f, 1f, 0.15f); // frosted glass white
@@ -1812,24 +1973,37 @@ namespace EscapeFromHell.Editor
             Image lineImg = dockTopLine.AddComponent<Image>();
             lineImg.color = new Color(1f, 1f, 1f, 0.2f); // subtle white divider line
 
-            HorizontalLayoutGroup dockHlg = dock.AddComponent<HorizontalLayoutGroup>();
-            dockHlg.padding = new RectOffset(20, 20, 5, 15);
-            dockHlg.spacing = 30f;
+            // Inner container for dock icons to align perfectly with Row 1 / Row 2
+            GameObject dockGrid = new GameObject("DockGrid");
+            dockGrid.transform.SetParent(dock.transform, false);
+            RectTransform dgRt = dockGrid.AddComponent<RectTransform>();
+            dgRt.anchorMin = new Vector2(0.5f, 0.5f);
+            dgRt.anchorMax = new Vector2(0.5f, 0.5f);
+            dgRt.pivot = new Vector2(0.5f, 0.5f);
+            dgRt.sizeDelta = new Vector2(310, 95);
+            dgRt.anchoredPosition = Vector2.zero;
+
+            HorizontalLayoutGroup dockHlg = dockGrid.AddComponent<HorizontalLayoutGroup>();
+            dockHlg.padding = new RectOffset(0, 0, 5, 10);
+            dockHlg.spacing = 12f;
             dockHlg.childAlignment = TextAnchor.MiddleCenter;
             dockHlg.childControlWidth = false;
             dockHlg.childControlHeight = false;
 
             // Dock Phone App Button
-            CreatePhoneAppIconButton(dock.transform, "PhoneAppButton", phoneIconSprite, bgGreen, "Điện Thoại", () => phoneUI.OpenPhoneApp());
+            CreatePhoneAppIconButton(dockGrid.transform, "PhoneAppButton", phoneIconSprite, bgGreen, "Điện Thoại", () => phoneUI.OpenPhoneApp());
 
             // Dock Messages App Button
-            GameObject msgAppBtnObj = CreatePhoneAppIconButton(dock.transform, "MessagesAppButton", messagesIconSprite, bgGreen, "Tin Nhắn", () => phoneUI.OpenMessagesApp());
+            GameObject msgAppBtnObj = CreatePhoneAppIconButton(dockGrid.transform, "MessagesAppButton", messagesIconSprite, bgGreen, "Tin Nhắn", () => phoneUI.OpenMessagesApp());
             
             // Notification Dot for Messages App (placed nicely at top-right of the icon background)
             GameObject msgNotifyDot = CreateNotificationDot(msgAppBtnObj.transform, Vector2.zero);
 
             // Dock Browser App Button
-            CreatePhoneAppIconButton(dock.transform, "BrowserAppButton", browserIconSprite, bgBlue, "Trình Duyệt", () => phoneUI.OpenBrowser());
+            CreatePhoneAppIconButton(dockGrid.transform, "BrowserAppButton", browserIconSprite, bgBlue, "Trình Duyệt", () => phoneUI.OpenBrowser());
+
+            // Dock MB Bank App Button
+            CreatePhoneAppIconButton(dockGrid.transform, "BankAppButton", bankIconSprite, bgBlue, "MB Bank", () => phoneUI.OpenBankApp());
 
             // Home/Close Swipe Indicator bar at bottom of phone
             GameObject homeBtnObj = new GameObject("HomeBar");
@@ -1856,35 +2030,17 @@ namespace EscapeFromHell.Editor
             mlRect.anchoredPosition = new Vector2(0, -15);
 
             Image mlImg = msgListScreen.AddComponent<Image>();
-            mlImg.color = new Color(0.08f, 0.08f, 0.08f, 1f); // Dark screen
+            mlImg.color = Color.black; // Pure black background
 
-            // Title "Tin Nhắn"
-            GameObject mlTitleObj = new GameObject("Title");
-            mlTitleObj.transform.parent = msgListScreen.transform;
-            RectTransform mltRect = mlTitleObj.AddComponent<RectTransform>();
-            mltRect.anchorMin = new Vector2(0f, 1f);
-            mltRect.anchorMax = new Vector2(1f, 1f);
-            mltRect.pivot = new Vector2(0.5f, 1f);
-            mltRect.sizeDelta = new Vector2(0, 40);
-            mltRect.anchoredPosition = Vector2.zero;
-
-            TextMeshProUGUI mltTxt = mlTitleObj.AddComponent<TextMeshProUGUI>();
-            mltTxt.text = "Tin Nhắn";
-            mltTxt.fontSize = 16;
-            mltTxt.fontStyle = FontStyles.Bold;
-            mltTxt.color = Color.white;
-            mltTxt.alignment = TextAlignmentOptions.Center;
-            mltTxt.verticalAlignment = VerticalAlignmentOptions.Middle;
-
-            // Back button in messages list (to go to Home screen)
+            // Back button at the top-left (instead of bar)
             GameObject mlBackObj = new GameObject("BackButton");
             mlBackObj.transform.SetParent(msgListScreen.transform, false);
             RectTransform mlbRect = mlBackObj.AddComponent<RectTransform>();
             mlbRect.anchorMin = new Vector2(0f, 1f);
             mlbRect.anchorMax = new Vector2(0f, 1f);
             mlbRect.pivot = new Vector2(0f, 1f);
-            mlbRect.sizeDelta = new Vector2(60, 30);
-            mlbRect.anchoredPosition = new Vector2(10, -5);
+            mlbRect.sizeDelta = new Vector2(30, 30);
+            mlbRect.anchoredPosition = new Vector2(15, -15);
 
             Image mlbImg = mlBackObj.AddComponent<Image>();
             mlbImg.color = Color.clear;
@@ -1898,24 +2054,76 @@ namespace EscapeFromHell.Editor
             mlbtRect.anchorMax = Vector2.one;
             mlbtRect.sizeDelta = Vector2.zero;
             TextMeshProUGUI mlbtTxt = mlbTextObj.AddComponent<TextMeshProUGUI>();
-            mlbtTxt.text = "< Home";
-            mlbtTxt.fontSize = 13;
-            mlbtTxt.color = ColorUtility.TryParseHtmlString("#007aff", out Color c) ? c : Color.blue;
-            mlbtTxt.alignment = TextAlignmentOptions.Left;
+            mlbtTxt.text = "←";
+            mlbtTxt.fontSize = 20;
+            mlbtTxt.color = new Color(0.55f, 0.55f, 0.58f, 1f); // light grey back arrow
+            mlbtTxt.alignment = TextAlignmentOptions.Center;
             mlbtTxt.verticalAlignment = VerticalAlignmentOptions.Middle;
 
-            // Container for chats — full width, starts below the title bar (50px)
+            // Title "Messaging" (large, bold, left-aligned, below back button)
+            GameObject mlTitleObj = new GameObject("Title");
+            mlTitleObj.transform.parent = msgListScreen.transform;
+            RectTransform mltRect = mlTitleObj.AddComponent<RectTransform>();
+            mltRect.anchorMin = new Vector2(0f, 1f);
+            mltRect.anchorMax = new Vector2(1f, 1f);
+            mltRect.pivot = new Vector2(0.5f, 1f);
+            mltRect.sizeDelta = new Vector2(-40, 40);
+            mltRect.anchoredPosition = new Vector2(0, -45); // lower than back button
+
+            TextMeshProUGUI mltTxt = mlTitleObj.AddComponent<TextMeshProUGUI>();
+            mltTxt.text = "Tin nhắn";
+            mltTxt.fontSize = 24;
+            mltTxt.fontStyle = FontStyles.Bold;
+            mltTxt.color = Color.white;
+            mltTxt.alignment = TextAlignmentOptions.Left;
+            mltTxt.verticalAlignment = VerticalAlignmentOptions.Middle;
+
+            // Search Bar (rounded rectangle search box, below title)
+            GameObject searchBarObj = new GameObject("SearchBar");
+            searchBarObj.transform.parent = msgListScreen.transform;
+            RectTransform sbRect = searchBarObj.AddComponent<RectTransform>();
+            sbRect.anchorMin = new Vector2(0f, 1f);
+            sbRect.anchorMax = new Vector2(1f, 1f);
+            sbRect.pivot = new Vector2(0.5f, 1f);
+            sbRect.sizeDelta = new Vector2(-40, 34); // left/right padding 20px
+            sbRect.anchoredPosition = new Vector2(0, -90);
+
+            Image sbImg = searchBarObj.AddComponent<Image>();
+            sbImg.color = new Color(0.16f, 0.16f, 0.18f, 1f); // clean grey bg for search box
+            Sprite roundedRectSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/RoundedRect.png");
+            if (roundedRectSprite != null)
+            {
+                sbImg.sprite = roundedRectSprite;
+                sbImg.type = Image.Type.Sliced; // prevent corner deformation
+            }
+
+            GameObject searchTextObj = new GameObject("SearchText");
+            searchTextObj.transform.parent = searchBarObj.transform;
+            RectTransform stRect = searchTextObj.AddComponent<RectTransform>();
+            stRect.anchorMin = Vector2.zero;
+            stRect.anchorMax = Vector2.one;
+            stRect.sizeDelta = new Vector2(-24, 0);
+            stRect.anchoredPosition = new Vector2(5, 0);
+
+            TextMeshProUGUI stTxt = searchTextObj.AddComponent<TextMeshProUGUI>();
+            stTxt.text = "Tìm kiếm...";
+            stTxt.fontSize = 13;
+            stTxt.color = new Color(0.60f, 0.60f, 0.62f, 1f); // muted placeholder text
+            stTxt.alignment = TextAlignmentOptions.Left;
+            stTxt.verticalAlignment = VerticalAlignmentOptions.Middle;
+
+            // Container for chats — starts below the search bar
             GameObject chatsContainer = new GameObject("ChatsContainer");
             chatsContainer.transform.parent = msgListScreen.transform;
             RectTransform ccRect = chatsContainer.AddComponent<RectTransform>();
             ccRect.anchorMin = new Vector2(0f, 1f);
             ccRect.anchorMax = new Vector2(1f, 1f);
             ccRect.pivot = new Vector2(0.5f, 1f);
-            ccRect.sizeDelta = new Vector2(0, 300); // tall enough for all chats
-            ccRect.anchoredPosition = new Vector2(0, -50); // below title bar
+            ccRect.sizeDelta = new Vector2(0, 440); // tall enough for all 6 chats
+            ccRect.anchoredPosition = new Vector2(0, -135); // below search bar
 
             VerticalLayoutGroup ccVlg = chatsContainer.AddComponent<VerticalLayoutGroup>();
-            ccVlg.spacing = 0f; // rows are self-contained with their own separator
+            ccVlg.spacing = 0f;
             ccVlg.padding = new RectOffset(0, 0, 0, 0);
             ccVlg.childAlignment = TextAnchor.UpperCenter;
             ccVlg.childControlWidth = true;
@@ -1924,12 +2132,35 @@ namespace EscapeFromHell.Editor
             ccVlg.childForceExpandHeight = false;
 
             // Chat 1: Mom
-            GameObject chat1Obj = CreateChatRowButton(chatsContainer.transform, "Chat_Mom", "Mẹ", "Minh ơi, tháng này dưới quê...", () => phoneUI.OpenChat(1));
-            GameObject momNotifyDot = CreateNotificationDot(chat1Obj.transform, new Vector2(-14, 0));
+            GameObject chat1Obj = CreateChatRowButton(chatsContainer.transform, "Chat_Mom", "MẸ <color=#ffffff><size=9><mark=#3a3a3c> 1 </mark></size></color>", "Minh ơi, tháng này dưới quê...", "15:30", () => phoneUI.OpenChat(1));
+            GameObject momNotifyDot = CreateNotificationDot(chat1Obj.transform, Vector2.zero);
+            AlignNotificationDotLeft(momNotifyDot);
 
             // Chat 2: Landlord/Bills
-            GameObject chat2Obj = CreateChatRowButton(chatsContainer.transform, "Chat_Bills", "Ban Quản Lý Trọ", "THÔNG BÁO HOÁ ĐƠN THÁNG 6...", () => phoneUI.OpenChat(2));
-            GameObject billsNotifyDot = CreateNotificationDot(chat2Obj.transform, new Vector2(-14, 0));
+            GameObject chat2Obj = CreateChatRowButton(chatsContainer.transform, "Chat_Bills", "BAN QUẢN LÝ TRỌ <color=#ffffff><size=9><mark=#3a3a3c> 1 </mark></size></color>", "THÔNG BÁO HOÁ ĐƠN THÁNG 6...", "08:15", () => phoneUI.OpenChat(2));
+            GameObject billsNotifyDot = CreateNotificationDot(chat2Obj.transform, Vector2.zero);
+            AlignNotificationDotLeft(billsNotifyDot);
+
+            // Chat 3: Close Friend (Thành)
+            GameObject chat3Obj = CreateChatRowButton(chatsContainer.transform, "Chat_Thanh", "THÀNH <color=#ffffff><size=9><mark=#3a3a3c> 1 </mark></size></color>", "Mày ơi, khi nào trả tao tiền...", "15:30", () => phoneUI.OpenChat(3));
+            GameObject thanhNotifyDot = CreateNotificationDot(chat3Obj.transform, Vector2.zero);
+            AlignNotificationDotLeft(thanhNotifyDot);
+
+            // Chat 4: Hùng (Đồng nghiệp cũ)
+            GameObject chat4Obj = CreateChatRowButton(chatsContainer.transform, "Chat_Hung", "HÙNG <color=#ffffff><size=9><mark=#3a3a3c> 1 </mark></size></color>", "Xin lỗi mày nha Minh, dạo này...", "10:30", () => phoneUI.OpenChat(4));
+            GameObject hungNotifyDot = CreateNotificationDot(chat4Obj.transform, Vector2.zero);
+            AlignNotificationDotLeft(hungNotifyDot);
+
+            // Chat 5: FinCredit (Nhắc nợ)
+            GameObject chat5Obj = CreateChatRowButton(chatsContainer.transform, "Chat_FinCredit", "FINCREDIT <color=#ffffff><size=9><mark=#3a3a3c> 1 </mark></size></color>", "Yêu cầu thanh toán khoản vay quá...", "08:30", () => phoneUI.OpenChat(5));
+            GameObject finCreditNotifyDot = CreateNotificationDot(chat5Obj.transform, Vector2.zero);
+            AlignNotificationDotLeft(finCreditNotifyDot);
+
+            // Chat 6: Số lạ — tin nhắn lừa đảo Campuchia
+            GameObject chat6Obj = CreateChatRowButton(chatsContainer.transform, "Chat_ScamJob", "+84 091 XXX XXXX <color=#ffffff><size=9><mark=#3a3a3c> 1 </mark></size></color>", "Chào bạn! Mình đang tuyển gấp nhân viên...", "07:15", () => phoneUI.OpenChat(6));
+            GameObject scamNotifyDot = CreateNotificationDot(chat6Obj.transform, Vector2.zero);
+            AlignNotificationDotLeft(scamNotifyDot);
+
 
             // --- CHAT VIEW SCREEN ---
             GameObject chatViewScreenObj = new GameObject("ChatViewScreen");
@@ -1977,7 +2208,7 @@ namespace EscapeFromHell.Editor
             cvbRect.anchorMin = new Vector2(0f, 0.5f);
             cvbRect.anchorMax = new Vector2(0f, 0.5f);
             cvbRect.pivot = new Vector2(0f, 0.5f);
-            cvbRect.sizeDelta = new Vector2(50, 30);
+            cvbRect.sizeDelta = new Vector2(30, 30);
             cvbRect.anchoredPosition = new Vector2(10, 0);
 
             Image cvbImg = cvBackObj.AddComponent<Image>();
@@ -1992,20 +2223,45 @@ namespace EscapeFromHell.Editor
             cvbtRect.anchorMax = Vector2.one;
             cvbtRect.sizeDelta = Vector2.zero;
             TextMeshProUGUI cvbtTxt = cvbTextObj.AddComponent<TextMeshProUGUI>();
-            cvbtTxt.text = "< Tin";
-            cvbtTxt.fontSize = 13;
-            cvbtTxt.color = ColorUtility.TryParseHtmlString("#007aff", out Color c2) ? c2 : Color.blue;
-            cvbtTxt.alignment = TextAlignmentOptions.Left;
+            cvbtTxt.text = "←";
+            cvbtTxt.fontSize = 20;
+            cvbtTxt.color = new Color(0.55f, 0.55f, 0.58f, 1f);
+            cvbtTxt.alignment = TextAlignmentOptions.Center;
             cvbtTxt.verticalAlignment = VerticalAlignmentOptions.Middle;
 
-            // Chat content body text
+            // Chat content scroll view
+            GameObject scrollViewObj = new GameObject("ChatScrollView");
+            scrollViewObj.transform.SetParent(chatViewScreenObj.transform, false);
+            RectTransform scrollRectTransform = scrollViewObj.AddComponent<RectTransform>();
+            scrollRectTransform.anchorMin = Vector2.zero;
+            scrollRectTransform.anchorMax = Vector2.one;
+            scrollRectTransform.sizeDelta = new Vector2(-24, -60);
+            scrollRectTransform.anchoredPosition = new Vector2(0, -25);
+
+            ScrollRect scrollRect = scrollViewObj.AddComponent<ScrollRect>();
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+            scrollRect.movementType = ScrollRect.MovementType.Clamped;
+
+            Image scrollImg = scrollViewObj.AddComponent<Image>();
+            scrollImg.color = Color.clear;
+            scrollViewObj.AddComponent<RectMask2D>();
+
+            // Content container inside ScrollView
             GameObject chatContentObj = new GameObject("ChatContent");
-            chatContentObj.transform.parent = chatViewScreenObj.transform;
+            chatContentObj.transform.SetParent(scrollViewObj.transform, false);
             RectTransform chatContentRect = chatContentObj.AddComponent<RectTransform>();
-            chatContentRect.anchorMin = new Vector2(0f, 0f);
+            chatContentRect.anchorMin = new Vector2(0f, 1f); // top anchor
             chatContentRect.anchorMax = new Vector2(1f, 1f);
-            chatContentRect.sizeDelta = new Vector2(-24, -60);
-            chatContentRect.anchoredPosition = new Vector2(0, -25);
+            chatContentRect.pivot = new Vector2(0.5f, 1f);
+            chatContentRect.sizeDelta = Vector2.zero;
+            chatContentRect.anchoredPosition = Vector2.zero;
+
+            scrollRect.content = chatContentRect;
+
+            ContentSizeFitter csf = chatContentObj.AddComponent<ContentSizeFitter>();
+            csf.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             TextMeshProUGUI cvBodyTxt = chatContentObj.AddComponent<TextMeshProUGUI>();
             cvBodyTxt.text = "Tin nhắn...";
@@ -2015,6 +2271,7 @@ namespace EscapeFromHell.Editor
 
             // --- MOCK APP WINDOWS ---
             TextMeshProUGUI notesContent, photosContent, settingsContent, browserContent, weatherContent, phoneContent;
+            TextMeshProUGUI tiktokContent, facebookContent, mapsContent, bankContent, finCreditContent;
             
             GameObject notesWin = CreatePhoneMockAppWindow(phoneBody.transform, "NotesWindow", "Ghi Chú", out notesContent, () => phoneUI.CloseNotes());
             GameObject photosWin = CreatePhoneMockAppWindow(phoneBody.transform, "PhotosWindow", "Thư Viện Ảnh", out photosContent, () => phoneUI.ClosePhotos());
@@ -2022,6 +2279,11 @@ namespace EscapeFromHell.Editor
             GameObject browserWin = CreatePhoneMockAppWindow(phoneBody.transform, "BrowserWindow", "Trình Duyệt Chrome", out browserContent, () => phoneUI.CloseBrowser());
             GameObject weatherWin = CreatePhoneMockAppWindow(phoneBody.transform, "WeatherWindow", "Thời Tiết", out weatherContent, () => phoneUI.CloseWeather());
             GameObject phoneWin = CreatePhoneMockAppWindow(phoneBody.transform, "PhoneWindow", "Điện Thoại", out phoneContent, () => phoneUI.ClosePhoneApp());
+            GameObject tiktokWin = CreatePhoneMockAppWindow(phoneBody.transform, "TikTokWindow", "TokTok", out tiktokContent, () => phoneUI.CloseTikTok());
+            GameObject facebookWin = CreatePhoneMockAppWindow(phoneBody.transform, "FacebookWindow", "FaceNet", out facebookContent, () => phoneUI.CloseFacebook());
+            GameObject mapsWin = CreatePhoneMockAppWindow(phoneBody.transform, "MapsWindow", "Bản đồ GoMaps", out mapsContent, () => phoneUI.CloseMaps());
+            GameObject bankWin = CreatePhoneMockAppWindow(phoneBody.transform, "BankWindow", "MB Bank", out bankContent, () => phoneUI.CloseBankApp());
+            GameObject finCreditWin = CreatePhoneMockAppWindow(phoneBody.transform, "FinCreditWindow", "FinCredit - Ví vay nợ", out finCreditContent, () => phoneUI.CloseFinCreditApp());
 
             // Tùy biến PhoneWindow thành giao diện danh bạ dạng nút bấm
             Transform phoneContentTrans = phoneWin.transform.Find("Content");
@@ -2035,12 +2297,14 @@ namespace EscapeFromHell.Editor
                 if (oldText != null) Object.DestroyImmediate(oldText);
 
                 // Thêm VerticalLayoutGroup để tự động căn chỉnh các dòng danh bạ dạng nút bấm
-                VerticalLayoutGroup vlg = phoneContentTrans.gameObject.AddComponent<VerticalLayoutGroup>();
-                vlg.padding = new RectOffset(10, 10, 10, 10);
-                vlg.spacing = 8f;
-                vlg.childAlignment = TextAnchor.UpperCenter;
-                vlg.childControlHeight = false;
-                vlg.childControlWidth = true;
+                VerticalLayoutGroup phoneVlg = phoneContentTrans.gameObject.AddComponent<VerticalLayoutGroup>();
+                phoneVlg.padding = new RectOffset(10, 10, 10, 10);
+                phoneVlg.spacing = 10f;
+                phoneVlg.childAlignment = TextAnchor.UpperCenter;
+                phoneVlg.childControlHeight = false;
+                phoneVlg.childControlWidth = false;
+                phoneVlg.childForceExpandHeight = false;
+                phoneVlg.childForceExpandWidth = false;
 
                 // Thêm tiêu đề danh bạ
                 GameObject headerTextObj = new GameObject("TitleText");
@@ -2058,25 +2322,14 @@ namespace EscapeFromHell.Editor
                 CreateContactButton(phoneContentTrans, "Contact_Hung", "Hùng (Bạn)", "0963-444-445", "(1 tháng trước)", new Color(0.7f, 0.7f, 0.7f));
 
                 // Tạo 3 liên hệ tuyển dụng, mặc định ẩn, tự động hiện khi Minh xem tin tuyển dụng trên laptop
-                gstarBtn = CreateContactButton(phoneContentTrans, "Contact_GStar", "G-Star Studio (Tuyển dụng)", "028-3333-5555", "(Mới tìm thấy)", new Color(0.5f, 0.8f, 1f));
+                gstarBtn = CreateContactButton(phoneContentTrans, "Contact_GStar", "JoyGame Studio (Tuyển dụng)", "028-3333-5555", "(Mới tìm thấy)", new Color(0.5f, 0.8f, 1f));
                 gstarBtn.SetActive(false);
 
-                vinatechBtn = CreateContactButton(phoneContentTrans, "Contact_VinaTech", "VinaTech Group (Tuyển dụng)", "024-9999-8888", "(Mới tìm thấy)", new Color(0.5f, 0.8f, 1f));
+                vinatechBtn = CreateContactButton(phoneContentTrans, "Contact_VinaTech", "NovaTech Group (Tuyển dụng)", "024-9999-8888", "(Mới tìm thấy)", new Color(0.5f, 0.8f, 1f));
                 vinatechBtn.SetActive(false);
 
                 scamContactBtn = CreateContactButton(phoneContentTrans, "Contact_AnhHungScam", "Anh Hùng (Bavet Campuchia)", "098-765-4321", "(Mới tìm thấy)", new Color(0.3f, 0.8f, 0.4f));
                 scamContactBtn.SetActive(false);
-
-                // Thêm dòng chú thích tài khoản hết tiền dưới cùng
-                GameObject footerTextObj = new GameObject("FooterText");
-                footerTextObj.transform.SetParent(phoneContentTrans, false);
-                RectTransform ftRect = footerTextObj.AddComponent<RectTransform>();
-                ftRect.sizeDelta = new Vector2(300, 30);
-                TextMeshProUGUI ftText = footerTextObj.AddComponent<TextMeshProUGUI>();
-                ftText.text = "<color=#ff4d4d><i>* Tài khoản hết tiền. Không thể thực hiện cuộc gọi. *</i></color>";
-                ftText.fontSize = 10;
-                ftText.alignment = TextAlignmentOptions.Center;
-                ftText.verticalAlignment = VerticalAlignmentOptions.Middle;
             }
 
             // Set private fields on PhoneUI
@@ -2091,6 +2344,18 @@ namespace EscapeFromHell.Editor
             SetPrivateField(phoneUI, "browserWindow", browserWin);
             SetPrivateField(phoneUI, "weatherWindow", weatherWin);
             SetPrivateField(phoneUI, "phoneWindow", phoneWin);
+            SetPrivateField(phoneUI, "tiktokWindow", tiktokWin);
+            SetPrivateField(phoneUI, "facebookWindow", facebookWin);
+            SetPrivateField(phoneUI, "mapsWindow", mapsWin);
+            SetPrivateField(phoneUI, "bankWindow", bankWin);
+            SetPrivateField(phoneUI, "finCreditWindow", finCreditWin);
+
+            // Set custom app icon sprites
+            SetPrivateField(phoneUI, "tiktokIcon", tiktokIconSprite);
+            SetPrivateField(phoneUI, "facebookIcon", facebookIconSprite);
+            SetPrivateField(phoneUI, "mapsIcon", mapsIconSprite);
+            SetPrivateField(phoneUI, "bankIcon", bankIconSprite);
+            SetPrivateField(phoneUI, "finCreditIcon", finCreditIconSprite);
 
             // Gán các nút liên hệ tuyển dụng vào PhoneUI để ẩn hiện
             SetPrivateField(phoneUI, "contactGStar", gstarBtn);
@@ -2101,6 +2366,10 @@ namespace EscapeFromHell.Editor
             SetPrivateField(phoneUI, "chatBodyText", cvBodyTxt);
             SetPrivateField(phoneUI, "momNotificationDot", momNotifyDot);
             SetPrivateField(phoneUI, "billsNotificationDot", billsNotifyDot);
+            SetPrivateField(phoneUI, "thanhNotificationDot", thanhNotifyDot);
+            SetPrivateField(phoneUI, "hungNotificationDot", hungNotifyDot);
+            SetPrivateField(phoneUI, "finCreditNotificationDot", finCreditNotifyDot);
+            SetPrivateField(phoneUI, "scamNotificationDot", scamNotifyDot);
             SetPrivateField(phoneUI, "messagesAppNotificationDot", msgNotifyDot);
 
             SetPrivateField(phoneUI, "notesContentText", notesContent);
@@ -2109,6 +2378,32 @@ namespace EscapeFromHell.Editor
             SetPrivateField(phoneUI, "browserContentText", browserContent);
             SetPrivateField(phoneUI, "weatherContentText", weatherContent);
             SetPrivateField(phoneUI, "phoneContentText", phoneContent);
+            SetPrivateField(phoneUI, "tiktokContentText", tiktokContent);
+            SetPrivateField(phoneUI, "facebookContentText", facebookContent);
+            SetPrivateField(phoneUI, "mapsContentText", mapsContent);
+            SetPrivateField(phoneUI, "bankContentText", bankContent);
+            SetPrivateField(phoneUI, "finCreditContentText", finCreditContent);
+
+            // Create Phone Frame Overlay (drawn on top of all screens inside phoneBody)
+            GameObject frameOverlay = new GameObject("PhoneFrameOverlay");
+            frameOverlay.transform.SetParent(phoneBody.transform, false);
+            RectTransform frameRect = frameOverlay.AddComponent<RectTransform>();
+            frameRect.anchorMin = Vector2.zero;
+            frameRect.anchorMax = Vector2.one;
+            frameRect.sizeDelta = Vector2.zero;
+            frameRect.anchoredPosition = Vector2.zero;
+
+            Image frameImg = frameOverlay.AddComponent<Image>();
+            if (phoneFrameSprite != null)
+            {
+                frameImg.sprite = phoneFrameSprite;
+                frameImg.color = Color.white;
+            }
+            else
+            {
+                frameImg.color = Color.clear;
+            }
+            frameImg.raycastTarget = false; // Let clicks pass through to elements underneath!
         }
 
         private static GameObject CreatePhoneMockAppWindow(Transform parent, string name, string title, out TextMeshProUGUI contentText, UnityEngine.Events.UnityAction onClose)
@@ -2145,7 +2440,7 @@ namespace EscapeFromHell.Editor
             ttRect.anchoredPosition = Vector2.zero;
             TextMeshProUGUI titleTxt = titleTextObj.AddComponent<TextMeshProUGUI>();
             titleTxt.text = title;
-            titleTxt.fontSize = 14;
+            titleTxt.fontSize = 15;
             titleTxt.fontStyle = FontStyles.Bold;
             titleTxt.color = Color.white;
             titleTxt.alignment = TextAlignmentOptions.Center;
@@ -2158,7 +2453,7 @@ namespace EscapeFromHell.Editor
             backRect.anchorMin = new Vector2(0f, 0.5f);
             backRect.anchorMax = new Vector2(0f, 0.5f);
             backRect.pivot = new Vector2(0f, 0.5f);
-            backRect.sizeDelta = new Vector2(60, 30);
+            backRect.sizeDelta = new Vector2(30, 30);
             backRect.anchoredPosition = new Vector2(10, 0);
 
             Image backImg = backBtnObj.AddComponent<Image>();
@@ -2173,10 +2468,10 @@ namespace EscapeFromHell.Editor
             btRect.anchorMax = Vector2.one;
             btRect.sizeDelta = Vector2.zero;
             TextMeshProUGUI btTxt = backTextObj.AddComponent<TextMeshProUGUI>();
-            btTxt.text = "< Thoát";
-            btTxt.fontSize = 13;
-            btTxt.color = ColorUtility.TryParseHtmlString("#007aff", out Color c) ? c : Color.blue;
-            btTxt.alignment = TextAlignmentOptions.Left;
+            btTxt.text = "←";
+            btTxt.fontSize = 20;
+            btTxt.color = new Color(0.55f, 0.55f, 0.58f, 1f);
+            btTxt.alignment = TextAlignmentOptions.Center;
             btTxt.verticalAlignment = VerticalAlignmentOptions.Middle;
 
             // Content Area
@@ -2190,7 +2485,7 @@ namespace EscapeFromHell.Editor
 
             contentText = contentObj.AddComponent<TextMeshProUGUI>();
             contentText.text = "Nội dung...";
-            contentText.fontSize = 12;
+            contentText.fontSize = 14;
             contentText.color = Color.white;
             contentText.verticalAlignment = VerticalAlignmentOptions.Top;
 
@@ -2259,7 +2554,7 @@ namespace EscapeFromHell.Editor
 
             TextMeshProUGUI lblTxt = labelObj.AddComponent<TextMeshProUGUI>();
             lblTxt.text = label;
-            lblTxt.fontSize = 10;
+            lblTxt.fontSize = 11;
             lblTxt.color = Color.white;
             lblTxt.alignment = TextAlignmentOptions.Center;
             lblTxt.verticalAlignment = VerticalAlignmentOptions.Middle;
@@ -2296,7 +2591,34 @@ namespace EscapeFromHell.Editor
             return dotObj;
         }
 
-        private static GameObject CreateChatRowButton(Transform parent, string name, string sender, string preview, UnityEngine.Events.UnityAction onClick)
+        private static void AlignNotificationDotLeft(GameObject dotObj)
+        {
+            if (dotObj == null) return;
+            // Remove the Image component to prevent rendering solid square if sprite configuration has lag
+            Image img = dotObj.GetComponent<Image>();
+            if (img != null) UnityEngine.Object.DestroyImmediate(img);
+
+            RectTransform rTrans = dotObj.GetComponent<RectTransform>();
+            if (rTrans != null)
+            {
+                rTrans.anchorMin = new Vector2(0f, 0.5f);
+                rTrans.anchorMax = new Vector2(0f, 0.5f);
+                rTrans.pivot = new Vector2(0f, 0.5f);
+                rTrans.sizeDelta = new Vector2(12, 12);
+                rTrans.anchoredPosition = new Vector2(10, 0); // 10px from the left edge of chat row
+            }
+
+            // Render a clean grey circular dot using TextMeshPro (guarantees perfect circle and exact grey color)
+            TextMeshProUGUI txt = dotObj.GetComponent<TextMeshProUGUI>();
+            if (txt == null) txt = dotObj.AddComponent<TextMeshProUGUI>();
+            txt.text = "●";
+            txt.fontSize = 11;
+            txt.color = new Color(0.55f, 0.55f, 0.58f, 1f); // Muted grey
+            txt.alignment = TextAlignmentOptions.Center;
+            txt.verticalAlignment = VerticalAlignmentOptions.Middle;
+        }
+
+        private static GameObject CreateChatRowButton(Transform parent, string name, string sender, string preview, string timeStr, UnityEngine.Events.UnityAction onClick)
         {
             // --- Row container (72px tall) ---
             GameObject btnObj = new GameObject(name);
@@ -2305,47 +2627,72 @@ namespace EscapeFromHell.Editor
             rTrans.sizeDelta = new Vector2(0, 72);
 
             Image img = btnObj.AddComponent<Image>();
-            img.color = new Color(0.10f, 0.10f, 0.12f, 1f); // dark row bg
+            img.color = new Color(0f, 0f, 0f, 0f); // transparent background, matches screen bg
             Button btn = btnObj.AddComponent<Button>();
             btn.onClick.AddListener(onClick);
 
             ColorBlock cb = btn.colors;
-            cb.normalColor = new Color(0.10f, 0.10f, 0.12f, 1f);
-            cb.highlightedColor = new Color(0.18f, 0.18f, 0.22f, 1f);
-            cb.pressedColor = new Color(0.25f, 0.25f, 0.30f, 1f);
+            cb.normalColor = new Color(0f, 0f, 0f, 0f);
+            cb.highlightedColor = new Color(0.11f, 0.11f, 0.13f, 1f); // subtle highlight
+            cb.pressedColor = new Color(0.18f, 0.18f, 0.20f, 1f);
             cb.selectedColor = cb.normalColor;
             cb.fadeDuration = 0.1f;
             btn.colors = cb;
 
-            // --- Avatar circle (44x44, centered vertically, 14px from left) ---
+            // --- Avatar circle (40x40, centered vertically, 28px from left to make room for red dot) ---
             GameObject avatarObj = new GameObject("Avatar");
             avatarObj.transform.SetParent(btnObj.transform, false);
             RectTransform avatarRect = avatarObj.AddComponent<RectTransform>();
             avatarRect.anchorMin = new Vector2(0f, 0.5f);
             avatarRect.anchorMax = new Vector2(0f, 0.5f);
             avatarRect.pivot = new Vector2(0f, 0.5f);
-            avatarRect.sizeDelta = new Vector2(44, 44);
-            avatarRect.anchoredPosition = new Vector2(14, 0);
+            avatarRect.sizeDelta = new Vector2(40, 40);
+            avatarRect.anchoredPosition = new Vector2(28, 0);
             Image avatarImg = avatarObj.AddComponent<Image>();
-            // Pick a distinct accent color per sender initial
-            string initial = sender.Length > 0 ? sender.Substring(0, 1) : "?";
-            avatarImg.color = initial == "M" ? new Color(0.18f, 0.52f, 0.87f, 1f)  // blue for Mẹ
-                                             : new Color(0.55f, 0.27f, 0.68f, 1f); // purple for Ban Quản Lý
+            avatarImg.color = new Color(0.24f, 0.24f, 0.27f, 1f); // modern clean grey background
 
-            // Initials text on avatar
-            GameObject initObj = new GameObject("Initial");
-            initObj.transform.SetParent(avatarObj.transform, false);
-            RectTransform initRect = initObj.AddComponent<RectTransform>();
-            initRect.anchorMin = Vector2.zero;
-            initRect.anchorMax = Vector2.one;
-            initRect.sizeDelta = Vector2.zero;
-            TextMeshProUGUI initTxt = initObj.AddComponent<TextMeshProUGUI>();
-            initTxt.text = initial;
-            initTxt.fontSize = 18;
-            initTxt.fontStyle = FontStyles.Bold;
-            initTxt.color = Color.white;
-            initTxt.alignment = TextAlignmentOptions.Center;
-            initTxt.verticalAlignment = VerticalAlignmentOptions.Middle;
+            // Use the rounded rectangle sprite to make avatar square with rounded corners
+            Sprite roundedRectSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/RoundedRect.png");
+            if (roundedRectSprite != null)
+            {
+                avatarImg.sprite = roundedRectSprite;
+                avatarImg.type = Image.Type.Sliced;
+            }
+
+            // Procedurally draw person silhouette to avoid font-missing-glyph issue (🔲)
+            GameObject personIcon = new GameObject("PersonIcon");
+            personIcon.transform.SetParent(avatarObj.transform, false);
+            RectTransform holderRt = personIcon.AddComponent<RectTransform>();
+            holderRt.anchorMin = Vector2.zero;
+            holderRt.anchorMax = Vector2.one;
+            holderRt.sizeDelta = Vector2.zero;
+
+            // Head (circle)
+            GameObject headObj = new GameObject("Head");
+            headObj.transform.SetParent(personIcon.transform, false);
+            RectTransform headRt = headObj.AddComponent<RectTransform>();
+            headRt.anchorMin = new Vector2(0.5f, 0.5f);
+            headRt.anchorMax = new Vector2(0.5f, 0.5f);
+            headRt.pivot = new Vector2(0.5f, 0.5f);
+            headRt.sizeDelta = new Vector2(10, 10);
+            headRt.anchoredPosition = new Vector2(0, 5);
+            Image headImg = headObj.AddComponent<Image>();
+            headImg.color = new Color(0.60f, 0.60f, 0.62f, 1f); // light grey
+            Sprite dotSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/NotificationDot.png");
+            if (dotSprite != null) headImg.sprite = dotSprite;
+
+            // Body/Shoulders (stretched rounded pill)
+            GameObject bodyObj = new GameObject("Body");
+            bodyObj.transform.SetParent(personIcon.transform, false);
+            RectTransform bodyRt = bodyObj.AddComponent<RectTransform>();
+            bodyRt.anchorMin = new Vector2(0.5f, 0.5f);
+            bodyRt.anchorMax = new Vector2(0.5f, 0.5f);
+            bodyRt.pivot = new Vector2(0.5f, 0.5f);
+            bodyRt.sizeDelta = new Vector2(22, 10);
+            bodyRt.anchoredPosition = new Vector2(0, -6);
+            Image bodyImg = bodyObj.AddComponent<Image>();
+            bodyImg.color = new Color(0.60f, 0.60f, 0.62f, 1f); // light grey
+            if (dotSprite != null) bodyImg.sprite = dotSprite;
 
             // --- Text block (sender + preview) anchored to avatar's right ---
             GameObject textObj = new GameObject("TextBlock");
@@ -2353,9 +2700,10 @@ namespace EscapeFromHell.Editor
             RectTransform tRect = textObj.AddComponent<RectTransform>();
             tRect.anchorMin = new Vector2(0f, 0f);
             tRect.anchorMax = new Vector2(1f, 1f);
-            // left edge = 14 (margin) + 44 (avatar) + 12 (gap) = 70
-            tRect.offsetMin = new Vector2(70, 0);
-            tRect.offsetMax = new Vector2(-14, 0);
+            // left edge = 28 (margin) + 40 (avatar) + 12 (gap) = 80
+            // right edge = -115 to leave plenty of room for time + delete button
+            tRect.offsetMin = new Vector2(80, 0);
+            tRect.offsetMax = new Vector2(-115, 0);
 
             // Sender name (bold, white, top half)
             GameObject senderObj = new GameObject("SenderName");
@@ -2367,7 +2715,7 @@ namespace EscapeFromHell.Editor
             sRect.anchoredPosition = Vector2.zero;
             TextMeshProUGUI senderTxt = senderObj.AddComponent<TextMeshProUGUI>();
             senderTxt.text = sender;
-            senderTxt.fontSize = 13;
+            senderTxt.fontSize = 14;
             senderTxt.fontStyle = FontStyles.Bold;
             senderTxt.color = Color.white;
             senderTxt.alignment = TextAlignmentOptions.Left;
@@ -2385,8 +2733,8 @@ namespace EscapeFromHell.Editor
             pRect.anchoredPosition = Vector2.zero;
             TextMeshProUGUI previewTxt = previewObj.AddComponent<TextMeshProUGUI>();
             previewTxt.text = preview;
-            previewTxt.fontSize = 11;
-            previewTxt.color = new Color(0.60f, 0.60f, 0.65f, 1f);
+            previewTxt.fontSize = 13;
+            previewTxt.color = new Color(0.70f, 0.70f, 0.73f, 1f); // lighter gray for better readability
             previewTxt.alignment = TextAlignmentOptions.Left;
             previewTxt.verticalAlignment = VerticalAlignmentOptions.Top;
             previewTxt.enableWordWrapping = false;
@@ -2399,10 +2747,69 @@ namespace EscapeFromHell.Editor
             sepRect.anchorMin = new Vector2(0f, 0f);
             sepRect.anchorMax = new Vector2(1f, 0f);
             sepRect.pivot = new Vector2(0.5f, 0f);
-            sepRect.offsetMin = new Vector2(70, 0); // indent from avatar
+            sepRect.offsetMin = new Vector2(80, 0); // indent from avatar
             sepRect.offsetMax = new Vector2(0, 1);  // 1px tall
             Image sepImg = sepObj.AddComponent<Image>();
-            sepImg.color = new Color(1f, 1f, 1f, 0.08f); // very subtle
+            sepImg.color = new Color(1f, 1f, 1f, 0.05f); // very subtle separator
+
+            // --- Time text (Top-right side) ---
+            GameObject timeObj = new GameObject("TimeText");
+            timeObj.transform.SetParent(btnObj.transform, false);
+            RectTransform timeRect = timeObj.AddComponent<RectTransform>();
+            timeRect.anchorMin = new Vector2(1f, 1f); // fixed top-right anchor, no stretch
+            timeRect.anchorMax = new Vector2(1f, 1f);
+            timeRect.pivot = new Vector2(1f, 1f);
+            timeRect.sizeDelta = new Vector2(80, 20); // wider and fixed height
+            timeRect.anchoredPosition = new Vector2(-15, -12); // 12px from the top edge
+            TextMeshProUGUI timeTxt = timeObj.AddComponent<TextMeshProUGUI>();
+            timeTxt.text = timeStr;
+            timeTxt.fontSize = 11;
+            timeTxt.color = new Color(0.65f, 0.65f, 0.68f, 1f); // slightly brighter gray
+            timeTxt.alignment = TextAlignmentOptions.Right;
+            timeTxt.verticalAlignment = VerticalAlignmentOptions.Top;
+            timeTxt.enableWordWrapping = false;
+            timeTxt.overflowMode = TextOverflowModes.Ellipsis;
+
+            // --- Delete button (Bottom-right side, small grey pill with grey-white text) ---
+            GameObject delBtnObj = new GameObject("DeleteButton");
+            delBtnObj.transform.SetParent(btnObj.transform, false);
+            RectTransform delRect = delBtnObj.AddComponent<RectTransform>();
+            delRect.anchorMin = new Vector2(1f, 0f); // fixed bottom-right anchor, no stretch
+            delRect.anchorMax = new Vector2(1f, 0f);
+            delRect.pivot = new Vector2(1f, 0f);
+            delRect.sizeDelta = new Vector2(46, 22); // slightly wider, fixed height
+            delRect.anchoredPosition = new Vector2(-15, 12); // 12px from the bottom edge (creates 12px gap with time text)
+
+            Image delImg = delBtnObj.AddComponent<Image>();
+            delImg.color = new Color(0.24f, 0.24f, 0.27f, 1f); // modern clean grey
+            if (roundedRectSprite != null)
+            {
+                delImg.sprite = roundedRectSprite;
+                delImg.type = Image.Type.Sliced;
+            }
+            
+            Button delBtn = delBtnObj.AddComponent<Button>();
+            ColorBlock delCb = delBtn.colors;
+            delCb.normalColor = new Color(0.24f, 0.24f, 0.27f, 1f);
+            delCb.highlightedColor = new Color(0.30f, 0.30f, 0.33f, 1f);
+            delCb.pressedColor = new Color(0.36f, 0.36f, 0.40f, 1f);
+            delCb.selectedColor = delCb.normalColor;
+            delBtn.colors = delCb;
+
+            // Text label
+            GameObject delTextObj = new GameObject("Label");
+            delTextObj.transform.SetParent(delBtnObj.transform, false);
+            RectTransform dtRect = delTextObj.AddComponent<RectTransform>();
+            dtRect.anchorMin = Vector2.zero;
+            dtRect.anchorMax = Vector2.one;
+            dtRect.sizeDelta = Vector2.zero;
+            TextMeshProUGUI delTxt = delTextObj.AddComponent<TextMeshProUGUI>();
+            delTxt.text = "Xoá";
+            delTxt.fontSize = 11;
+            delTxt.fontStyle = FontStyles.Bold;
+            delTxt.color = new Color(0.90f, 0.90f, 0.92f, 1f); // clean off-white
+            delTxt.alignment = TextAlignmentOptions.Center;
+            delTxt.verticalAlignment = VerticalAlignmentOptions.Middle;
 
             return btnObj;
         }
@@ -2600,9 +3007,16 @@ namespace EscapeFromHell.Editor
             GameObject btnObj = new GameObject(name);
             btnObj.transform.SetParent(parent, false);
             RectTransform rTrans = btnObj.AddComponent<RectTransform>();
-            rTrans.sizeDelta = new Vector2(310, 48);
+            rTrans.sizeDelta = new Vector2(310, 52);
+
+            Sprite roundedRectSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/RoundedRect.png");
 
             Image img = btnObj.AddComponent<Image>();
+            if (roundedRectSprite != null)
+            {
+                img.sprite = roundedRectSprite;
+                img.type = Image.Type.Sliced;
+            }
             img.color = new Color(0.12f, 0.12f, 0.15f, 1f); // Dark background for contact item
             Outline outline = btnObj.AddComponent<Outline>();
             outline.effectColor = new Color(1f, 1f, 1f, 0.05f);
@@ -2629,7 +3043,7 @@ namespace EscapeFromHell.Editor
             ntRect.offsetMax = new Vector2(-12, -4);
             TextMeshProUGUI ntText = nameTextObj.AddComponent<TextMeshProUGUI>();
             ntText.text = $"<b>{contactName}</b>: {phoneNumber}";
-            ntText.fontSize = 11;
+            ntText.fontSize = 13;
             ntText.color = Color.white;
             ntText.alignment = TextAlignmentOptions.Left;
             ntText.verticalAlignment = VerticalAlignmentOptions.Bottom;
@@ -2644,7 +3058,7 @@ namespace EscapeFromHell.Editor
             stRect.offsetMax = new Vector2(-12, 0);
             TextMeshProUGUI stText = statusTextObj.AddComponent<TextMeshProUGUI>();
             stText.text = statusText;
-            stText.fontSize = 8;
+            stText.fontSize = 11;
             stText.color = statusColor;
             stText.alignment = TextAlignmentOptions.Left;
             stText.verticalAlignment = VerticalAlignmentOptions.Top;

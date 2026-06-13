@@ -78,88 +78,91 @@ namespace EscapeFromHell.Editor
             var colorMap = new Dictionary<char, Color>
             {
                 { '.', Color.clear },
-                { 'H', ColorFromHex("#1F1610") }, // Hair (Dark Brown)
-                { 'h', ColorFromHex("#3D2E25") }, // Hair Highlight
-                { 'S', ColorFromHex("#FAD2B0") }, // Skin (Peach)
-                { 's', ColorFromHex("#DCA382") }, // Skin Shadow
-                { 'E', ColorFromHex("#1A1A1A") }, // Eyes (Dark Gray)
-                { 'B', ColorFromHex("#3B5998") }, // Shirt (Blue)
-                { 'b', ColorFromHex("#5A7EC7") }, // Shirt Highlight
-                { 'D', ColorFromHex("#1D2E54") }, // Dark Blue shadow
-                { 'P', ColorFromHex("#34495E") }, // Jeans (Blue-Gray)
-                { 'p', ColorFromHex("#1F2E3E") }, // Jeans Shadow
-                { 'K', ColorFromHex("#5D4037") }, // Shoes (Brown)
-                { 'k', ColorFromHex("#3E2723") }  // Background Shoes (Dark Brown shadow)
+                { 'H', ColorFromHex("#1A0F0A") }, // Hair (Very Dark Brown, rich)
+                { 'h', ColorFromHex("#4A2C18") }, // Hair Highlight (warm brown)
+                { 'S', ColorFromHex("#FFDAB9") }, // Skin (Peach Puff - brighter)
+                { 's', ColorFromHex("#E0A87A") }, // Skin Shadow
+                { 'E', ColorFromHex("#0D0D0D") }, // Eyes (Near Black)
+                { 'W', ColorFromHex("#FFFFFF") }, // Eye white / sparkle
+                { 'C', ColorFromHex("#FF6B9D") }, // Cheek blush (pink)
+                { 'B', ColorFromHex("#4A90D9") }, // Shirt (Vibrant Blue)
+                { 'b', ColorFromHex("#7BB8F0") }, // Shirt Highlight
+                { 'D', ColorFromHex("#1B3F6E") }, // Dark Blue shadow
+                { 'P', ColorFromHex("#3D5068") }, // Jeans (Slate Blue)
+                { 'p', ColorFromHex("#1E2E3E") }, // Jeans Shadow/crease
+                { 'K', ColorFromHex("#6D4C41") }, // Shoes (Brown)
+                { 'k', ColorFromHex("#3E2723") }  // Shoes Shadow
             };
 
-            // IDLE DOWN - facing camera
+
+            // IDLE DOWN - facing camera (Chibi style: big head, short body)
             string[] down = {
-                "................",
-                "................",
-                "......HHHH......",
-                "....HHHHHHHH....",
-                "....HHhHHhHH....",
-                "....HSSSSSSH....",
-                "....HSESSSESH...",
-                "....HSSSSssH....",
-                ".....sSSss......",
-                "......SSSS......", // neck
-                "....BBBBBBBB....", // shoulders
-                "...BBbBBBBbBB...", // torso
-                "...BBBBBBBBBB...",
-                "...BBDDDDDDBB...",
-                "...BBDDDDDDBB...",
-                "....SDDDDDDS....", // hands
-                "....sDDDDDDs....",
-                ".....PPPPPP.....", // waist
-                ".....PPPPPP.....",
-                ".....PPppPP.....", // thighs
-                ".....PP..PP.....",
-                ".....PP..PP.....",
-                ".....PP..PP.....",
-                ".....PP..PP.....",
-                ".....PP..PP.....",
-                ".....PP..PP.....",
-                ".....PP..PP.....",
-                ".....PP..PP.....",
-                ".....KK..KK.....",
-                "....KKK..KKK....",
-                "................",
-                "................"
+                "................", // 0
+                "....HHHHHHHH....", // 1  - hair top
+                "...HHHhHhHHHH...", // 2  - hair
+                "...HHSSSSSSHHH..", // 3  - forehead
+                "..HHHSSSSSSSSHHH", // 4  - cheeks
+                "..HHHSEssESSsHHH", // 5  - eyes row (E=pupil, s=shadow)
+                "..HHHSWSWSWSHHH.", // 6  - eye sparkle (W=white)
+                "..HHHSSSSSSSHH..", // 7  - lower face
+                "..HHHsCSSCSsSH..", // 8  - cheeks blush (C=blush)
+                "...HHSSSSSsHH...", // 9  - chin
+                "....HSSSSSHH....", // 10 - neck/chin
+                "....SSSSSSS.....", // 11 - neck
+                "..BBBBBBBBBBB...", // 12 - shoulders
+                "..BbBBBBBBBBb...", // 13 - shirt
+                "..BBBBbBbBBBB...", // 14 - shirt
+                "..BBDDDDDDDBBs..", // 15 - hands
+                "..sSDDDDDDDSs...", // 16 - hands shadow
+                "...PPPPPPPPP....", // 17 - waist
+                "...PPppPPppPP...", // 18 - hips
+                "...PP.....PP....", // 19 - legs gap
+                "...PP.....PP....", // 20 - legs
+                "...PP.....PP....", // 21 - legs
+                "...PP.....PP....", // 22 - legs
+                "...PP.....PP....", // 23 - legs
+                "...KKK...KKK....", // 24 - shoes
+                "..KKKKk.kKKKKk..", // 25 - shoes detail
+                "................", // 26
+                "................", // 27
+                "................", // 28
+                "................", // 29
+                "................", // 30
+                "................"  // 31
             };
 
             // WALK DOWN 1
             string[] down_walk1 = {
                 "................",
-                "................",
-                "......HHHH......",
                 "....HHHHHHHH....",
-                "....HHhHHhHH....",
-                "....HSSSSSSH....",
-                "....HSESSSESH...",
-                "....HSSSSssH....",
-                ".....sSSss......",
-                "......SSSS......",
-                "....BBBBBBBB....",
-                "...BBbBBBBbBB...",
-                "...BBBBBBBBBB...",
-                "...BBDDDDDDBB...",
-                "...SSDDDDDDSS...", // hands swinging
-                "....sDDDDDDs....",
-                ".....PPPPPP.....",
-                ".....PPPPPP.....",
-                ".....PPppPP.....",
-                ".....PP..PP.....",
-                ".....PP..PP.....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP..........",
-                "....KK....KK....",
-                "...KKK...KKK....",
-                "...KKK..........",
+                "...HHHhHhHHHH...",
+                "...HHSSSSSSHHH..",
+                "..HHHSSSSSSSSHHH",
+                "..HHHSEssESSsHHH",
+                "..HHHSWSWSWSHHH.",
+                "..HHHSSSSSSSHH..",
+                "..HHHsCSSCSsSH..",
+                "...HHSSSSSsHH...",
+                "....HSSSSSHH....",
+                "....SSSSSSS.....",
+                "..BBBBBBBBBBB...",
+                "..BbBBBBBBBBb...",
+                "..BBBBbBbBBBB...",
+                "..BBDDDDDDDBBs..",
+                "..sSDDDDDDDSs...",
+                "...PPPPPPPPP....",
+                "...PPppPPppPP...",
+                "...PP.....PP....",
+                "...PP.....PP....",
+                "..PP.......PP...",  // walk legs apart
+                "..PP.......PP...",
+                "..PP.......PP...",
+                "..KKK.....KKK...",
+                "..KKKKk.kKKKKk..",
+                "................",
+                "................",
+                "................",
+                "................",
                 "................",
                 "................"
             };
@@ -167,71 +170,71 @@ namespace EscapeFromHell.Editor
             // WALK DOWN 2
             string[] down_walk2 = {
                 "................",
-                "................",
-                "......HHHH......",
                 "....HHHHHHHH....",
-                "....HHhHHhHH....",
-                "....HSSSSSSH....",
-                "....HSESSSESH...",
-                "....HSSSSssH....",
-                ".....sSSss......",
-                "......SSSS......",
-                "....BBBBBBBB....",
-                "...BBbBBBBbBB...",
-                "...BBBBBBBBBB...",
-                "...BBDDDDDDBB...",
-                "...SSDDDDDDSS...",
-                "....sDDDDDDs....",
-                ".....PPPPPP.....",
-                ".....PPPPPP.....",
-                ".....PPppPP.....",
-                ".....PP..PP.....",
-                ".....PP..PP.....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "..........PP....",
-                "....KK....KK....",
-                "...KKK...KKK....",
-                ".........KKK....",
+                "...HHHhHhHHHH...",
+                "...HHSSSSSSHHH..",
+                "..HHHSSSSSSSSHHH",
+                "..HHHSEssESSsHHH",
+                "..HHHSWSWSWSHHH.",
+                "..HHHSSSSSSSHH..",
+                "..HHHsCSSCSsSH..",
+                "...HHSSSSSsHH...",
+                "....HSSSSSHH....",
+                "....SSSSSSS.....",
+                "..BBBBBBBBBBB...",
+                "..BbBBBBBBBBb...",
+                "..BBBBbBbBBBB...",
+                "..sSDDDDDDDBBs..",
+                "..sSSDDDDDDSSs..",
+                "...PPPPPPPPP....",
+                "...PPppPPppPP...",
+                "...PP.....PP....",
+                "...PP.....PP....",
+                "....PP...PP.....",  // legs together
+                "....PP...PP.....",
+                "....PP...PP.....",
+                "....KKK.KKK.....",
+                "...kKKKKkKKKKk..",
+                "................",
+                "................",
+                "................",
+                "................",
                 "................",
                 "................"
             };
 
-            // IDLE UP - facing away
+            // IDLE UP - facing away (chibi back view)
             string[] up = {
                 "................",
+                "....HHHHHHHH....",
+                "...HHHhHhHHHH...",
+                "..HHHHHhHHHHHH..",
+                "..HHHHHHHHHHHHH.",
+                "..HHHHHHHHHHHHH.",
+                "..HHHHHHHHHHHHH.",
+                "..HHHHHHHHHHHHH.",
+                "..HHHHHHHHHHHH..",
+                "...HHHhHhHHHH...",
+                "....HHHHHHHH....",
+                "....SSSSSSS.....",
+                "..BBBBBBBBBBB...",
+                "..BbBBBBBBBBb...",
+                "..BBBBbBbBBBB...",
+                "..BBDDDDDDDBBs..",
+                "..sSDDDDDDDSs...",
+                "...PPPPPPPPP....",
+                "...PPppPPppPP...",
+                "...PP.....PP....",
+                "...PP.....PP....",
+                "...PP.....PP....",
+                "...PP.....PP....",
+                "...PP.....PP....",
+                "...KKK...KKK....",
+                "..KKKKk.kKKKKk..",
                 "................",
-                "......HHHH......",
-                "....HHHHHHHH....",
-                "....HHhHHhHH....",
-                "....HHHHHHHH....",
-                "....HHHHHHHH....",
-                "....HHHHHHHH....",
-                ".....HHHHHH.....",
-                "......HHHH......",
-                "....BBBBBBBB....",
-                "...BBbBBBBbBB...",
-                "...BBBBBBBBBB...",
-                "...BBDDDDDDBB...",
-                "...BBDDDDDDBB...",
-                "....SDDDDDDS....",
-                "....sDDDDDDs....",
-                ".....PPPPPP.....",
-                ".....PPPPPP.....",
-                ".....PPppPP.....",
-                ".....PP..PP.....",
-                ".....PP..PP.....",
-                ".....PP..PP.....",
-                ".....PP..PP.....",
-                ".....PP..PP.....",
-                ".....PP..PP.....",
-                ".....PP..PP.....",
-                ".....PP..PP.....",
-                ".....KK..KK.....",
-                "....KKK..KKK....",
+                "................",
+                "................",
+                "................",
                 "................",
                 "................"
             };
@@ -239,35 +242,35 @@ namespace EscapeFromHell.Editor
             // WALK UP 1
             string[] up_walk1 = {
                 "................",
+                "....HHHHHHHH....",
+                "...HHHhHhHHHH...",
+                "..HHHHHhHHHHHH..",
+                "..HHHHHHHHHHHHH.",
+                "..HHHHHHHHHHHHH.",
+                "..HHHHHHHHHHHHH.",
+                "..HHHHHHHHHHHHH.",
+                "..HHHHHHHHHHHH..",
+                "...HHHhHhHHHH...",
+                "....HHHHHHHH....",
+                "....SSSSSSS.....",
+                "..BBBBBBBBBBB...",
+                "..BbBBBBBBBBb...",
+                "..BBBBbBbBBBB...",
+                "..BBDDDDDDDBBs..",
+                "..sSDDDDDDDSs...",
+                "...PPPPPPPPP....",
+                "...PPppPPppPP...",
+                "...PP.....PP....",
+                "...PP.....PP....",
+                "..PP.......PP...",
+                "..PP.......PP...",
+                "..PP.......PP...",
+                "..KKK.....KKK...",
+                "..KKKKk.kKKKKk..",
                 "................",
-                "......HHHH......",
-                "....HHHHHHHH....",
-                "....HHhHHhHH....",
-                "....HHHHHHHH....",
-                "....HHHHHHHH....",
-                "....HHHHHHHH....",
-                ".....HHHHHH.....",
-                "......HHHH......",
-                "....BBBBBBBB....",
-                "...BBbBBBBbBB...",
-                "...BBBBBBBBBB...",
-                "...BBDDDDDDBB...",
-                "...SSDDDDDDSS...",
-                "....sDDDDDDs....",
-                ".....PPPPPP.....",
-                ".....PPPPPP.....",
-                ".....PPppPP.....",
-                ".....PP..PP.....",
-                ".....PP..PP.....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP..........",
-                "....KK....KK....",
-                "...KKK...KKK....",
-                "...KKK..........",
+                "................",
+                "................",
+                "................",
                 "................",
                 "................"
             };
@@ -275,71 +278,71 @@ namespace EscapeFromHell.Editor
             // WALK UP 2
             string[] up_walk2 = {
                 "................",
+                "....HHHHHHHH....",
+                "...HHHhHhHHHH...",
+                "..HHHHHhHHHHHH..",
+                "..HHHHHHHHHHHHH.",
+                "..HHHHHHHHHHHHH.",
+                "..HHHHHHHHHHHHH.",
+                "..HHHHHHHHHHHHH.",
+                "..HHHHHHHHHHHH..",
+                "...HHHhHhHHHH...",
+                "....HHHHHHHH....",
+                "....SSSSSSS.....",
+                "..BBBBBBBBBBB...",
+                "..BbBBBBBBBBb...",
+                "..BBBBbBbBBBB...",
+                "..sSDDDDDDDBBs..",
+                "..sSSDDDDDDSSs..",
+                "...PPPPPPPPP....",
+                "...PPppPPppPP...",
+                "...PP.....PP....",
+                "...PP.....PP....",
+                "....PP...PP.....",
+                "....PP...PP.....",
+                "....PP...PP.....",
+                "....KKK.KKK.....",
+                "...kKKKKkKKKKk..",
                 "................",
-                "......HHHH......",
-                "....HHHHHHHH....",
-                "....HHhHHhHH....",
-                "....HHHHHHHH....",
-                "....HHHHHHHH....",
-                "....HHHHHHHH....",
-                ".....HHHHHH.....",
-                "......HHHH......",
-                "....BBBBBBBB....",
-                "...BBbBBBBbBB...",
-                "...BBBBBBBBBB...",
-                "...BBDDDDDDBB...",
-                "...SSDDDDDDSS...",
-                "....sDDDDDDs....",
-                ".....PPPPPP.....",
-                ".....PPPPPP.....",
-                ".....PPppPP.....",
-                ".....PP..PP.....",
-                ".....PP..PP.....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "..........PP....",
-                "....KK....KK....",
-                "...KKK...KKK....",
-                ".........KKK....",
+                "................",
+                "................",
+                "................",
                 "................",
                 "................"
             };
 
-            // IDLE RIGHT
+            // IDLE RIGHT (chibi side view)
             string[] right = {
                 "................",
-                "................",
                 "....HHHHHH......",
-                "...HHHHHHHH.....",
-                "...HHHhHHhHH....",
-                "..HHHHHHSSHH....",
-                "..HHHHSSSESs....",
-                "...HHSSSSSSH....",
-                "...HsSSSSSs.....",
-                ".....SSSSS......",
-                "...BBBBBBBB.....",
-                "..BBbBBBBbBB....",
-                "..BBBBBBBBBB....",
-                "..BBDDDDDDBB....",
-                "..BBDDDDDDBB....",
-                "...SDDDDDDS.....", // Skin hands
-                "...sDDDDDDs.....", // Skin hand shadows
-                "....PPPPPP......",
-                "....PPPPPP......",
-                "....PPPPPP......",
-                "...PPPPPPPP.....",
-                "...PP....PP.....",
-                "...PP....PP.....",
-                "...PP....PP.....",
-                "...PP....PP.....",
-                "...PP....PP.....",
-                "...PP....PP.....",
-                "...PP....PP.....",
-                "...KK....KK.....",
-                "..KKK....KKK....",
+                "...HHHhHhHHH....",
+                "...HHSSSSSShHH..",
+                "..HHHSSSSSSssHH.",
+                "..HHHSEsSSssHHH.",
+                "..HHHSWSSSssHH..",
+                "..HHHSSSSSSsHH..",
+                "..HHHsCSSSSsHH..",
+                "...HHSSSSsSHH...",
+                "....HSSSSShH....",
+                "....SSSSSSS.....",
+                "...BBBBBBBBB....",
+                "..BbBBBBBBBBb...",
+                "..BBBBbBbBBBB...",
+                "..SSDDDDDDDBBs..",
+                "..sDDDDDDDSSs...",
+                "....PPPPPPP.....",
+                "...PPppPPppPP...",
+                "...PPpPPPPpPP...",
+                "...PP.....PP....",
+                "...PP.....PP....",
+                "...PP.....PP....",
+                "...PP.....PP....",
+                "...KKK...KKK....",
+                "..KKKKk.kKKKKk..",
+                "................",
+                "................",
+                "................",
+                "................",
                 "................",
                 "................"
             };
@@ -349,33 +352,33 @@ namespace EscapeFromHell.Editor
                 "................",
                 "................",
                 "....HHHHHH......",
-                "...HHHHHHHH.....",
-                "...HHHhHHhHH....",
-                "..HHHHHHSSHH....",
-                "..HHHHSSSESs....",
-                "...HHSSSSSSH....",
-                "...HsSSSSSs.....",
-                ".....SSSSS......",
-                "...BBBBBBBB.....",
-                "..BBbBBBBbBB....",
-                "..BBBBBBBBBB....",
-                "..BBDDDDDDBB....",
-                "..SSDDDDDDSS....",
-                "...sDDDDDDs.....",
-                "....PPPPPP......",
-                "....PPPPPP......",
-                "....PPPPPP......",
-                "...PPPPPPPP.....",
-                "...PP....PP.....",
-                "...PP....PP.....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "...KK....KK.....",
-                "..KKK....KKK....",
-                "..........KKK...",
+                "...HHHhHhHHH....",
+                "...HHSSSSSShHH..",
+                "..HHHSSSSSSssHH.",
+                "..HHHSEsSSssHHH.",
+                "..HHHSWSSSssHH..",
+                "..HHHSSSSSSsHH..",
+                "..HHHsCSSSSsHH..",
+                "...HHSSSSsSHH...",
+                "....HSSSSShH....",
+                "....SSSSSSS.....",
+                "...BBBBBBBBB....",
+                "..BbBBBBBBBBb...",
+                "..BBBBbBbBBBB...",
+                "..SSDDDDDDDBBs..",
+                "..sDDDDDDDSSs...",
+                "....PPPPPPP.....",
+                "...PPppPPppPP...",
+                "...PPpPPPPpPP...",
+                "...PP.....PP....",
+                "....PP.....PP...",
+                "....PP.....PP...",
+                "...KKK.....KKK..",
+                "..kKKKk...kKKKk.",
+                "................",
+                "................",
+                "................",
+                "................",
                 "................",
                 "................"
             };
@@ -385,34 +388,33 @@ namespace EscapeFromHell.Editor
                 "................",
                 "................",
                 "....HHHHHH......",
-                "...HHHHHHHH.....",
-                "...HHHhHHhHH....",
-                "..HHHHHHSSHH....",
-                "..HHHHSSSESs....",
-                "...HHSSSSSSH....",
-                "...HsSSSSSs.....",
-                ".....SSSSS......",
-                "...BBBBBBBB.....",
-                "..BBbBBBBbBB....",
-                "..BBBBBBBBBB....",
-                "..BBDDDDDDBB....",
-                "..SSDDDDDDSS....",
-                "...sDDDDDDs.....",
-                "....PPPPPP......",
-                "....PPPPPP......",
-                "....PPPPPP......",
-                "...PPPPPPPP.....",
-                "...PP....PP.....",
-                "...PP....PP.....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "....PP....PP....",
-                "...KK....KK.....",
-                "..KKK....KKK....",
-                "..KKK...........",
+                "...HHHhHhHHH....",
+                "...HHSSSSSShHH..",
+                "..HHHSSSSSSssHH.",
+                "..HHHSEsSSssHHH.",
+                "..HHHSWSSSssHH..",
+                "..HHHSSSSSSsHH..",
+                "..HHHsCSSSSsHH..",
+                "...HHSSSSsSHH...",
+                "....HSSSSShH....",
+                "....SSSSSSS.....",
+                "...BBBBBBBBB....",
+                "..BbBBBBBBBBb...",
+                "..BBBBbBbBBBB...",
+                "..SSDDDDDDDBBs..",
+                "..sDDDDDDDSSs...",
+                "....PPPPPPP.....",
+                "...PPppPPppPP...",
+                "...PPpPPPPpPP...",
+                "...PP.....PP....",
+                "..PP......PP....",
+                "..PP......PP....",
+                "..KKK.....KKK...",
+                ".kKKKk...kKKKk..",
+                "................",
+                "................",
+                "................",
+                "................",
                 "................",
                 "................"
             };
@@ -437,6 +439,7 @@ namespace EscapeFromHell.Editor
             GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Walk_Right_2.png", right_walk2, colorMap, 16, 32);
         }
 
+
         private static string[] MirrorGrid(string[] grid)
         {
             string[] mirrored = new string[grid.Length];
@@ -448,6 +451,7 @@ namespace EscapeFromHell.Editor
             }
             return mirrored;
         }
+
         private static void GenerateGuardSprites()
         {
             var colorMap = new Dictionary<char, Color>
@@ -1277,11 +1281,18 @@ namespace EscapeFromHell.Editor
             GenerateRoundedGradientTexture("Assets/Sprites/UI/AppIconBg_Cyan.png", ColorFromHex("#64d8ff"), ColorFromHex("#1ca0f0"), 64, 64, 12f);
             GenerateRoundedGradientTexture("Assets/Sprites/UI/AppIconBg_Grey.png", ColorFromHex("#bdc3c7"), ColorFromHex("#8e9eab"), 64, 64, 12f);
 
-            // Procedural iOS 7 Style Phone Wallpaper (replaces old narrow phone_wallpaper.png)
-            GenerateWallpaperTexture("Assets/Sprites/UI/phone_wallpaper.png", ColorFromHex("#70d2f6"), ColorFromHex("#1c3b70"), 360, 640);
+            // Procedural Premium Abstract Phone Wallpaper
+            GeneratePremiumWallpaper("Assets/Sprites/UI/phone_wallpaper.png", 360, 640);
+
+            // Procedural Phone Mask and Frame Overlay for rounded corners and modern Dynamic Island bezel
+            GenerateRoundedMaskTexture("Assets/Sprites/UI/phone_mask.png", 360, 640, 38f);
+            GeneratePhoneFrameTexture("Assets/Sprites/UI/phone_frame.png", 360, 640, 38f, 8f);
 
             // Procedural Red Circular Notification Dot
             GenerateCircleTexture("Assets/Sprites/UI/NotificationDot.png", ColorFromHex("#ff3b30"), 32);
+
+            // Procedural White Rounded Rect for buttons/inputs
+            GenerateRoundedGradientTexture("Assets/Sprites/UI/RoundedRect.png", Color.white, Color.white, 64, 64, 8f);
         }
 
         private static void GenerateCircleTexture(string path, Color color, int size = 32)
@@ -1417,43 +1428,58 @@ namespace EscapeFromHell.Editor
 
         private static void GeneratePhoneSpriteFromImage()
         {
-            string sourcePath = @"C:\Users\hieua\.gemini\antigravity\brain\98871e4d-8463-4de3-9b6e-e8e5d4ff6662\modern_phone_sprite_1781175375128.png";
             string destPath = "Assets/Sprites/Items/Phone.png";
 
-            if (!File.Exists(sourcePath))
+            // 32x32 pixel art phone — PPU=16 → renders at 2x2 world units (clearly visible)
+            var phoneMap = new Dictionary<char, Color>
             {
-                Debug.LogError($"Source image not found: {sourcePath}");
-                return;
-            }
+                { '.', Color.clear },
+                { 'B', ColorFromHex("#1c1c1e") }, // Dark bezel
+                { 'b', ColorFromHex("#2c2c2e") }, // Lighter titanium frame
+                { 'D', ColorFromHex("#050505") }, // Dynamic Island black
+                { 'V', ColorFromHex("#120c1f") }, // Wallpaper Deep Violet/Navy
+                { 'M', ColorFromHex("#ff2a85") }, // Pink glow
+                { 'C', ColorFromHex("#00f0ff") }, // Cyan glow
+                { 'P', ColorFromHex("#8a2be2") }, // Purple
+                { 'w', ColorFromHex("#ffffff") }  // Home indicator bar
+            };
 
-            byte[] fileData = File.ReadAllBytes(sourcePath);
-            Texture2D texture = new Texture2D(2, 2);
-            if (!texture.LoadImage(fileData))
-            {
-                Debug.LogError("Failed to load source image texture.");
-                return;
-            }
+            string[] phone = {
+                ".....bbbbbbbbbbbbbbbbbbbbbb.....", // 31
+                ".....bBBBBBBBBBBBBBBBBBBBBb.....", // 30
+                ".....bBBBBBBBBBBBBBBBBBBBBb.....", // 29
+                ".....bBBBBBBDDDDDDDDBBBBBBb.....", // 28 - Dynamic Island
+                ".....bBMPPVVVVVVVVVVVVVVVVBb.....", // 27 - Pink glow
+                ".....bBMPPPVVVVVVVVVVVVVVBb.....", // 26
+                ".....bBPPPVVVVVVVVVVVVVVVVBb.....", // 25
+                ".....bBVVVVVVVVVVVVVVVVVVBb.....", // 24
+                ".....bBVVVVVVVVVVVVVVVVVVBb.....", // 23
+                ".....bBVVVVVVVVVVVVVVVVVVBb.....", // 22
+                ".....bBVVVVVVVVVVVVVVVVVVBb.....", // 21
+                ".....bBVVVVVVVVVVVVVVVVVVBb.....", // 20
+                ".....bBVVVVVVVVVVVVVVVVVVBb.....", // 19
+                ".....bBVVVVVVVVVVVVVVVVVVBb.....", // 18
+                ".....bBVVVVVVVVVVVVVVVVVVBb.....", // 17
+                ".....bBVVVVVVVVVVVVVVVVVVBb.....", // 16
+                ".....bBVVVVVVVVVVVVVVVVVVBb.....", // 15
+                ".....bBVVVVVVVVVVVVVVVVVVBb.....", // 14
+                ".....bBVVVVVVVVVVVVVVVVVVBb.....", // 13
+                ".....bBVVVVVVVVVVVVVVVCCCBb.....", // 12 - Cyan glow
+                ".....bBVVVVVVVVVVVVVVCCCCBb.....", // 11
+                ".....bBVVVVVVVVVVVVVVVCCCBb.....", // 10
+                ".....bBVVVVVVVVVVVVVVVVVVBb.....", // 9
+                ".....bBVVVVVVVVVVVVVVVVVVBb.....", // 8
+                ".....bBVVVVVVwwwwwwVVVVVVBb.....", // 7 - Home Indicator
+                ".....bBBBBBBBBBBBBBBBBBBBBb.....", // 6
+                ".....bBBBBBBBBBBBBBBBBBBBBb.....", // 5
+                ".....bbbbbbbbbbbbbbbbbbbbbb.....", // 4
+                "................................", // 3
+                "................................", // 2
+                "................................", // 1
+                "................................"  // 0
+            };
 
-            int width = texture.width;
-            int height = texture.height;
-            Color[] pixels = texture.GetPixels();
-
-            for (int i = 0; i < pixels.Length; i++)
-            {
-                Color c = pixels[i];
-                // Since the phone is centered on a pure white background, make white pixels transparent
-                if (c.r > 0.95f && c.g > 0.95f && c.b > 0.95f)
-                {
-                    pixels[i] = Color.clear;
-                }
-            }
-
-            Texture2D transparentTexture = new Texture2D(width, height, TextureFormat.RGBA32, false);
-            transparentTexture.SetPixels(pixels);
-            transparentTexture.Apply();
-
-            byte[] pngData = transparentTexture.EncodeToPNG();
-            File.WriteAllBytes(destPath, pngData);
+            GenerateSpriteFromGrid(destPath, phone, phoneMap, 32, 32);
 
             AssetDatabase.ImportAsset(destPath);
             TextureImporter importer = AssetImporter.GetAtPath(destPath) as TextureImporter;
@@ -1461,8 +1487,8 @@ namespace EscapeFromHell.Editor
             {
                 importer.textureType = TextureImporterType.Sprite;
                 importer.spriteImportMode = SpriteImportMode.Single;
-                importer.spritePixelsPerUnit = 1024; // High-res matching width so it imports at 1 unit size
-                importer.filterMode = FilterMode.Bilinear;
+                importer.spritePixelsPerUnit = 16; // 32px / 16 PPU = 2 world units — visible on bed!
+                importer.filterMode = FilterMode.Point; // crisp pixel art
                 importer.textureCompression = TextureImporterCompression.Uncompressed;
                 importer.mipmapEnabled = false;
 
@@ -1470,7 +1496,167 @@ namespace EscapeFromHell.Editor
                 importer.SaveAndReimport();
             }
 
-            Debug.Log($"Processed phone image saved to {destPath}");
+            Debug.Log($"Phone sprite generated (32x32, PPU=16) at {destPath}");
+        }
+
+        private static void GeneratePremiumWallpaper(string path, int width = 360, int height = 640)
+        {
+            Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            for (int y = 0; y < height; y++)
+            {
+                float ny = (float)y / (height - 1);
+                for (int x = 0; x < width; x++)
+                {
+                    float nx = (float)x / (width - 1);
+                    
+                    // Base gradient: diagonal from bottom-left (dark navy) to top-right (lavender gray)
+                    float t = (nx + ny) / 2f;
+                    Color baseCol = Color.Lerp(ColorFromHex("#120c1f"), ColorFromHex("#2d124d"), t);
+                    
+                    // Add a glowing magenta/pink light at top-left
+                    float distToTopLeft = Mathf.Sqrt(nx * nx + (1f - ny) * (1f - ny));
+                    float glow1 = Mathf.Max(0f, 1f - distToTopLeft / 0.8f);
+                    glow1 = glow1 * glow1; // smoothstep-like
+                    Color glow1Col = ColorFromHex("#ff2a85");
+                    baseCol = Color.Lerp(baseCol, glow1Col, glow1 * 0.45f);
+                    
+                    // Add a glowing cyan/blue light at bottom-right
+                    float distToBottomRight = Mathf.Sqrt((1f - nx) * (1f - nx) + ny * ny);
+                    float glow2 = Mathf.Max(0f, 1f - distToBottomRight / 0.9f);
+                    glow2 = glow2 * glow2;
+                    Color glow2Col = ColorFromHex("#00f0ff");
+                    baseCol = Color.Lerp(baseCol, glow2Col, glow2 * 0.4f);
+                    
+                    // Add a soft golden highlight near the top center
+                    float distToTopCenter = Mathf.Sqrt((nx - 0.5f) * (nx - 0.5f) * 2f + (1f - ny) * (1f - ny));
+                    float glow3 = Mathf.Max(0f, 1f - distToTopCenter / 0.6f);
+                    glow3 = glow3 * glow3;
+                    Color glow3Col = ColorFromHex("#ffb347");
+                    baseCol = Color.Lerp(baseCol, glow3Col, glow3 * 0.25f);
+                    
+                    tex.SetPixel(x, y, baseCol);
+                }
+            }
+            tex.Apply();
+            SaveUITexture(tex, path, false);
+        }
+
+        private static void GenerateRoundedMaskTexture(string path, int width = 360, int height = 640, float cornerRadius = 38f)
+        {
+            Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            float cx = width / 2.0f;
+            float cy = height / 2.0f;
+            float rSq = cornerRadius * cornerRadius;
+            float rx = width / 2.0f - cornerRadius;
+            float ry = height / 2.0f - cornerRadius;
+            
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    float dx = Mathf.Max(0, Mathf.Abs(x + 0.5f - cx) - rx);
+                    float dy = Mathf.Max(0, Mathf.Abs(y + 0.5f - cy) - ry);
+                    
+                    if (dx * dx + dy * dy > rSq)
+                    {
+                        tex.SetPixel(x, y, Color.clear);
+                    }
+                    else
+                    {
+                        tex.SetPixel(x, y, Color.white);
+                    }
+                }
+            }
+            tex.Apply();
+            SaveUITexture(tex, path, false);
+        }
+
+        private static void GeneratePhoneFrameTexture(string path, int width = 360, int height = 640, float cornerRadius = 38f, float bezelWidth = 8f)
+        {
+            Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            float cx = width / 2.0f;
+            float cy = height / 2.0f;
+            
+            // Bezel colors
+            Color outerBezelColor = ColorFromHex("#1e1e24"); // Titanium gray
+            Color innerBezelColor = ColorFromHex("#08080a"); // Pure black bezel
+            Color transparent = Color.clear;
+            
+            float outerR = cornerRadius;
+            float innerR = cornerRadius - bezelWidth;
+            
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    float dxOuter = Mathf.Max(0, Mathf.Abs(x + 0.5f - cx) - (width / 2.0f - outerR));
+                    float dyOuter = Mathf.Max(0, Mathf.Abs(y + 0.5f - cy) - (height / 2.0f - outerR));
+                    float distOuterSq = dxOuter * dxOuter + dyOuter * dyOuter;
+                    
+                    float dxInner = Mathf.Max(0, Mathf.Abs(x + 0.5f - cx) - (width / 2.0f - bezelWidth - innerR));
+                    float dyInner = Mathf.Max(0, Mathf.Abs(y + 0.5f - cy) - (height / 2.0f - bezelWidth - innerR));
+                    float distInnerSq = dxInner * dxInner + dyInner * dyInner;
+                    
+                    // Dynamic Island (Pill-shaped cutout) near the top
+                    float diX = width / 2.0f;
+                    float diY = height - 28f;
+                    float diW = 74f;
+                    float diH = 18f;
+                    float diR = 9f;
+                    
+                    float dxDi = Mathf.Max(0, Mathf.Abs(x + 0.5f - diX) - (diW / 2.0f - diR));
+                    float dyDi = Mathf.Max(0, Mathf.Abs(y + 0.5f - diY) - (diH / 2.0f - diR));
+                    bool inDynamicIsland = (dxDi * dxDi + dyDi * dyDi <= diR * diR);
+                    
+                    // Speaker grill at the very top (optional, but let's add it for extra realism!)
+                    bool inSpeaker = (x >= width / 2.0f - 20f && x <= width / 2.0f + 20f && y >= height - 9f && y <= height - 7f);
+                    
+                    if (inDynamicIsland)
+                    {
+                        float camX = diX - 20f;
+                        float camY = diY;
+                        float dxCam = x + 0.5f - camX;
+                        float dyCam = y + 0.5f - camY;
+                        if (dxCam * dxCam + dyCam * dyCam <= 9f)
+                        {
+                            tex.SetPixel(x, y, ColorFromHex("#0d1117"));
+                        }
+                        else
+                        {
+                            tex.SetPixel(x, y, ColorFromHex("#050505"));
+                        }
+                    }
+                    else if (inSpeaker)
+                    {
+                        tex.SetPixel(x, y, ColorFromHex("#2a2a2a"));
+                    }
+                    else if (distInnerSq <= innerR * innerR && 
+                             x >= bezelWidth && x < width - bezelWidth && 
+                             y >= bezelWidth && y < height - bezelWidth)
+                    {
+                        tex.SetPixel(x, y, transparent);
+                    }
+                    else if (distOuterSq <= outerR * outerR)
+                    {
+                        float outerRimDist = outerR - 1.5f;
+                        if (dxOuter * dxOuter + dyOuter * dyOuter > outerRimDist * outerRimDist || 
+                            x < 1 || x >= width - 1 || y < 1 || y >= height - 1)
+                        {
+                            tex.SetPixel(x, y, outerBezelColor);
+                        }
+                        else
+                        {
+                            tex.SetPixel(x, y, innerBezelColor);
+                        }
+                    }
+                    else
+                    {
+                        tex.SetPixel(x, y, transparent);
+                    }
+                }
+            }
+            tex.Apply();
+            SaveUITexture(tex, path, false);
         }
     }
 }

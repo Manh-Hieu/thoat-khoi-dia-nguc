@@ -28,6 +28,9 @@ namespace EscapeFromHell.Systems
         private bool hasOpenedMail = false;
         private bool hasOpenedBills = false;
         private int currentViewingJobIndex = 0; // 0: none, 1: Job 1, 2: Job 2, 3: Scam Job
+        private GameObject startMenuPanel;
+        private bool hasViewedJob1 = false;
+        private bool hasViewedJob2 = false;
 
         private void Awake()
         {
@@ -63,6 +66,9 @@ namespace EscapeFromHell.Systems
                 email4Button.onClick.AddListener(() => ShowEmail(4));
             }
 
+            // Initialize the Start Menu panel dynamically
+            InitializeStartMenu();
+
             // Hook up all desktop and window buttons at runtime
             HookUpComputerButtons();
         }
@@ -93,6 +99,8 @@ namespace EscapeFromHell.Systems
             }
         }
 
+        public bool IsComputerOpen => computerPanel != null && computerPanel.activeSelf;
+
         public void CloseComputer()
         {
             if (computerPanel != null)
@@ -102,8 +110,22 @@ namespace EscapeFromHell.Systems
                 // Re-hide cursor if needed (depending on game state, standard top-down top view might keep cursor visible but here we return control)
                 if (GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.Cutscene)
                 {
-                    GameManager.Instance.ChangeState(GameState.Playing);
+                    bool keepCutscene = false;
+                    if (DialogueSystem.Instance != null && DialogueSystem.Instance.IsDialogueActive)
+                    {
+                        keepCutscene = true;
+                    }
+
+                    if (!keepCutscene)
+                    {
+                        GameManager.Instance.ChangeState(GameState.Playing);
+                    }
                 }
+            }
+
+            if (Chapter1Controller.Instance != null)
+            {
+                Chapter1Controller.Instance.OnUIClosed();
             }
         }
 
@@ -114,6 +136,7 @@ namespace EscapeFromHell.Systems
             if (thisPCWindow != null) thisPCWindow.SetActive(false);
             if (recycleBinWindow != null) recycleBinWindow.SetActive(false);
             if (chromeWindow != null) chromeWindow.SetActive(false);
+            if (startMenuPanel != null) startMenuPanel.SetActive(false);
         }
 
         public void OpenMail()
@@ -268,12 +291,12 @@ namespace EscapeFromHell.Systems
                 if (paget != null)
                 {
                     paget.text = "<size=11><color=#9aa0a6>Khoảng 124.000 kết quả (0,32 giây)</color></size><br><br>" +
-                                 "<color=#8ab4f8><size=13><b>1. Thực Tập Sinh Lập Trình Unity - G-Star Studio</b></size></color><br>" +
-                                 "<color=#9aa0a6><size=10>https://gstarstudio.vn/tuyen-dung/intern-unity</size></color><br>" +
+                                 "<color=#8ab4f8><size=13><b>1. Thực Tập Sinh Lập Trình Unity - JoyGame Studio</b></size></color><br>" +
+                                 "<color=#9aa0a6><size=10>https://joygamestudio.vn/tuyen-dung/intern-unity</size></color><br>" +
                                  "• Yêu cầu: Có sản phẩm game tự làm, hiểu rõ C# và cấu trúc dữ liệu.<br>" +
                                  "• Lương hỗ trợ: 1.000.000đ/tháng. Thử việc không lương 2 tháng.<br><br>" +
-                                 "<color=#8ab4f8><size=13><b>2. Lập Trình Viên Web (Fresher) - VinaTech Group</b></size></color><br>" +
-                                 "<color=#9aa0a6><size=10>https://vinatech.com/careers/web-fresher</size></color><br>" +
+                                 "<color=#8ab4f8><size=13><b>2. Lập Trình Viên Web (Fresher) - NovaTech Group</b></size></color><br>" +
+                                 "<color=#9aa0a6><size=10>https://novatech.com/careers/web-fresher</size></color><br>" +
                                  "• Yêu cầu: Có tối thiểu 1 năm kinh nghiệm làm việc thực tế tại doanh nghiệp.<br>" +
                                  "• Mức lương: 6.000.000đ - 8.000.000đ. Phỏng vấn kỹ thuật 3 vòng.<br><br>" +
                                  "<color=#33cc66><size=13><b>3. [HOT] Việc Làm Nước Ngoài Lương Cao - Tuyển Kỹ Thuật Viên Máy Tính (Campuchia)</b></size></color><br>" +
@@ -327,7 +350,7 @@ namespace EscapeFromHell.Systems
                 TextMeshProUGUI addrt = addrTextTransform.GetComponent<TextMeshProUGUI>();
                 if (addrt != null)
                 {
-                    addrt.text = "<color=#5cb85c>• Secure</color> | https://gstarstudio.vn/tuyen-dung/intern-unity";
+                    addrt.text = "<color=#5cb85c>• Secure</color> | https://joygamestudio.vn/tuyen-dung/intern-unity";
                 }
             }
 
@@ -339,7 +362,7 @@ namespace EscapeFromHell.Systems
                 if (paget != null)
                 {
                     paget.text = "<size=13><b>CHI TIẾT TUYỂN DỤNG: THỰC TẬP SINH UNITY DEVELOPER</b></size><br>" +
-                                 "<b>Công ty:</b> G-Star Game Studio<br>" +
+                                 "<b>Công ty:</b> JoyGame Game Studio<br>" +
                                  "<b>Địa điểm:</b> Quận 7, TP. Hồ Chí Minh<br>" +
                                  "<b>Mức lương hỗ trợ:</b> <color=#33cc66>1.000.000đ/tháng</color> (Thử việc không lương 2 tháng)<br>" +
                                  "------------------------------------------------------------------<br>" +
@@ -352,8 +375,8 @@ namespace EscapeFromHell.Systems
                                  "• Hiểu rõ ngôn ngữ C# và cấu trúc dữ liệu, giải thuật cơ bản.<br>" +
                                  "• Chăm chỉ, có khả năng làm việc nhóm tốt.<br><br>" +
                                  "<b>Thông tin liên hệ tuyển dụng:</b><br>" +
-                                 "• Zalo/Hotline: <color=#ff9900><b>028.3333.5555</b></color> (Phòng Nhân Sự - G-Star Studio)<br>" +
-                                 "• Email: hr@gstarstudio.vn";
+                                 "• Zalo/Hotline: <color=#ff9900><b>028.3333.5555</b></color> (Phòng Nhân Sự - JoyGame Studio)<br>" +
+                                 "• Email: hr@joygamestudio.vn";
                 }
             }
 
@@ -364,14 +387,18 @@ namespace EscapeFromHell.Systems
 
             UpdateSaveContactButtonState();
 
-            if (DialogueSystem.Instance != null)
+            if (!hasViewedJob1)
             {
-                DialogueData textMock = ScriptableObject.CreateInstance<DialogueData>();
-                textMock.lines = new System.Collections.Generic.List<DialogueLine> {
-                    new DialogueLine { speakerName = "Minh", text = "Thực tập sinh Unity ở G-Star Studio... Lương hỗ trợ có 1 triệu một tháng lại còn bắt thử việc không lương 2 tháng." },
-                    new DialogueLine { speakerName = "Minh", text = "Đúng là bóc lột mà, làm sao mình đủ trả tiền phòng trọ đây... Có số điện thoại liên lạc ở đây: 028.3333.5555." }
-                };
-                DialogueSystem.Instance.StartDialogue(textMock);
+                hasViewedJob1 = true;
+                if (DialogueSystem.Instance != null)
+                {
+                    DialogueData textMock = ScriptableObject.CreateInstance<DialogueData>();
+                    textMock.lines = new System.Collections.Generic.List<DialogueLine> {
+                        new DialogueLine { speakerName = "Minh", text = "Thực tập sinh Unity ở JoyGame Studio... Lương hỗ trợ có 1 triệu một tháng lại còn bắt thử việc không lương 2 tháng." },
+                        new DialogueLine { speakerName = "Minh", text = "Đúng là bóc lột mà, làm sao mình đủ trả tiền phòng trọ đây... Có số điện thoại liên lạc ở đây: 028.3333.5555." }
+                    };
+                    DialogueSystem.Instance.StartDialogue(textMock);
+                }
             }
         }
 
@@ -387,7 +414,7 @@ namespace EscapeFromHell.Systems
                 TextMeshProUGUI addrt = addrTextTransform.GetComponent<TextMeshProUGUI>();
                 if (addrt != null)
                 {
-                    addrt.text = "<color=#5cb85c>• Secure</color> | https://vinatech.com/careers/web-fresher";
+                    addrt.text = "<color=#5cb85c>• Secure</color> | https://novatech.com/careers/web-fresher";
                 }
             }
 
@@ -399,7 +426,7 @@ namespace EscapeFromHell.Systems
                 if (paget != null)
                 {
                     paget.text = "<size=13><b>CHI TIẾT TUYỂN DỤNG: LẬP TRÌNH VIÊN WEB (FRESHER)</b></size><br>" +
-                                 "<b>Công ty:</b> VinaTech Group<br>" +
+                                 "<b>Công ty:</b> NovaTech Group<br>" +
                                  "<b>Địa điểm:</b> Quận Cầu Giấy, Hà Nội<br>" +
                                  "<b>Mức lương:</b> <color=#33cc66>6.000.000đ - 8.000.000đ/tháng</color> (Phỏng vấn kỹ thuật 3 vòng)<br>" +
                                  "------------------------------------------------------------------<br>" +
@@ -412,8 +439,8 @@ namespace EscapeFromHell.Systems
                                  "• Sử dụng tốt Git, HTML, CSS, Javascript (hoặc Typescript).<br>" +
                                  "• Ưu tiên ứng viên có kiến thức về React, Angular hoặc Node.js.<br><br>" +
                                  "<b>Thông tin liên hệ tuyển dụng:</b><br>" +
-                                 "• Zalo/Hotline: <color=#ff9900><b>024.9999.8888</b></color> (Phòng Tuyển Dụng - VinaTech Group)<br>" +
-                                 "• Email: careers@vinatech.com";
+                                 "• Zalo/Hotline: <color=#ff9900><b>024.9999.8888</b></color> (Phòng Tuyển Dụng - NovaTech Group)<br>" +
+                                 "• Email: careers@novatech.com";
                 }
             }
 
@@ -424,74 +451,46 @@ namespace EscapeFromHell.Systems
 
             UpdateSaveContactButtonState();
 
-            if (DialogueSystem.Instance != null)
+            if (!hasViewedJob2)
             {
-                DialogueData textMock = ScriptableObject.CreateInstance<DialogueData>();
-                textMock.lines = new System.Collections.Generic.List<DialogueLine> {
-                    new DialogueLine { speakerName = "Minh", text = "Tuyển Fresher Web ở VinaTech lương 6 đến 8 triệu, nhưng lại đòi hỏi tận 1 năm kinh nghiệm làm việc thực tế tại doanh nghiệp..." },
-                    new DialogueLine { speakerName = "Minh", text = "Đã ghi là Fresher mà lại đòi 1 năm kinh nghiệm thì sao mình ứng tuyển nổi đây... Số điện thoại phòng nhân sự của họ: 024.9999.8888." }
-                };
-                DialogueSystem.Instance.StartDialogue(textMock);
+                hasViewedJob2 = true;
+                if (DialogueSystem.Instance != null)
+                {
+                    DialogueData textMock = ScriptableObject.CreateInstance<DialogueData>();
+                    textMock.lines = new System.Collections.Generic.List<DialogueLine> {
+                        new DialogueLine { speakerName = "Minh", text = "Tuyển Fresher Web ở NovaTech lương 6 đến 8 triệu, nhưng lại đòi hỏi tận 1 năm kinh nghiệm làm việc thực tế tại doanh nghiệp..." },
+                        new DialogueLine { speakerName = "Minh", text = "Đã ghi là Fresher mà lại đòi 1 năm kinh nghiệm thì sao mình ứng tuyển nổi đây... Số điện thoại phòng nhân sự của họ: 024.9999.8888." }
+                    };
+                    DialogueSystem.Instance.StartDialogue(textMock);
+                }
             }
         }
 
         public void ClickScamJob()
         {
-            currentViewingJobIndex = 3;
             if (chromeWindow == null) return;
-
-            // Find address text
-            Transform addrTextTransform = chromeWindow.transform.Find("HeaderBar/AddressBox/Text");
-            if (addrTextTransform != null)
-            {
-                TextMeshProUGUI addrt = addrTextTransform.GetComponent<TextMeshProUGUI>();
-                if (addrt != null)
-                {
-                    addrt.text = "<color=#5cb85c>• Secure</color> | https://vieclamnuocngoai.com/tuyen-dung/cambodia-tech";
-                }
-            }
-
-            // Find page text
-            Transform pageTextTransform = chromeWindow.transform.Find("Content/PageText");
-            if (pageTextTransform != null)
-            {
-                TextMeshProUGUI paget = pageTextTransform.GetComponent<TextMeshProUGUI>();
-                if (paget != null)
-                {
-                    paget.text = "<size=13><b>CHI TIẾT TUYỂN DỤNG: KỸ THUẬT VIÊN MÁY TÍNH</b></size><br>" +
-                                 "<b>Địa điểm làm việc:</b> Bavet, Campuchia (sát cửa khẩu Mộc Bài, Tây Ninh)<br>" +
-                                 "<b>Mức lương:</b> <color=#33cc66>1.000.000đ - 1.500.000đ/ngày</color> (Nhận trực tiếp theo ngày)<br>" +
-                                 "------------------------------------------------------------------<br>" +
-                                 "<b>Mô tả công việc:</b><br>" +
-                                 "• Sử dụng máy tính và ứng dụng chat để chăm sóc khách hàng trực tuyến.<br>" +
-                                 "• Tư vấn và hướng dẫn người chơi tham gia trò chơi điện tử trực tuyến.<br>" +
-                                 "• Thực hiện các công việc nhập liệu cơ bản theo hướng dẫn của quản lý.<br><br>" +
-                                 "<b>Quyền lợi:</b><br>" +
-                                 "• Bao ăn ở 100%, có ký túc xá máy lạnh đầy đủ tiện nghi, wifi 24/7.<br>" +
-                                 "• Hỗ trợ toàn bộ chi phí làm hộ chiếu và xe đưa đón sang Campuchia.<br>" +
-                                 "• Cam kết công việc văn phòng nhẹ nhàng, không áp doanh số.<br><br>" +
-                                 "<b>Liên hệ nộp hồ sơ & phỏng vấn trực tiếp:</b><br>" +
-                                 "• Zalo/Hotline: <color=#ff9900><b>098.765.4321</b></color> (Gặp Anh Hùng - Trưởng phòng nhân sự)<br>" +
-                                 "• Email: tuyendung.bavetholding@gmail.com";
-                }
-            }
 
             HideAllChromeJobButtons();
 
-            Transform backBtn = chromeWindow.transform.Find("Content/ChromeBackButton");
-            if (backBtn != null) backBtn.gameObject.SetActive(true);
-
-            UpdateSaveContactButtonState();
-
             if (DialogueSystem.Instance != null)
             {
+                DialogueSystem.Instance.OnDialogueEnd += OnScamJobDialogueEnd;
+
                 DialogueData textMock = ScriptableObject.CreateInstance<DialogueData>();
                 textMock.lines = new System.Collections.Generic.List<DialogueLine> {
-                    new DialogueLine { speakerName = "Minh", text = "Chi tiết ghi rõ là lương 1 đến 1.5 triệu mỗi ngày, phát trực tiếp... Bao ăn ở từ A đến Z, lại còn hỗ trợ chi phí đi lại nữa." },
-                    new DialogueLine { speakerName = "Minh", text = "Có cả số điện thoại Zalo của người tên Hùng để liên lạc: 098.765.4321. Mình nên lưu số này lại đề phòng cần đến..." }
+                    new DialogueLine { speakerName = "Minh", text = "Nhìn đã biết là công việc lừa đảo, mình nên tìm những công việc khác." }
                 };
                 DialogueSystem.Instance.StartDialogue(textMock);
             }
+        }
+
+        private void OnScamJobDialogueEnd()
+        {
+            if (DialogueSystem.Instance != null)
+            {
+                DialogueSystem.Instance.OnDialogueEnd -= OnScamJobDialogueEnd;
+            }
+            ShowChromeSearchResults();
         }
 
         private void ShowEmail(int emailIndex)
@@ -620,6 +619,7 @@ namespace EscapeFromHell.Systems
             bind("Workspace/IconsContainer/ChromeIcon", () => OpenChrome());
 
             // Bind Taskbar Shortcuts
+            bind("Workspace/Taskbar/CenteredContainer/StartButton", () => ToggleStartMenu());
             bind("Workspace/Taskbar/CenteredContainer/ExplorerShortcut", () => OpenThisPC());
             bind("Workspace/Taskbar/CenteredContainer/ChromeShortcut", () => OpenChrome());
             bind("Workspace/Taskbar/CenteredContainer/MailShortcut", () => OpenMail());
@@ -693,12 +693,12 @@ namespace EscapeFromHell.Systems
             if (currentViewingJobIndex == 1)
             {
                 PhoneUI.Instance.hasSeenJob1 = true;
-                contactName = "G-Star Studio (Tuyển dụng)";
+                contactName = "JoyGame Studio (Tuyển dụng)";
             }
             else if (currentViewingJobIndex == 2)
             {
                 PhoneUI.Instance.hasSeenJob2 = true;
-                contactName = "VinaTech Group (Tuyển dụng)";
+                contactName = "NovaTech Group (Tuyển dụng)";
             }
             else if (currentViewingJobIndex == 3)
             {
@@ -736,6 +736,225 @@ namespace EscapeFromHell.Systems
                 if (btn != null) return btn;
             }
             return null;
+        }
+
+        private void InitializeStartMenu()
+        {
+            if (computerPanel == null || startMenuPanel != null) return;
+
+            // Find Workspace transform
+            Transform workspaceTrans = computerPanel.transform.Find("Workspace");
+            if (workspaceTrans == null) return;
+
+            // Hide the old taskbar shutdown button
+            Transform oldShutdown = workspaceTrans.Find("Taskbar/ShutdownButton");
+            if (oldShutdown != null)
+            {
+                oldShutdown.gameObject.SetActive(false);
+            }
+
+            // Create StartMenuPanel
+            startMenuPanel = new GameObject("StartMenuPanel");
+            startMenuPanel.transform.SetParent(workspaceTrans, false);
+            
+            RectTransform smRect = startMenuPanel.AddComponent<RectTransform>();
+            smRect.anchorMin = new Vector2(0f, 0f);
+            smRect.anchorMax = new Vector2(0f, 0f);
+            smRect.pivot = new Vector2(0f, 0f);
+            smRect.sizeDelta = new Vector2(280, 320);
+            // Position above taskbar (taskbar is 40px high, let's place it at x=10, y=45)
+            smRect.anchoredPosition = new Vector2(10, 45);
+
+            // Add background image
+            Image bg = startMenuPanel.AddComponent<Image>();
+            bg.color = new Color(0.08f, 0.08f, 0.1f, 0.96f);
+            
+            // Add rounded outline/border
+            Outline outline = startMenuPanel.AddComponent<Outline>();
+            outline.effectColor = new Color(1f, 1f, 1f, 0.12f);
+            outline.effectDistance = new Vector2(1.5f, 1.5f);
+
+            // --- Top Header: User Profile ---
+            GameObject userProfileObj = new GameObject("UserProfile");
+            userProfileObj.transform.SetParent(startMenuPanel.transform, false);
+            RectTransform upRect = userProfileObj.AddComponent<RectTransform>();
+            upRect.anchorMin = new Vector2(0f, 1f);
+            upRect.anchorMax = new Vector2(1f, 1f);
+            upRect.pivot = new Vector2(0.5f, 1f);
+            upRect.sizeDelta = new Vector2(0, 60);
+            upRect.anchoredPosition = new Vector2(0, 0);
+
+            // Subtle dark separator at bottom of profile
+            Image upImg = userProfileObj.AddComponent<Image>();
+            upImg.color = new Color(1f, 1f, 1f, 0.04f);
+
+            // Avatar Circle/Box
+            GameObject avatarObj = new GameObject("Avatar");
+            avatarObj.transform.SetParent(userProfileObj.transform, false);
+            RectTransform avRect = avatarObj.AddComponent<RectTransform>();
+            avRect.anchorMin = new Vector2(0f, 0.5f);
+            avRect.anchorMax = new Vector2(0f, 0.5f);
+            avRect.pivot = new Vector2(0f, 0.5f);
+            avRect.sizeDelta = new Vector2(36, 36);
+            avRect.anchoredPosition = new Vector2(15, 0);
+            Image avImg = avatarObj.AddComponent<Image>();
+            avImg.color = new Color(0.18f, 0.48f, 0.76f, 1f); // Blue avatar background
+            Outline avOutline = avatarObj.AddComponent<Outline>();
+            avOutline.effectColor = new Color(1f, 1f, 1f, 0.2f);
+
+            // Avatar text (Minh's initials: "M")
+            GameObject avTextObj = new GameObject("Text");
+            avTextObj.transform.SetParent(avatarObj.transform, false);
+            RectTransform avtRect = avTextObj.AddComponent<RectTransform>();
+            avtRect.anchorMin = Vector2.zero;
+            avtRect.anchorMax = Vector2.one;
+            avtRect.sizeDelta = Vector2.zero;
+            TextMeshProUGUI avtText = avTextObj.AddComponent<TextMeshProUGUI>();
+            avtText.text = "M";
+            avtText.fontSize = 18;
+            avtText.fontStyle = FontStyles.Bold;
+            avtText.color = Color.white;
+            avtText.alignment = TextAlignmentOptions.Center;
+            avtText.verticalAlignment = VerticalAlignmentOptions.Middle;
+
+            // Username Label
+            GameObject nameObj = new GameObject("Username");
+            nameObj.transform.SetParent(userProfileObj.transform, false);
+            RectTransform nameRect = nameObj.AddComponent<RectTransform>();
+            nameRect.anchorMin = new Vector2(0f, 0.5f);
+            nameRect.anchorMax = new Vector2(1f, 0.5f);
+            nameRect.pivot = new Vector2(0f, 0.5f);
+            nameRect.sizeDelta = new Vector2(-80, 30);
+            nameRect.anchoredPosition = new Vector2(65, 0);
+            TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
+            nameText.text = "Nguyễn Hoài Minh";
+            nameText.fontSize = 13;
+            nameText.fontStyle = FontStyles.Bold;
+            nameText.color = Color.white;
+            nameText.verticalAlignment = VerticalAlignmentOptions.Middle;
+
+            // --- Middle Body: Quick Links ---
+            string[] items = { "Tài liệu (Documents)", "Ảnh (Pictures)", "Cài đặt (Settings)", "Trợ giúp & Hỗ trợ (Help)" };
+            for (int i = 0; i < items.Length; i++)
+            {
+                int index = i;
+                GameObject itemObj = new GameObject("Link_" + i);
+                itemObj.transform.SetParent(startMenuPanel.transform, false);
+                RectTransform itRect = itemObj.AddComponent<RectTransform>();
+                itRect.anchorMin = new Vector2(0f, 1f);
+                itRect.anchorMax = new Vector2(1f, 1f);
+                itRect.pivot = new Vector2(0.5f, 1f);
+                itRect.sizeDelta = new Vector2(-20, 32);
+                itRect.anchoredPosition = new Vector2(0, -75 - (i * 38));
+
+                Image itImg = itemObj.AddComponent<Image>();
+                itImg.color = Color.clear;
+                Button itBtn = itemObj.AddComponent<Button>();
+                itBtn.targetGraphic = itImg;
+                
+                ColorBlock cb = itBtn.colors;
+                cb.normalColor = Color.clear;
+                cb.highlightedColor = new Color(1f, 1f, 1f, 0.05f);
+                cb.pressedColor = new Color(1f, 1f, 1f, 0.1f);
+                cb.selectedColor = Color.clear;
+                itBtn.colors = cb;
+
+                GameObject itTextObj = new GameObject("Text");
+                itTextObj.transform.SetParent(itemObj.transform, false);
+                RectTransform ittRect = itTextObj.AddComponent<RectTransform>();
+                ittRect.anchorMin = Vector2.zero;
+                ittRect.anchorMax = Vector2.one;
+                ittRect.offsetMin = new Vector2(10, 0);
+                ittRect.offsetMax = Vector2.zero;
+                TextMeshProUGUI ittText = itTextObj.AddComponent<TextMeshProUGUI>();
+                ittText.text = items[i];
+                ittText.fontSize = 11;
+                ittText.color = new Color(0.85f, 0.85f, 0.85f, 1f);
+                ittText.verticalAlignment = VerticalAlignmentOptions.Middle;
+                
+                // Clicking mock links plays a tiny monologue
+                itBtn.onClick.AddListener(() => {
+                    if (DialogueSystem.Instance != null)
+                    {
+                        DialogueData d = ScriptableObject.CreateInstance<DialogueData>();
+                        d.lines = new System.Collections.Generic.List<DialogueLine> {
+                            new DialogueLine { speakerName = "Minh", text = $"Không có gì hữu ích trong thư mục này cả... Mình nên tập trung tìm việc." }
+                        };
+                        DialogueSystem.Instance.StartDialogue(d);
+                    }
+                });
+            }
+
+            // --- Bottom Footer: Shutdown Panel ---
+            GameObject footerObj = new GameObject("Footer");
+            footerObj.transform.SetParent(startMenuPanel.transform, false);
+            RectTransform ftRect = footerObj.AddComponent<RectTransform>();
+            ftRect.anchorMin = new Vector2(0f, 0f);
+            ftRect.anchorMax = new Vector2(1f, 0f);
+            ftRect.pivot = new Vector2(0.5f, 0f);
+            ftRect.sizeDelta = new Vector2(0, 50);
+            ftRect.anchoredPosition = Vector2.zero;
+
+            Image ftImg = footerObj.AddComponent<Image>();
+            ftImg.color = new Color(1f, 1f, 1f, 0.02f);
+
+            // Shutdown Button in Start Menu
+            GameObject shutdownBtnObj = new GameObject("ShutdownButtonMenu");
+            shutdownBtnObj.transform.SetParent(footerObj.transform, false);
+            RectTransform sdbRect = shutdownBtnObj.AddComponent<RectTransform>();
+            sdbRect.anchorMin = new Vector2(1f, 0.5f);
+            sdbRect.anchorMax = new Vector2(1f, 0.5f);
+            sdbRect.pivot = new Vector2(1f, 0.5f);
+            sdbRect.sizeDelta = new Vector2(110, 28);
+            sdbRect.anchoredPosition = new Vector2(-15, 0);
+
+            Image sdbImg = shutdownBtnObj.AddComponent<Image>();
+            sdbImg.color = new Color(0.9f, 0.2f, 0.2f, 0.2f);
+            Outline sdbOutline = shutdownBtnObj.AddComponent<Outline>();
+            sdbOutline.effectColor = new Color(0.9f, 0.2f, 0.2f, 0.5f);
+
+            Button sdbBtn = shutdownBtnObj.AddComponent<Button>();
+            sdbBtn.targetGraphic = sdbImg;
+            ColorBlock sdbCb = sdbBtn.colors;
+            sdbCb.normalColor = new Color(0.9f, 0.2f, 0.2f, 0.2f);
+            sdbCb.highlightedColor = new Color(0.9f, 0.2f, 0.2f, 0.4f);
+            sdbCb.pressedColor = new Color(0.9f, 0.2f, 0.2f, 0.7f);
+            sdbCb.selectedColor = new Color(0.9f, 0.2f, 0.2f, 0.2f);
+            sdbBtn.colors = sdbCb;
+
+            GameObject sdbTextObj = new GameObject("Text");
+            sdbTextObj.transform.SetParent(shutdownBtnObj.transform, false);
+            RectTransform sdbtRect = sdbTextObj.AddComponent<RectTransform>();
+            sdbtRect.anchorMin = Vector2.zero;
+            sdbtRect.anchorMax = Vector2.one;
+            sdbtRect.sizeDelta = Vector2.zero;
+            TextMeshProUGUI sdbText = sdbTextObj.AddComponent<TextMeshProUGUI>();
+            sdbText.text = "Shut Down ⏻";
+            sdbText.fontSize = 11;
+            sdbText.fontStyle = FontStyles.Bold;
+            sdbText.color = Color.white;
+            sdbText.alignment = TextAlignmentOptions.Center;
+            sdbText.verticalAlignment = VerticalAlignmentOptions.Middle;
+
+            sdbBtn.onClick.AddListener(() => {
+                ToggleStartMenu();
+                CloseComputer();
+            });
+
+            startMenuPanel.SetActive(false);
+        }
+
+        public void ToggleStartMenu()
+        {
+            if (startMenuPanel != null)
+            {
+                bool nextState = !startMenuPanel.activeSelf;
+                startMenuPanel.SetActive(nextState);
+                if (nextState)
+                {
+                    startMenuPanel.transform.SetAsLastSibling();
+                }
+            }
         }
     }
 }
