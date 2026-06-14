@@ -2893,8 +2893,69 @@ namespace EscapeFromHell.Editor
             return fileObj;
         }
 
+        private static void ConfigurePlayerSprite(string path)
+        {
+            if (!File.Exists(path)) return;
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer != null)
+            {
+                bool changed = false;
+                if (importer.textureType != TextureImporterType.Sprite)
+                {
+                    importer.textureType = TextureImporterType.Sprite;
+                    changed = true;
+                }
+                if (importer.spriteImportMode != SpriteImportMode.Single)
+                {
+                    importer.spriteImportMode = SpriteImportMode.Single;
+                    changed = true;
+                }
+                if (importer.spritePixelsPerUnit != 32)
+                {
+                    importer.spritePixelsPerUnit = 32;
+                    changed = true;
+                }
+                if (importer.filterMode != FilterMode.Point)
+                {
+                    importer.filterMode = FilterMode.Point;
+                    changed = true;
+                }
+                if (importer.textureCompression != TextureImporterCompression.Uncompressed)
+                {
+                    importer.textureCompression = TextureImporterCompression.Uncompressed;
+                    changed = true;
+                }
+                if (changed)
+                {
+                    EditorUtility.SetDirty(importer);
+                    importer.SaveAndReimport();
+                }
+            }
+        }
+
         private static void SetupPlayerAnimator(UnityEditor.Animations.AnimatorController controller)
         {
+            // Configure sprite settings before loading them
+            string[] spritePaths = {
+                "Assets/Sprites/Characters/Minh/Minh_Idle_Down.png",
+                "Assets/Sprites/Characters/Minh/Minh_Idle_Up.png",
+                "Assets/Sprites/Characters/Minh/Minh_Idle_Left.png",
+                "Assets/Sprites/Characters/Minh/Minh_Idle_Right.png",
+                "Assets/Sprites/Characters/Minh/Minh_Walk_Down_1.png",
+                "Assets/Sprites/Characters/Minh/Minh_Walk_Down_2.png",
+                "Assets/Sprites/Characters/Minh/Minh_Walk_Up_1.png",
+                "Assets/Sprites/Characters/Minh/Minh_Walk_Up_2.png",
+                "Assets/Sprites/Characters/Minh/Minh_Walk_Left_1.png",
+                "Assets/Sprites/Characters/Minh/Minh_Walk_Left_2.png",
+                "Assets/Sprites/Characters/Minh/Minh_Walk_Right_1.png",
+                "Assets/Sprites/Characters/Minh/Minh_Walk_Right_2.png"
+            };
+            foreach (string path in spritePaths)
+            {
+                ConfigurePlayerSprite(path);
+            }
+            AssetDatabase.Refresh();
+
             var rootStateMachine = controller.layers[0].stateMachine;
 
             // Clear existing states to rebuild cleanly
