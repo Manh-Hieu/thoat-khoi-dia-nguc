@@ -141,14 +141,15 @@ namespace EscapeFromHell.Editor
 
             // Custom boundaries configured by user in editor
             CreateBoundary(environment.transform, "Boundary_Top (2)", new Vector3(-2.53f, -3.87f, -0.08f), new Vector2(4f, 1f), Quaternion.Euler(-35.161f, 93.175f, -87.697f));
-            CreateBoundary(environment.transform, "Boundary_Top (3)", new Vector3(-6.82f, -0.84f, 0.88f), new Vector2(2f, 1f), Quaternion.Euler(-86.985f, 7.12f, -1.389f));
+            CreateBoundary(environment.transform, "Boundary_Top (3)", new Vector3(-5.82f, -0.57f, 0.89f), new Vector2(2f, 1f), Quaternion.Euler(-86.985f, 7.12f, -1.389f));
             CreateBoundary(environment.transform, "Boundary_Top (4)", new Vector3(-5.38f, -3.81f, 0.34f), new Vector2(5f, 1f), Quaternion.Euler(-86.985f, 7.12f, -1.389f));
-            CreateBoundary(environment.transform, "Boundary_Top (5)", new Vector3(3.11f, -3.75f, -0.52f), new Vector2(4f, 1f), Quaternion.Euler(-86.985f, 7.12f, -1.389f));
+            // Shift Boundary_Top (5) to the right to leave a gap at X=1.73f for the entrance door
+            CreateBoundary(environment.transform, "Boundary_Top (5)", new Vector3(4.25f, -3.75f, -0.52f), new Vector2(2.5f, 1f), Quaternion.Euler(-86.985f, 7.12f, -1.389f));
 
             // 4. Create Player (Minh)
             GameObject playerObj = new GameObject("Player");
             playerObj.tag = "Player";
-            playerObj.transform.position = new Vector3(-5.5f, -3.0f, 0); // Start near the left exit door
+            playerObj.transform.position = new Vector3(1.73f, -3.5f, 0); // Start near the casino entrance door
 
             SpriteRenderer playerSR = playerObj.AddComponent<SpriteRenderer>();
             Sprite playerSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Characters/Minh/Minh_Idle_Down.png");
@@ -211,21 +212,21 @@ namespace EscapeFromHell.Editor
             SpawnCasinoTable(propsParent.transform, "TaiXiuTableProp", new Vector3(0.47f, -6.71f, 0f), Chapter2PropType.TaiXiuTable, "Chơi Tài Xỉu", false, true);
             SpawnCasinoTable(propsParent.transform, "RouletteTable", new Vector3(4.3f, -6.38f, 0f), Chapter2PropType.RouletteTable, "Chơi Roulette", true, false);
 
-            // Left Exit Door (visual item and interactive prop)
-            SpawnExitDoor(propsParent.transform, "LeftExitDoor", new Vector3(-8.1f, -2.3f, 0f), 2.0f);
+            // Left Exit Door (placed exactly over the casino entrance door shown in the background illustration)
+            SpawnExitDoor(propsParent.transform, "LeftExitDoor", new Vector3(1.73f, -2.3f, 0f), 2.0f);
 
-            // Left Door Guard 1 (stands to the left of the door)
-            SpawnGuard(propsParent.transform, "LeftDoorGuard1", new Vector3(-8.8f, -2.4f, 0f), Chapter2PropType.LeftDoorGuard1, "Hỏi thăm bảo vệ");
+            // Left Door Guard 1 (stands to the left of the door, matching the left column background elements)
+            SpawnGuard(propsParent.transform, "LeftDoorGuard1", new Vector3(-0.9f, -2.4f, 0f), Chapter2PropType.LeftDoorGuard1, "Hỏi thăm bảo vệ");
 
-            // Left Door Guard 2 (stands to the right of the door)
-            SpawnGuard(propsParent.transform, "LeftDoorGuard2", new Vector3(-6.1f, -2.4f, 0f), Chapter2PropType.LeftDoorGuard2, "Hỏi thăm bảo vệ");
+            // Left Door Guard 2 (stands to the right of the door, matching the right column background elements)
+            SpawnGuard(propsParent.transform, "LeftDoorGuard2", new Vector3(4.4f, -2.4f, 0f), Chapter2PropType.LeftDoorGuard2, "Hỏi thăm bảo vệ");
 
             // Recruiter NPC (standing on the far right side)
             SpawnGuard(propsParent.transform, "RecruiterNPC", new Vector3(7.0f, -2.4f, 0f), Chapter2PropType.Recruiter, "Nói chuyện");
 
             // VIP Stairs Guard (guarding stairs to VIP floor)
             // Use wider collider width (1.5f) to prevent bypassing the stairs
-            SpawnGuard(propsParent.transform, "VipStairsGuardNPC", new Vector3(-3.0f, -2.2f, 0f), Chapter2PropType.VipStairsGuard, "Hỏi thăm bảo vệ", 1.5f);
+            SpawnGuard(propsParent.transform, "VipStairsGuardNPC", new Vector3(-7.05f, 1.13f, 0f), Chapter2PropType.VipStairsGuard, "Hỏi thăm bảo vệ", 1.5f);
 
             // 6. Create UI Canvas
             GameObject uiRoot = new GameObject("UI_Canvas");
@@ -768,12 +769,11 @@ namespace EscapeFromHell.Editor
             doorObj.transform.position = doorPos;
             doorObj.transform.localScale = new Vector3(scale, scale, 1f);
 
-            SpriteRenderer doorSR = doorObj.AddComponent<SpriteRenderer>();
-            doorSR.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/Door.png");
-            doorSR.sortingOrder = 1;
+            // Do not add a visible SpriteRenderer, because the beautiful casino doors are already drawn on the background!
+            // This leaves the door visual as drawn by the background but provides the required interactive zone.
 
             BoxCollider2D doorTrigger = doorObj.AddComponent<BoxCollider2D>();
-            doorTrigger.size = new Vector2(0.8f, 1.2f);
+            doorTrigger.size = new Vector2(2.5f, 1.5f); // Larger collider box matching the double doors width
             doorTrigger.isTrigger = true;
 
             Chapter2Prop doorProp = doorObj.AddComponent<Chapter2Prop>();
