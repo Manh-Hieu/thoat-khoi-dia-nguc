@@ -12,20 +12,20 @@ def hex_to_rgba(hex_str):
 palette = {
     '.': (0, 0, 0, 0),
     # Hair (Dark Charcoal/Black with warm highlight)
-    'H': hex_to_rgba('#1c1c24'), # Base hair
-    'h': hex_to_rgba('#3a3a4a'), # Hair highlight
-    'o': hex_to_rgba('#0c0c10'), # Hair outline / dark shadow
+    'H': hex_to_rgba('#1a1108'), # Base hair
+    'h': hex_to_rgba('#3c2714'), # Hair highlight
+    'o': hex_to_rgba('#0d0804'), # Hair outline / dark shadow
     # Skin (Peach, shaded)
     'S': hex_to_rgba('#fcd4b4'), # Main skin
     's': hex_to_rgba('#e2a884'), # Skin shadow
     'c': hex_to_rgba('#ffabb2'), # Cheek blush
-    'E': hex_to_rgba('#0d0d12'), # Eyes / Pupils
+    'E': hex_to_rgba('#1c1105'), # Eyes / Pupils
     'e': hex_to_rgba('#ffffff'), # Eye whites
     # Hoodie (Slate Blue)
     'B': hex_to_rgba('#2b5d92'), # Main blue hoodie
     'b': hex_to_rgba('#487bb0'), # Hoodie highlight
-    'd': hex_to_rgba('#1c3b5d'), # Hoodie shadow
-    'O': hex_to_rgba('#0b1724'), # Hoodie outline
+    'd': hex_to_rgba('#163558'), # Hoodie shadow
+    'O': hex_to_rgba('#0b1a2c'), # Clothing outline
     'w': hex_to_rgba('#e6e6e6'), # Drawstring / Zipper (white)
     # Pants (Steel Grey)
     'P': hex_to_rgba('#505a66'), # Main grey pants
@@ -42,354 +42,341 @@ HEAD_FRONT = [
     "................................", # 0
     "................................", # 1
     "................................", # 2
-    "............oooooooo............", # 3
-    "..........oohhhhhhhhoo..........", # 4
-    "........oohhHHHHHHHHhhoo........", # 5
-    ".......ooHHHHHHHHHHHHHHoo.......", # 6
-    "......ooHHHHHHHHHHHHHHHHoo......", # 7
-    "......ooHHHHHHHHHHHHHHHHoo......", # 8
-    "......ooHHHSSSSSSSSSSHHHoo......", # 9
-    "......ooHSSSSeSSSeSSSSHHoo......", # 10 (Eyes at cols 13, 17)
-    "......ooHSSSSEsSSEsSSSHHoo......", # 11 (Eyes pupil/shadow)
-    "......ooHSSSSSsSSsSSSSHHoo......", # 12
-    ".......ooHSSssSSssSSsHHoo.......", # 13
-    "........ooHSSSSSSSSSHHoo........", # 14
-    ".........oohHSSSSSHhoo..........", # 15
-    "...........ooSSSSSoo............", # 16 (Neck)
-    "............oSSSSo..............", # 17
-    "................................", # 18
-    "................................"  # 19
+    "................................", # 3
+    "................................", # 4
+    "................................", # 5
+    "................................", # 6
+    "............oo.oo.oo............", # 7 (Modern messy top spikes - no giant gap)
+    "..........oohhHHHHhhoo..........", # 8 (Layered hair volume with highlights)
+    ".........oohHHHHHHHHhoo.........", # 9
+    "........oohHHHHHHHHHHHhoo.......", # 10
+    "........oohHHHHHHHHHHHhoo.......", # 11
+    "........ooHHHHHHHHHHHHoo........", # 12
+    "........ooHhShHSSHhShHoo........", # 13 (Symmetric messy bangs falling over face)
+    "........ooHhSSSSSSSShHoo........", # 14 (Strands frame the face)
+    "........ooHSSSSSSSSSSHoo........", # 15
+    "........ooHSooSSSSooSHoo........", # 16 (Eyebrows)
+    "........ooHSeESSSSEeSHoo........", # 17 (Eyes: Left eE, Right Ee)
+    "........ooHSSSSSSSSSSHoo........", # 18
+    ".........ooHSSSSSSSSHoo.........", # 19
+    "..........ooHSSssSSHoo..........", # 20 (Chin/Mouth shadow)
+    "...........ooHSSSShoo...........", # 21
+    "..............oSSo.............."  # 22 (Neck)
 ]
 
 TORSO_FRONT = [
-    "............OOOO................", # 20
-    "..........OOObbbOOO.............", # 21
-    "........OOObbbbbbbOOO...........", # 22
-    ".......OObbbbbbbbbbbOO..........", # 23
-    "......OObbBBBBBBBBbbbbOO........", # 24
-    ".....OObBBBBBBBBBBBBbbOO........", # 25
-    "....OObBBBDDDDDDDDBBBbbOO.......", # 26
-    "....OObBBDDDDDDDDDDBBBbOO.......", # 27
-    "....OObBBDDDwDDwDDDBBBbOO.......", # 28
-    "....OObBBDDDwDDwDDDBBBbOO.......", # 29
-    "....OObBBDDDDDDDDDDBBBbOO.......", # 30
-    "....OObBBDDDDDDDDDDBBBbOO.......", # 31
-    ".....OOBBDDDDDDDDDDBBBOO........", # 32
-    "......OOBBDDDDDDDDBBOO..........", # 33
-    ".......OOBBBBBBBBBBOO...........", # 34
-    "........OOOOOOOOOOOO............"  # 35
+    "..............OOOO..............", # 23 (Collar)
+    "...........OOObbbbOOO...........", # 24 (Shoulders)
+    "..........OObbbbbbbOO...........", # 25 (Fixed length: added a dot at the end)
+    ".........OObbbbbbbbbOO..........", # 26
+    ".........OObBBBBBBBBbOO.........", # 27
+    "........OObbbBddddddBbbOO.......", # 28 (Arms start separating)
+    "........ObBBdBBBBBBdBBbO........", # 29 (Arm sleeves + body)
+    "........ObBBdBBwwBBdBBbO........", # 30 (Zipper/strings start)
+    "........ObBBdBBwwBBdBBbO........", # 31
+    "........ObBBdBBwwBBdBBbO........", # 32
+    "........ObBBdBBwwBBdBBbO........", # 33
+    "........ObBBdBBBBBBdBBbO........", # 34
+    "........OSSSdBBBBBBdSSSO........", # 35 (Sleeve ends, hands appear)
+    "........OSSSdOOOOOOdSSSO........"  # 36 (Waistband / hoodie hem)
 ]
 
 LEGS_FRONT_IDLE = [
-    ".........OOOOOOOOOO.............", # 36
-    "........OOpPPPPPPppO............", # 37
-    ".......OOpPPPPPPPPppO...........", # 38
-    ".......OOpPPPPPPPPppO...........", # 39
-    "......OOpPPPPPPPPPPppO..........", # 40
-    "......OOpPPPP..PPPPppO..........", # 41
-    "......OOpPPP....PPPppO..........", # 42
-    "......OOpPPP....PPPppO..........", # 43
-    "......OOpPPP....PPPppO..........", # 44
-    "......OOpPPP....PPPppO..........", # 45
-    "......OOpPPP....PPPppO..........", # 46
-    "......OOpPPP....PPPppO..........", # 47
-    "......OOpPPP....PPPppO..........", # 48
-    "......OOpPPP....PPPppO..........", # 49
-    "......OOpPPP....PPPppO..........", # 50
-    "......OOpPPP....PPPppO..........", # 51
-    "......OOpPPP....PPPppO..........", # 52
-    "......OOpPPP....PPPppO..........", # 53
-    "......OOpPPP....PPPppO..........", # 54
-    "......OOpPPP....PPPppO..........", # 55
-    "......OOpPPP....PPPppO..........", # 56
-    "......OOpPPP....PPPppO..........", # 57
-    "......OOpPPP....PPPppO..........", # 58
-    "......OOpKKK....KKKppO..........", # 59
-    ".....OOKKKKK...KKKKKppO.........", # 60
-    "....OOKKKKKK..OOKKKKKKpO........", # 61
-    "....OOnnnnnn...nnnnnnnO.........", # 62
+    "........OSSSdOOOOOOdSSSO........", # 37 (Hands continue)
+    "........OSSSdOOOOOOdSSSO........", # 38
+    "........OSSSdOOOOOOdSSSO........", # 39
+    "...........OOpPPPPppO...........", # 40 (Pants waist / hips start)
+    "..........OOpPPPPPPppO..........", # 41
+    "..........OOpPPPPPPppO..........", # 42
+    "..........OpPPp..pPPpO..........", # 43 (Legs shifted left 1px for symmetric alignment)
+    "..........OpPPp..pPPpO..........", # 44
+    "..........OpPPp..pPPpO..........", # 45
+    "..........OpPPp..pPPpO..........", # 46
+    "..........OpPPp..pPPpO..........", # 47
+    "..........OpPPp..pPPpO..........", # 48
+    "..........OpPPp..pPPpO..........", # 49
+    "..........OpPPp..pPPpO..........", # 50
+    "..........OpPPp..pPPpO..........", # 51
+    "..........OpPPp..pPPpO..........", # 52
+    "..........OpPPp..pPPpO..........", # 53
+    "..........OpPPp..pPPpO..........", # 54
+    "..........OpPPp..pPPpO..........", # 55
+    "..........OpPPp..pPPpO..........", # 56
+    "..........OpPPp..pPPpO..........", # 57
+    "..........OpKKp..pKKpO..........", # 58 (Boots start)
+    "..........OKKKp..pKKKO..........", # 59
+    "..........OKKKp..pKKKO..........", # 60
+    "..........Onnnp..pnnnO..........", # 61 (Soles)
+    "................................", # 62
     "................................"  # 63
 ]
 
 LEGS_FRONT_WALK1 = [
-    ".........OOOOOOOOOO.............",
-    "........OOpPPPPPPppO............",
-    ".......OOpPPPPPPPPppO...........",
-    ".......OOpPPPPPPPPppO...........",
-    "......OOpPPPPPPPPPPppO..........",
-    "......OOpPPPP..PPPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpKKK....KKKppO..........",
-    ".....OOKKKKK...KKKKKppO.........", # Left leg down, right leg starts lifting
-    "....OOKKKKKK....KKKKKpO.........", 
-    "....OOnnnnnn....nnnnnO..........", # Left foot touches bottom
-    "................................"
+    "........OSSSdOOOOOOdSSSO........", # 37
+    "........OSSSdOOOOOOdSSSO........", # 38
+    "........OSSSdOOOOOOdSSSO........", # 39
+    "...........OOpPPPPppO...........", # 40
+    "..........OOpPPPPPPppO..........", # 41
+    "..........OOpPPPPPPppO..........", # 42
+    "..........OpPPp..pPPpO..........", # 43
+    "..........OpPPp..pPPpO..........", # 44
+    "..........OpPPp..pPPpO..........", # 45
+    "..........OpPPp..pPPpO..........", # 46
+    "..........OpPPp..pPPpO..........", # 47
+    "..........OpPPp..pPPpO..........", # 48
+    "..........OpPPp...pPPpO.........", # 49 (Right knee bends outward)
+    "..........OpPPp...pPPpO.........", # 50
+    "..........OpPPp...pPPpO.........", # 51
+    "..........OpPPp...pPPpO.........", # 52
+    "..........OpPPp...pPPpO.........", # 53
+    "..........OpPPp...pPPpO.........", # 54
+    "..........OpPPp..pPPpO..........", # 55
+    "..........OpPPp..pPPpO..........", # 56
+    "..........OpPPp..pPPpO..........", # 57
+    "..........OpKKp...pKKpO.........", # 58 (Right boot shifted outward)
+    "..........OKKKp...pnnnO.........", # 59 (Right sole lifted/shifted)
+    "..........OKKKp.................", # 60 (Left foot down, right empty)
+    "..........Onnnp.................", # 61 (Left sole down, right empty)
+    "................................", # 62
+    "................................"  # 63
 ]
 
 LEGS_FRONT_WALK2 = [
-    ".........OOOOOOOOOO.............",
-    "........OOpPPPPPPppO............",
-    ".......OOpPPPPPPPPppO...........",
-    ".......OOpPPPPPPPPppO...........",
-    "......OOpPPPPPPPPPPppO..........",
-    "......OOpPPPP..PPPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpPPP....PPPppO..........",
-    "......OOpKKK....KKKppO..........",
-    ".....OOKKKKK...KKKKKppO.........", # Right leg down, left leg starts lifting
-    ".....OOKKKKK....KKKKKpO.........", 
-    "......nnnnn....OOnnnnnnO........", # Right foot touches bottom
-    "................................"
+    "........OSSSdOOOOOOdSSSO........", # 37
+    "........OSSSdOOOOOOdSSSO........", # 38
+    "........OSSSdOOOOOOdSSSO........", # 39
+    "...........OOpPPPPppO...........", # 40
+    "..........OOpPPPPPPppO..........", # 41
+    "..........OOpPPPPPPppO..........", # 42
+    "..........OpPPp..pPPpO..........", # 43
+    "..........OpPPp..pPPpO..........", # 44
+    "..........OpPPp..pPPpO..........", # 45
+    "..........OpPPp..pPPpO..........", # 46
+    "..........OpPPp..pPPpO..........", # 47
+    "..........OpPPp..pPPpO..........", # 48
+    ".........OpPPp...pPPpO..........", # 49 (Left knee bends outward)
+    ".........OpPPp...pPPpO..........", # 50
+    ".........OpPPp...pPPpO..........", # 51
+    ".........OpPPp...pPPpO..........", # 52
+    ".........OpPPp...pPPpO..........", # 53
+    ".........OpPPp...pPPpO..........", # 54
+    "..........OpPPp..pPPpO..........", # 55
+    "..........OpPPp..pPPpO..........", # 56
+    "..........OpPPp..pPPpO..........", # 57
+    ".........OpKKp...pKKpO..........", # 58 (Left boot shifted outward)
+    ".........Onnnp...pKKKO..........", # 59 (Left sole lifted/shifted)
+    ".................pKKKO..........", # 60 (Right boot down, left empty)
+    "................pnnnO...........", # 61 (Right sole down, left empty)
+    "................................", # 62
+    "................................"  # 63
 ]
-
 
 # --- BACK MODULAR PIECES ---
 HEAD_BACK = [
     "................................", # 0
     "................................", # 1
     "................................", # 2
-    "............oooooooo............", # 3
-    "..........oohhhhhhhhoo..........", # 4
-    "........oohhHHHHHHHHhhoo........", # 5
-    ".......ooHHHHHHHHHHHHHHoo.......", # 6
-    "......ooHHHHHHHHHHHHHHHHoo......", # 7
-    "......ooHHHHHHHHHHHHHHHHoo......", # 8
-    "......ooHHHHHHHHHHHHHHHHoo......", # 9 (Full hair back)
-    "......ooHHHHHHHHHHHHHHHHoo......", # 10
-    "......ooHHHHHHHHHHHHHHHHoo......", # 11
-    "......ooHHHHHHHHHHHHHHHHoo......", # 12
-    ".......ooHHHHHHHHHHHHHHoo.......", # 13
-    "........ooHHHHHHHHHHHHoo........", # 14
-    ".........oohHHHHHHHhoo..........", # 15
-    "...........ooHHHHHoo............", # 16 (Neck is covered by hair)
-    "............oHHHHo..............", # 17
-    "................................", # 18
-    "................................"  # 19
+    "................................", # 3
+    "................................", # 4
+    "................................", # 5
+    "................................", # 6
+    "............oo.oo.oo............", # 7
+    "..........oohhHHHHhhoo..........", # 8
+    ".........oohHHHHHHHHhoo.........", # 9
+    "........oohHHHHHHHHHHHhoo.......", # 10
+    "........oohHHHHHHHHHHHhoo.......", # 11
+    "........ooHHHHHHHHHHHHoo........", # 12
+    "........ooHHHHHHHHHHHHoo........", # 13
+    "........ooHHHhHHhHHHhHoo........", # 14
+    "........ooHHHHHHHHHHHHoo........", # 15
+    "........ooHHHhHHhHHHhHoo........", # 16
+    "........ooHHHHHHHHHHHHoo........", # 17
+    "........ooHHHHHHHHHHHHoo........", # 18
+    ".........ooHHHHHHHHHHoo.........", # 19
+    "..........ooHHHHHHHHoo..........", # 20
+    "...........ooHHHHHhoo...........", # 21
+    "..............oHHo.............."  # 22 (Neck)
 ]
 
 TORSO_BACK = [
-    "............OOOO................", # 20
-    "..........OOObbbOOO.............", # 21
-    "........OOObbbbbbbOOO...........", # 22
-    ".......OObbbbbbbbbbbOO..........", # 23
-    "......OObbBBBBBBBBbbbbOO........", # 24
-    ".....OObBBBBBBBBBBBBbbOO........", # 25
-    "....OObBBBBBBBBBBBBBBbbOO.......", # 26 (Back is full blue)
-    "....OObBBBBBBBBBBBBBBbOO........", # 27
-    "....OObBBDDDDDDDDDDBBBbOO.......", # 28 (Shadow near bottom)
-    "....OObBBDDDDDDDDDDBBBbOO.......", # 29
-    "....OObBBDDDDDDDDDDBBBbOO.......", # 30
-    "....OObBBDDDDDDDDDDBBBbOO.......", # 31
-    ".....OOBBDDDDDDDDDDBBBOO........", # 32
-    "......OOBBDDDDDDDDBBOO..........", # 33
-    ".......OOBBBBBBBBBBOO...........", # 34
-    "........OOOOOOOOOOOO............"  # 35
+    "..............OOOO..............", # 23 (Collar)
+    "...........OOObbbbOOO...........", # 24 (Shoulders)
+    "..........OObbbbbbbOO...........", # 25 (Fixed length: added a dot at the end)
+    ".........OObbbbbbbbbOO..........", # 26
+    ".........OObBBBBBBBBbOO.........", # 27
+    "........OObbbBddddddBbbOO.......", # 28
+    "........ObBBdBBBBBBdBBbO........", # 29
+    "........ObBBdBBddBBdBBbO........", # 30
+    "........ObBBdBBddBBdBBbO........", # 31
+    "........ObBBdBBddBBdBBbO........", # 32
+    "........ObBBdBBddBBdBBbO........", # 33
+    "........ObBBdBBBBBBdBBbO........", # 34
+    "........OSSSdBBBBBBdSSSO........", # 35 (Hands)
+    "........OSSSdOOOOOOdSSSO........"  # 36
 ]
 
-# Back legs are identical to front legs layout but with back boots and back seams
 LEGS_BACK_IDLE = LEGS_FRONT_IDLE
 LEGS_BACK_WALK1 = LEGS_FRONT_WALK1
 LEGS_BACK_WALK2 = LEGS_FRONT_WALK2
 
-
 # --- LEFT SIDE MODULAR PIECES ---
 HEAD_LEFT = [
-    "................................",
-    "................................",
-    "................................",
-    "............oooooo..............",
-    "..........oohhhhhhho............",
-    "........oohhHHHHHHHHo...........",
-    ".......ooHHHHHHHHHHHHo..........",
-    "......ooHHHHHHHHHHHHHHo.........",
-    "......oHHHHHHHHHHHHHHHo.........",
-    "......oHHHHSSSSSSSHHHHo.........", # Face on the left
-    "......oHHSSeESSSSSSHHHo.........", # Eye on left (col 12)
-    "......oHHSSSEsSSSHHHHHo.........",
-    "......oHHSSSSSSSSHHHHHo.........",
-    ".......oHSSSssSSHHHHoo..........",
-    "........oHSSSHHHHHHoo...........",
-    ".........oohHHHHHhoo............",
-    "...........ooSSSoo..............", # Neck
-    "............oSSo................",
-    "................................",
-    "................................"
+    "................................", # 0
+    "................................", # 1
+    "................................", # 2
+    "................................", # 3
+    "................................", # 4
+    "................................", # 5
+    "................................", # 6
+    "............oo.oo.oo............", # 7
+    "..........oohhHHHHhhoo..........", # 8
+    ".........oohHHHHHHHHhoo.........", # 9
+    "........oohHHHHHHHHHHHhoo.......", # 10
+    "........oohHHHHHHHHHHHhoo.......", # 11
+    "........ooHHHHHHHHHHHHoo........", # 12
+    "........ooSSSSSHhHhHHHoo........", # 13 (Face skin on left, textured hair on right)
+    "........ooSSSSSSHHhHHHoo........", # 14
+    "........ooSSoSSSHHhHHHoo........", # 15 (Eyebrow on left)
+    "........ooSSeSSSHHhHHHoo........", # 16 (Eye white and pupil)
+    "........ooSSESSSHHhHHHoo........", # 17
+    ".........ooSSSSSHhHHoo..........", # 18
+    "..........ooSSSSShHoo...........", # 19
+    "...........ooSSShhoo............", # 20
+    "............ooSSSoo.............", # 21
+    "..............oSSo.............."  # 22 (Neck)
 ]
 
 TORSO_LEFT = [
-    "............OOO.................",
-    "..........OOObbOO...............",
-    "........OOObbbbbOO..............",
-    ".......OObbbbbbbbOO.............",
-    "......OObbBBBBBBbbOO............",
-    ".....OObBBBBBBBBBbbOO...........",
-    "....OObBBBBBDDDBBBbbOO..........", # Arm sleeve in middle
-    "....OObBBBBDDDDBBBbbOO..........",
-    "....OObBBBBDDDDBBBbOO...........",
-    "....OObBBBBDDDDBBBbOO...........",
-    "....OObBBBBDDDDBBBbOO...........",
-    "....OObBBBBDDDDBBBbOO...........",
-    ".....OOBBBDDDBBBBBOO............",
-    "......OOBBDDDBBBOO..............",
-    ".......OOBBBBBBOO...............",
-    "........OOOOOOOO................"
+    "..............OOOO..............", # 23 (Collar)
+    "............OOObbbOOO...........", # 24 (Shoulders side)
+    "...........OObbbbbbbOO..........", # 25
+    "..........OObbbbbbbbbOO.........", # 26
+    "..........OObBBBBBBBBbOO........", # 27
+    "..........OObBBddddBBbOO........", # 28 (Arm begins to form)
+    ".........OBBdBBbOBBbO...........", # 29 (Arm sleeve in middle)
+    ".........OBBdBBbOBBbO...........", # 30
+    ".........OBBdBBbOBBbO...........", # 31
+    ".........OBBdBBbOBBbO...........", # 32
+    ".........OBBdBBbOBBbO...........", # 33
+    ".........OBBdBBbOBBbO...........", # 34
+    ".........OBBdSSoOBBbO...........", # 35 (Hand appears)
+    ".........OOBdSSoOOBbO..........."  # 36 (Hoodie hem)
 ]
 
 LEGS_LEFT_IDLE = [
-    ".........OOOOOOOO...............",
-    "........OOpPPPPppO..............",
-    ".......OOpPPPPPPPppO............",
-    ".......OOpPPPPPPPppO............",
-    "......OOpPPPPPPPPPppO...........",
-    "......OOpPPPPPPPPPppO...........",
-    "......OOpPPPPpPpppppO...........", # Foreground and background overlap
-    "......OOpPPPPpPpppppO...........",
-    "......OOpPPPPpPpppppO...........",
-    "......OOpPPPPpPpppppO...........",
-    "......OOpPPPPpPpppppO...........",
-    "......OOpPPPPpPpppppO...........",
-    "......OOpPPPPpPpppppO...........",
-    "......OOpPPPPpPpppppO...........",
-    "......OOpPPPPpPpppppO...........",
-    "......OOpPPPPpPpppppO...........",
-    "......OOpPPPPpPpppppO...........",
-    "......OOpPPPPpPpppppO...........",
-    "......OOpPPPPpPpppppO...........",
-    "......OOpPPPPpPpppppO...........",
-    "......OOpPPPPpPpppppO...........",
-    "......OOpPPPPpPpppppO...........",
-    "......OOpPPPPpPpppppO...........",
-    "......OOpKKKpKKKppppO...........", # Boots
-    ".....OOKKKKKkKKKKppO............",
-    "....OOKKKKKKkKKKKKpO............",
-    "....OOnnnnnnknnnnnO.............", # Soles
-    "................................"
+    ".........OOBdSSoOOBbO...........", # 37 (Hand continues)
+    ".........OOBdSSoOOBbO...........", # 38
+    ".........OOBdSSoOOBbO...........", # 39
+    "..........OOpPPPPppO............", # 40 (Hips side start - shifted 2px left)
+    "..........OOpPPPPppO............", # 41
+    "..........OOpPPPPppO............", # 42
+    "..........OOpPPPPppO............", # 43 (Legs overlapping, no gap)
+    "..........OOpPPPPppO............", # 44
+    "..........OOpPPPPppO............", # 45
+    "..........OOpPPPPppO............", # 46
+    "..........OOpPPPPppO............", # 47
+    "..........OOpPPPPppO............", # 48
+    "..........OOpPPPPppO............", # 49
+    "..........OOpPPPPppO............", # 50
+    "..........OOpPPPPppO............", # 51
+    "..........OOpPPPPppO............", # 52
+    "..........OOpPPPPppO............", # 53
+    "..........OOpPPPPppO............", # 54
+    "..........OOpPPPPppO............", # 55
+    "..........OOpPPPPppO............", # 56
+    "..........OOpPPPPppO............", # 57
+    "..........OOpKKKKppO............", # 58 (Boots side start)
+    "..........OOKKKKKkOO............", # 59
+    "..........OOKKKKKkOO............", # 60
+    "..........OOnnnnnnkO............", # 61 (Soles side)
+    "................................", # 62
+    "................................"  # 63
 ]
 
 LEGS_LEFT_WALK1 = [
-    ".........OOOOOOOO...............",
-    "........OOpPPPPppO..............",
-    ".......OOpPPPPPPPppO............",
-    ".......OOpPPPPPPPppO............",
-    "......OOpPPPPPPPPPppO...........",
-    "......OOpPPPPPPPPPppO...........",
-    "......OOpPPPPPppppppO...........",
-    ".....OOpPPPP...ppppppO..........", # Separation starts
-    ".....OOpPPP.....pppppO..........",
-    "....OOpPPP.......pppppO.........",
-    "....OOpPPP.......pppppO.........",
-    "....OOpPPP.......pppppO.........",
-    "....OOpPPP.......pppppO.........",
-    "....OOpPPP.......pppppO.........",
-    "....OOpPPP.......pppppO.........",
-    "....OOpPPP.......pppppO.........",
-    "....OOpPPP.......pppppO.........",
-    "....OOpPPP.......pppppO.........",
-    "....OOpPPP.......pppppO.........",
-    "....OOpPPP.......pppppO.........",
-    "....OOpPPP.......pppppO.........",
-    "....OOpPPP.......pppppO.........",
-    "....OOpPPP.......pppppO.........",
-    "....OOpKKK.......KKKppO.........",
-    "....OOKKKK.......KKKKpO.........", # Left forward, right back
-    "....OOnnnn.......nnnnO..........", 
-    "...OOnnnn.........nnO...........", # Left sole touches bottom, right lifted
-    "................................"
+    ".........OOBdSSoOOBbO...........", # 37
+    ".........OOBdSSoOOBbO...........", # 38
+    ".........OOBdSSoOOBbO...........", # 39
+    "..........OOpPPPPppO............", # 40
+    ".........OOpPPPPPPppO...........", # 41 (Subtle walking stance - narrow stride)
+    ".........OpPPPPP.PPppO..........", # 42 (Compressed đùi width)
+    ".........OpPPp.pPPpO............", # 43 (Symmetric narrow 1px stride gap!)
+    ".........OpPPp.pPPpO............", # 44
+    ".........OpPPp.pPPpO............", # 45
+    ".........OpPPp.pPPpO............", # 46
+    ".........OpPPp.pPPpO............", # 47
+    ".........OpPPp.pPPpO............", # 48
+    ".........OpPPp.pPPpO............", # 49
+    ".........OpPPp.pPPpO............", # 50
+    ".........OpPPp.pPPpO............", # 51
+    ".........OpPPp.pPPpO............", # 52
+    ".........OpPPp.pPPpO............", # 53
+    ".........OpPPp.pPPpO............", # 54
+    ".........OpPPp.pPPpO............", # 55
+    ".........OpPPp.pPPpO............", # 56
+    ".........OpPPp.pPPpO............", # 57
+    ".........OpKKp.pKKpO............", # 58 (Boots separate)
+    ".........OKKKp.pKKKO............", # 59
+    ".........OKKKp.pnnnO............", # 60 (Right foot lifted, sole here)
+    ".........Onnnp..................", # 61 (Left foot down, right empty)
+    "................................", # 62
+    "................................"  # 63
 ]
 
 LEGS_LEFT_WALK2 = [
-    ".........OOOOOOOO...............",
-    "........OOpPPPPppO..............",
-    ".......OOpPPPPPPPppO............",
-    ".......OOpPPPPPPPppO............",
-    "......OOpPPPPPPPPPppO...........",
-    "......OOpPPPPPPPPPppO...........",
-    "......OOpPPPPPppppppO...........",
-    ".....OOppppp...PPPPppO..........", # Opposite separation
-    ".....OOppppp.....PPPppO.........",
-    "....OOppppp.......PPPppO........",
-    "....OOppppp.......PPPppO........",
-    "....OOppppp.......PPPppO........",
-    "....OOppppp.......PPPppO........",
-    "....OOppppp.......PPPppO........",
-    "....OOppppp.......PPPppO........",
-    "....OOppppp.......PPPppO........",
-    "....OOppppp.......PPPppO........",
-    "....OOppppp.......PPPppO........",
-    "....OOppppp.......PPPppO........",
-    "....OOppppp.......PPPppO........",
-    "....OOppppp.......PPPppO........",
-    "....OOppppp.......PPPppO........",
-    "....OOppppp.......PPPppO........",
-    "....OOpKKK.......KKKppO.........",
-    "....OOKKKK.......KKKKpO.........", # Right forward, left back
-    "....OOnnnn.......nnnnO..........", 
-    ".....nn.........nnnnnO..........", # Right sole touches bottom, left lifted
-    "................................"
+    ".........OOBdSSoOOBbO...........", # 37
+    ".........OOBdSSoOOBbO...........", # 38
+    ".........OOBdSSoOOBbO...........", # 39
+    "..........OOpPPPPppO............", # 40
+    ".........OOpPPPPPPppO...........", # 41 (Subtle walking stance - narrow stride)
+    ".........OpPPPPP.PPppO..........", # 42 (Compressed đùi width)
+    ".........OpPPp.pPPpO............", # 43 (Symmetric narrow 1px stride gap!)
+    ".........OpPPp.pPPpO............", # 44
+    ".........OpPPp.pPPpO............", # 45
+    ".........OpPPp.pPPpO............", # 46
+    ".........OpPPp.pPPpO............", # 47
+    ".........OpPPp.pPPpO............", # 48
+    ".........OpPPp.pPPpO............", # 49
+    ".........OpPPp.pPPpO............", # 50
+    ".........OpPPp.pPPpO............", # 51
+    ".........OpPPp.pPPpO............", # 52
+    ".........OpPPp.pPPpO............", # 53
+    ".........OpPPp.pPPpO............", # 54
+    ".........OpPPp.pPPpO............", # 55
+    ".........OpPPp.pPPpO............", # 56
+    ".........OpPPp.pPPpO............", # 57
+    ".........OpKKp.pKKpO............", # 58
+    ".........OKKKp.pKKKO............", # 59
+    ".........Onnnp.pKKKO............", # 60 (Left foot lifted, sole here)
+    "...............pnnnO............", # 61 (Right foot down, left empty)
+    "................................", # 62
+    "................................"  # 63
 ]
 
-
 def assemble_sprite(head, torso, legs, shift_down=False):
-    # Assemble 32x64 image
     img = Image.new("RGBA", (32, 64), (0, 0, 0, 0))
     pixels = img.load()
     
-    # Grid lines to copy
     for y in range(64):
-        # Determine source part and line
-        if y < 20:
+        if y < 23:
             part = head
             py = y
-        elif y < 36:
+        elif y < 37:
             part = torso
-            py = y - 20
+            py = y - 23
         else:
             part = legs
-            py = y - 36
+            py = y - 37
             
-        # Shift body down by 1px if head bobbing is active
-        if shift_down and y < 36:
-            # Shift head and torso down by 1 pixel (leaving row 0 empty)
+        if shift_down and y < 37:
             if y == 0:
                 row_str = "." * 32
             else:
-                # Get the previous row
                 prev_y = y - 1
-                if prev_y < 20:
+                if prev_y < 23:
                     row_str = head[prev_y]
                 else:
-                    row_str = torso[prev_y - 20]
+                    row_str = torso[prev_y - 23]
         else:
             row_str = part[py]
             
@@ -410,7 +397,6 @@ def main():
     
     left_idle = assemble_sprite(HEAD_LEFT, TORSO_LEFT, LEGS_LEFT_IDLE)
     left_idle.save(os.path.join(dest_dir, "Minh_Idle_Left.png"))
-    # Mirror left to get right
     left_idle.transpose(Image.FLIP_LEFT_RIGHT).save(os.path.join(dest_dir, "Minh_Idle_Right.png"))
     
     # 2. Walk Sprites (with 1px head bobbing shift_down=True)
@@ -428,7 +414,7 @@ def main():
     left_walk2.save(os.path.join(dest_dir, "Minh_Walk_Left_2.png"))
     left_walk2.transpose(Image.FLIP_LEFT_RIGHT).save(os.path.join(dest_dir, "Minh_Walk_Right_2.png"))
     
-    print("Redesigned 32x64 sprites successfully generated on disk!")
+    print("Symmetric redesigned 32x64 sprites successfully generated on disk!")
 
 if __name__ == '__main__':
     main()

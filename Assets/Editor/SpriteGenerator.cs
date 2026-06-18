@@ -75,368 +75,40 @@ namespace EscapeFromHell.Editor
 
         private static void GenerateMinhSprites()
         {
-            var colorMap = new Dictionary<char, Color>
+            string projectRoot = Path.GetDirectoryName(Application.dataPath);
+            string scriptPath = Path.Combine(projectRoot, "scratch", "generate_minh_32x64.py");
+            
+            if (File.Exists(scriptPath))
             {
-                { '.', Color.clear },
-                { 'H', ColorFromHex("#1A0F0A") }, // Hair (Very Dark Brown, rich)
-                { 'h', ColorFromHex("#4A2C18") }, // Hair Highlight (warm brown)
-                { 'S', ColorFromHex("#FFDAB9") }, // Skin (Peach Puff - brighter)
-                { 's', ColorFromHex("#E0A87A") }, // Skin Shadow
-                { 'E', ColorFromHex("#0D0D0D") }, // Eyes (Near Black)
-                { 'W', ColorFromHex("#FFFFFF") }, // Eye white / sparkle
-                { 'C', ColorFromHex("#FF6B9D") }, // Cheek blush (pink)
-                { 'B', ColorFromHex("#4A90D9") }, // Shirt (Vibrant Blue)
-                { 'b', ColorFromHex("#7BB8F0") }, // Shirt Highlight
-                { 'D', ColorFromHex("#1B3F6E") }, // Dark Blue shadow
-                { 'P', ColorFromHex("#3D5068") }, // Jeans (Slate Blue)
-                { 'p', ColorFromHex("#1E2E3E") }, // Jeans Shadow/crease
-                { 'K', ColorFromHex("#6D4C41") }, // Shoes (Brown)
-                { 'k', ColorFromHex("#3E2723") }  // Shoes Shadow
-            };
-
-
-            // IDLE DOWN - facing camera (Chibi style: big head, short body)
-            string[] down = {
-                "................", // 0
-                "....HHHHHHHH....", // 1  - hair top
-                "...HHHhHhHHHH...", // 2  - hair
-                "...HHSSSSSSHHH..", // 3  - forehead
-                "..HHHSSSSSSSSHHH", // 4  - cheeks
-                "..HHHSEssESSsHHH", // 5  - eyes row (E=pupil, s=shadow)
-                "..HHHSWSWSWSHHH.", // 6  - eye sparkle (W=white)
-                "..HHHSSSSSSSHH..", // 7  - lower face
-                "..HHHsCSSCSsSH..", // 8  - cheeks blush (C=blush)
-                "...HHSSSSSsHH...", // 9  - chin
-                "....HSSSSSHH....", // 10 - neck/chin
-                "....SSSSSSS.....", // 11 - neck
-                "..BBBBBBBBBBB...", // 12 - shoulders
-                "..BbBBBBBBBBb...", // 13 - shirt
-                "..BBBBbBbBBBB...", // 14 - shirt
-                "..BBDDDDDDDBBs..", // 15 - hands
-                "..sSDDDDDDDSs...", // 16 - hands shadow
-                "...PPPPPPPPP....", // 17 - waist
-                "...PPppPPppPP...", // 18 - hips
-                "...PP.....PP....", // 19 - legs gap
-                "...PP.....PP....", // 20 - legs
-                "...PP.....PP....", // 21 - legs
-                "...PP.....PP....", // 22 - legs
-                "...PP.....PP....", // 23 - legs
-                "...KKK...KKK....", // 24 - shoes
-                "..KKKKk.kKKKKk..", // 25 - shoes detail
-                "................", // 26
-                "................", // 27
-                "................", // 28
-                "................", // 29
-                "................", // 30
-                "................"  // 31
-            };
-
-            // WALK DOWN 1
-            string[] down_walk1 = {
-                "................",
-                "....HHHHHHHH....",
-                "...HHHhHhHHHH...",
-                "...HHSSSSSSHHH..",
-                "..HHHSSSSSSSSHHH",
-                "..HHHSEssESSsHHH",
-                "..HHHSWSWSWSHHH.",
-                "..HHHSSSSSSSHH..",
-                "..HHHsCSSCSsSH..",
-                "...HHSSSSSsHH...",
-                "....HSSSSSHH....",
-                "....SSSSSSS.....",
-                "..BBBBBBBBBBB...",
-                "..BbBBBBBBBBb...",
-                "..BBBBbBbBBBB...",
-                "..BBDDDDDDDBBs..",
-                "..sSDDDDDDDSs...",
-                "...PPPPPPPPP....",
-                "...PPppPPppPP...",
-                "...PP.....PP....",
-                "...PP.....PP....",
-                "..PP.......PP...",  // walk legs apart
-                "..PP.......PP...",
-                "..PP.......PP...",
-                "..KKK.....KKK...",
-                "..KKKKk.kKKKKk..",
-                "................",
-                "................",
-                "................",
-                "................",
-                "................",
-                "................"
-            };
-
-            // WALK DOWN 2
-            string[] down_walk2 = {
-                "................",
-                "....HHHHHHHH....",
-                "...HHHhHhHHHH...",
-                "...HHSSSSSSHHH..",
-                "..HHHSSSSSSSSHHH",
-                "..HHHSEssESSsHHH",
-                "..HHHSWSWSWSHHH.",
-                "..HHHSSSSSSSHH..",
-                "..HHHsCSSCSsSH..",
-                "...HHSSSSSsHH...",
-                "....HSSSSSHH....",
-                "....SSSSSSS.....",
-                "..BBBBBBBBBBB...",
-                "..BbBBBBBBBBb...",
-                "..BBBBbBbBBBB...",
-                "..sSDDDDDDDBBs..",
-                "..sSSDDDDDDSSs..",
-                "...PPPPPPPPP....",
-                "...PPppPPppPP...",
-                "...PP.....PP....",
-                "...PP.....PP....",
-                "....PP...PP.....",  // legs together
-                "....PP...PP.....",
-                "....PP...PP.....",
-                "....KKK.KKK.....",
-                "...kKKKKkKKKKk..",
-                "................",
-                "................",
-                "................",
-                "................",
-                "................",
-                "................"
-            };
-
-            // IDLE UP - facing away (chibi back view)
-            string[] up = {
-                "................",
-                "....HHHHHHHH....",
-                "...HHHhHhHHHH...",
-                "..HHHHHhHHHHHH..",
-                "..HHHHHHHHHHHHH.",
-                "..HHHHHHHHHHHHH.",
-                "..HHHHHHHHHHHHH.",
-                "..HHHHHHHHHHHHH.",
-                "..HHHHHHHHHHHH..",
-                "...HHHhHhHHHH...",
-                "....HHHHHHHH....",
-                "....SSSSSSS.....",
-                "..BBBBBBBBBBB...",
-                "..BbBBBBBBBBb...",
-                "..BBBBbBbBBBB...",
-                "..BBDDDDDDDBBs..",
-                "..sSDDDDDDDSs...",
-                "...PPPPPPPPP....",
-                "...PPppPPppPP...",
-                "...PP.....PP....",
-                "...PP.....PP....",
-                "...PP.....PP....",
-                "...PP.....PP....",
-                "...PP.....PP....",
-                "...KKK...KKK....",
-                "..KKKKk.kKKKKk..",
-                "................",
-                "................",
-                "................",
-                "................",
-                "................",
-                "................"
-            };
-
-            // WALK UP 1
-            string[] up_walk1 = {
-                "................",
-                "....HHHHHHHH....",
-                "...HHHhHhHHHH...",
-                "..HHHHHhHHHHHH..",
-                "..HHHHHHHHHHHHH.",
-                "..HHHHHHHHHHHHH.",
-                "..HHHHHHHHHHHHH.",
-                "..HHHHHHHHHHHHH.",
-                "..HHHHHHHHHHHH..",
-                "...HHHhHhHHHH...",
-                "....HHHHHHHH....",
-                "....SSSSSSS.....",
-                "..BBBBBBBBBBB...",
-                "..BbBBBBBBBBb...",
-                "..BBBBbBbBBBB...",
-                "..BBDDDDDDDBBs..",
-                "..sSDDDDDDDSs...",
-                "...PPPPPPPPP....",
-                "...PPppPPppPP...",
-                "...PP.....PP....",
-                "...PP.....PP....",
-                "..PP.......PP...",
-                "..PP.......PP...",
-                "..PP.......PP...",
-                "..KKK.....KKK...",
-                "..KKKKk.kKKKKk..",
-                "................",
-                "................",
-                "................",
-                "................",
-                "................",
-                "................"
-            };
-
-            // WALK UP 2
-            string[] up_walk2 = {
-                "................",
-                "....HHHHHHHH....",
-                "...HHHhHhHHHH...",
-                "..HHHHHhHHHHHH..",
-                "..HHHHHHHHHHHHH.",
-                "..HHHHHHHHHHHHH.",
-                "..HHHHHHHHHHHHH.",
-                "..HHHHHHHHHHHHH.",
-                "..HHHHHHHHHHHH..",
-                "...HHHhHhHHHH...",
-                "....HHHHHHHH....",
-                "....SSSSSSS.....",
-                "..BBBBBBBBBBB...",
-                "..BbBBBBBBBBb...",
-                "..BBBBbBbBBBB...",
-                "..sSDDDDDDDBBs..",
-                "..sSSDDDDDDSSs..",
-                "...PPPPPPPPP....",
-                "...PPppPPppPP...",
-                "...PP.....PP....",
-                "...PP.....PP....",
-                "....PP...PP.....",
-                "....PP...PP.....",
-                "....PP...PP.....",
-                "....KKK.KKK.....",
-                "...kKKKKkKKKKk..",
-                "................",
-                "................",
-                "................",
-                "................",
-                "................",
-                "................"
-            };
-
-            // IDLE RIGHT (chibi side view)
-            string[] right = {
-                "................",
-                "....HHHHHH......",
-                "...HHHhHhHHH....",
-                "...HHSSSSSShHH..",
-                "..HHHSSSSSSssHH.",
-                "..HHHSEsSSssHHH.",
-                "..HHHSWSSSssHH..",
-                "..HHHSSSSSSsHH..",
-                "..HHHsCSSSSsHH..",
-                "...HHSSSSsSHH...",
-                "....HSSSSShH....",
-                "....SSSSSSS.....",
-                "...BBBBBBBBB....",
-                "..BbBBBBBBBBb...",
-                "..BBBBbBbBBBB...",
-                "..SSDDDDDDDBBs..",
-                "..sDDDDDDDSSs...",
-                "....PPPPPPP.....",
-                "...PPppPPppPP...",
-                "...PPpPPPPpPP...",
-                "...PP.....PP....",
-                "...PP.....PP....",
-                "...PP.....PP....",
-                "...PP.....PP....",
-                "...KKK...KKK....",
-                "..KKKKk.kKKKKk..",
-                "................",
-                "................",
-                "................",
-                "................",
-                "................",
-                "................"
-            };
-
-            // WALK RIGHT 1
-            string[] right_walk1 = {
-                "................",
-                "................",
-                "....HHHHHH......",
-                "...HHHhHhHHH....",
-                "...HHSSSSSShHH..",
-                "..HHHSSSSSSssHH.",
-                "..HHHSEsSSssHHH.",
-                "..HHHSWSSSssHH..",
-                "..HHHSSSSSSsHH..",
-                "..HHHsCSSSSsHH..",
-                "...HHSSSSsSHH...",
-                "....HSSSSShH....",
-                "....SSSSSSS.....",
-                "...BBBBBBBBB....",
-                "..BbBBBBBBBBb...",
-                "..BBBBbBbBBBB...",
-                "..SSDDDDDDDBBs..",
-                "..sDDDDDDDSSs...",
-                "....PPPPPPP.....",
-                "...PPppPPppPP...",
-                "...PPpPPPPpPP...",
-                "...PP.....PP....",
-                "....PP.....PP...",
-                "....PP.....PP...",
-                "...KKK.....KKK..",
-                "..kKKKk...kKKKk.",
-                "................",
-                "................",
-                "................",
-                "................",
-                "................",
-                "................"
-            };
-
-            // WALK RIGHT 2
-            string[] right_walk2 = {
-                "................",
-                "................",
-                "....HHHHHH......",
-                "...HHHhHhHHH....",
-                "...HHSSSSSShHH..",
-                "..HHHSSSSSSssHH.",
-                "..HHHSEsSSssHHH.",
-                "..HHHSWSSSssHH..",
-                "..HHHSSSSSSsHH..",
-                "..HHHsCSSSSsHH..",
-                "...HHSSSSsSHH...",
-                "....HSSSSShH....",
-                "....SSSSSSS.....",
-                "...BBBBBBBBB....",
-                "..BbBBBBBBBBb...",
-                "..BBBBbBbBBBB...",
-                "..SSDDDDDDDBBs..",
-                "..sDDDDDDDSSs...",
-                "....PPPPPPP.....",
-                "...PPppPPppPP...",
-                "...PPpPPPPpPP...",
-                "...PP.....PP....",
-                "..PP......PP....",
-                "..PP......PP....",
-                "..KKK.....KKK...",
-                ".kKKKk...kKKKk..",
-                "................",
-                "................",
-                "................",
-                "................",
-                "................",
-                "................"
-            };
-
-            // Mirror right arrays to get left arrays
-            string[] left = MirrorGrid(right);
-            string[] left_walk1 = MirrorGrid(right_walk1);
-            string[] left_walk2 = MirrorGrid(right_walk2);
-
-            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Idle_Down.png", down, colorMap, 16, 32);
-            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Idle_Up.png", up, colorMap, 16, 32);
-            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Idle_Left.png", left, colorMap, 16, 32);
-            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Idle_Right.png", right, colorMap, 16, 32);
-
-            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Walk_Down_1.png", down_walk1, colorMap, 16, 32);
-            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Walk_Down_2.png", down_walk2, colorMap, 16, 32);
-            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Walk_Up_1.png", up_walk1, colorMap, 16, 32);
-            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Walk_Up_2.png", up_walk2, colorMap, 16, 32);
-            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Walk_Left_1.png", left_walk1, colorMap, 16, 32);
-            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Walk_Left_2.png", left_walk2, colorMap, 16, 32);
-            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Walk_Right_1.png", right_walk1, colorMap, 16, 32);
-            GenerateSpriteFromGrid("Assets/Sprites/Characters/Minh/Minh_Walk_Right_2.png", right_walk2, colorMap, 16, 32);
+                Debug.Log("Running Python Sprite Generator...");
+                var startInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "python",
+                    Arguments = $"\"{scriptPath}\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+                using (var process = System.Diagnostics.Process.Start(startInfo))
+                {
+                    process.WaitForExit();
+                    string output = process.StandardOutput.ReadToEnd();
+                    string error = process.StandardError.ReadToEnd();
+                    if (process.ExitCode != 0)
+                    {
+                        Debug.LogError($"Python script failed with code {process.ExitCode}: {error}");
+                    }
+                    else
+                    {
+                        Debug.Log($"Python script output: {output}");
+                    }
+                }
+            }
+            else
+            {
+                Debug.LogError($"Python script not found at {scriptPath}!");
+            }
         }
 
 
@@ -452,165 +124,67 @@ namespace EscapeFromHell.Editor
             return mirrored;
         }
 
+        private static void ConfigureImportSettings(string path, int ppu)
+        {
+            AssetDatabase.ImportAsset(path);
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer != null)
+            {
+                importer.textureType = TextureImporterType.Sprite;
+                importer.spriteImportMode = SpriteImportMode.Single;
+                importer.spritePixelsPerUnit = ppu;
+                importer.filterMode = FilterMode.Point;
+                importer.textureCompression = TextureImporterCompression.Uncompressed;
+                importer.mipmapEnabled = false;
+                EditorUtility.SetDirty(importer);
+                importer.SaveAndReimport();
+            }
+        }
+
         private static void GenerateGuardSprites()
         {
-            var colorMap = new Dictionary<char, Color>
+            string projectRoot = Path.GetDirectoryName(Application.dataPath);
+            string scriptPath = Path.Combine(projectRoot, "scratch", "generate_npcs_32x64.py");
+            
+            if (File.Exists(scriptPath))
             {
-                { '.', Color.clear },
-                { 'H', ColorFromHex("#2C3E50") }, // Helmet (Steel Blue)
-                { 'S', ColorFromHex("#E0AE85") }, // Skin (Peach-Tan)
-                { 'E', ColorFromHex("#EF4444") }, // Visor Glow (Red)
-                { 'R', ColorFromHex("#C0392B") }, // Shirt (Crimson)
-                { 'D', ColorFromHex("#7B241C") }, // Shirt Shadow
-                { 'P', ColorFromHex("#1A252F") }, // Pants (Navy-Black)
-                { 'p', ColorFromHex("#111922") }, // Pants Shadow
-                { 'K', ColorFromHex("#111111") }  // Boots (Black)
+                Debug.Log("Running Python NPC Generator...");
+                var startInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "python",
+                    Arguments = $"\"{scriptPath}\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+                using (var process = System.Diagnostics.Process.Start(startInfo))
+                {
+                    process.WaitForExit();
+                    string error = process.StandardError.ReadToEnd();
+                    if (process.ExitCode != 0)
+                    {
+                        Debug.LogError($"Python NPC script failed: {error}");
+                    }
+                }
+            }
+
+            string[] paths = {
+                "Assets/Sprites/Characters/Guards/Guard_Idle_Down.png",
+                "Assets/Sprites/Characters/Guards/Guard_Idle_Up.png",
+                "Assets/Sprites/Characters/Guards/Guard_Idle_Left.png",
+                "Assets/Sprites/Characters/Guards/Guard_Idle_Right.png",
+                "Assets/Sprites/Characters/Guards/Recruiter_Idle_Down.png",
+                "Assets/Sprites/Characters/Guards/Recruiter_Idle_Up.png",
+                "Assets/Sprites/Characters/Guards/Recruiter_Idle_Left.png",
+                "Assets/Sprites/Characters/Guards/Recruiter_Idle_Right.png"
             };
 
-            string[] down = {
-                "................",
-                "................",
-                "......HHHHHH....",
-                "....HHHHHHHHHH..",
-                "....HHEESSEESHH.",
-                "....HHHHHHHHHH..",
-                "....HSSSSSSSSSH.",
-                "....HSSSSSSSSSH.",
-                ".....sSSSSSSs...",
-                "......SSSSSS....",
-                "....RRRRRRRRRR..",
-                "...RRrRRRRRRrRR.",
-                "...RRRRRRRRRRRR.",
-                "...RRDDDDDDDDRR.",
-                "...RRDDDDDDDDRR.",
-                "....SDDDDDDDDS..", // Skin hands
-                "....sDDDDDDDDs..", // Skin hand shadows
-                ".....PPPPPPPP...",
-                ".....PPPPPPPP...",
-                "....PPPPPPPPPP..",
-                "....PPpPPPPpPP..",
-                "....PPpPPPPpPP..",
-                "....PPpPPPPpPP..",
-                "....PP.PPPP.PP..",
-                "....PP.PPPP.PP..",
-                "....PP.PPPP.PP..",
-                "....PP.PPPP.PP..",
-                "....PP.PPPP.PP..",
-                "....KK.KKKK.KK..",
-                "....KKK.KKK.KKK.",
-                "................",
-                "................"
-            };
-
-            string[] up = {
-                "................",
-                "................",
-                "......HHHHHH....",
-                "....HHHHHHHHHH..",
-                "....HHHHHHHHHH..",
-                "....HHHHHHHHHH..",
-                "....HHHHHHHHHH..",
-                "....HHHHHHHHHH..",
-                ".....HHHHHHHH...",
-                "......HHHHHH....",
-                "....RRRRRRRRRR..",
-                "...RRrRRRRRRrRR.",
-                "...RRRRRRRRRRRR.",
-                "...RRDDDDDDDDRR.",
-                "...RRDDDDDDDDRR.",
-                "....SDDDDDDDDS..", // Skin hands
-                "....sDDDDDDDDs..", // Skin hand shadows
-                ".....PPPPPPPP...",
-                ".....PPPPPPPP...",
-                "....PPPPPPPPPP..",
-                "....PPpPPPPpPP..",
-                "....PPpPPPPpPP..",
-                "....PPpPPPPpPP..",
-                "....PP.PPPP.PP..",
-                "....PP.PPPP.PP..",
-                "....PP.PPPP.PP..",
-                "....PP.PPPP.PP..",
-                "....PP.PPPP.PP..",
-                "....KK.KKKK.KK..",
-                "....KKK.KKK.KKK.",
-                "................",
-                "................"
-            };
-
-            string[] left = {
-                "................",
-                "................",
-                "......HHHHHH....",
-                ".....HHHHHHHH...",
-                "....HHEEHHHHH...",
-                "....HHHHHHHHHH..",
-                "....HSSSSSSHHH..",
-                "....HSSSSSSHHH..",
-                ".....sSSSSSsH...",
-                "......SSSSS.....",
-                ".....RRRRRRRR...",
-                "....RRrRRRRrRR..",
-                "....RRRRRRRRRR..",
-                "....RRDDDDDDRR..",
-                "....SSDDDDDDSS..", // Skin hands
-                ".....sDDDDDDs...", // Skin hand shadows
-                "......PPPPPP....",
-                "......PPPPPP....",
-                ".....PPPPPPPP...",
-                ".....PPpPPpPP...",
-                ".....PPpPPpPP...",
-                ".....PPpPPpPP...",
-                ".....PP.PP.PP...",
-                ".....PP.PP.PP...",
-                ".....PP.PP.PP...",
-                ".....PP.PP.PP...",
-                ".....PP.PP.PP...",
-                ".....KK.KK.KK...",
-                ".....KKK.K.KK...",
-                "................",
-                "................",
-                "................"
-            };
-
-            string[] right = {
-                "................",
-                "................",
-                "....HHHHHH......",
-                "...HHHHHHHH.....",
-                "...HHHHHEEHH....",
-                "..HHHHHHHHHH....",
-                "..HHHSSSSSSH....",
-                "..HHHSSSSSSH....",
-                "...HSSSSSsH.....",
-                ".....SSSSS......",
-                "...RRRRRRRR.....",
-                "..RRrRRRRrRR....",
-                "..RRRRRRRRRR....",
-                "..RRDDDDDDRR....",
-                "..SSDDDDDDSS....", // Skin hand
-                "...sDDDDDDs.....", // Skin hand shadow
-                "....PPPPPP......",
-                "....PPPPPP......",
-                "...PPPPPPPP.....",
-                "...PPpPPpPP.....",
-                "...PPpPPpPP.....",
-                "...PPpPPpPP.....",
-                "...PP.PP.PP.....",
-                "...PP.PP.PP.....",
-                "...PP.PP.PP.....",
-                "...PP.PP.PP.....",
-                "...PP.PP.PP.....",
-                "...KK.KK.KK.....",
-                "...KK.K.KKK.....",
-                "................",
-                "................",
-                "................"
-            };
-
-            GenerateSpriteFromGrid("Assets/Sprites/Characters/Guards/Guard_Idle_Down.png", down, colorMap, 16, 32);
-            GenerateSpriteFromGrid("Assets/Sprites/Characters/Guards/Guard_Idle_Up.png", up, colorMap, 16, 32);
-            GenerateSpriteFromGrid("Assets/Sprites/Characters/Guards/Guard_Idle_Left.png", left, colorMap, 16, 32);
-            GenerateSpriteFromGrid("Assets/Sprites/Characters/Guards/Guard_Idle_Right.png", right, colorMap, 16, 32);
+            foreach (var path in paths)
+            {
+                ConfigureImportSettings(path, 38);
+            }
+            AssetDatabase.Refresh();
         }
 
         private static void GenerateTileSprites()
@@ -1293,6 +867,27 @@ namespace EscapeFromHell.Editor
 
             // Procedural White Rounded Rect for buttons/inputs
             GenerateRoundedGradientTexture("Assets/Sprites/UI/RoundedRect.png", Color.white, Color.white, 64, 64, 8f);
+
+            // Procedural Dice Faces
+            for (int i = 1; i <= 6; i++)
+            {
+                GenerateDiceFace($"Assets/Sprites/UI/Dice_{i}.png", i, 64);
+            }
+
+            // Procedural Suits
+            GenerateSuitHeart("Assets/Sprites/UI/Suit_Heart.png", 32);
+            GenerateSuitDiamond("Assets/Sprites/UI/Suit_Diamond.png", 32);
+            GenerateSuitSpade("Assets/Sprites/UI/Suit_Spade.png", 32);
+            GenerateSuitClub("Assets/Sprites/UI/Suit_Club.png", 32);
+
+            // Procedural Roulette Wheel
+            GenerateRouletteWheel("Assets/Sprites/UI/Roulette_Wheel.png", 256);
+
+            // Procedural Card Background
+            GenerateCardBackground("Assets/Sprites/UI/Card_Background.png", 64, 96, 6f);
+
+            // Procedural Tài Xỉu Bowl Cover
+            GenerateBowl("Assets/Sprites/UI/TaiXiu_Bowl.png", 220, 120);
         }
 
         private static void GenerateCircleTexture(string path, Color color, int size = 32)
@@ -1652,6 +1247,423 @@ namespace EscapeFromHell.Editor
                     else
                     {
                         tex.SetPixel(x, y, transparent);
+                    }
+                }
+            }
+            tex.Apply();
+            SaveUITexture(tex, path, false);
+        }
+
+        private static void GenerateDiceFace(string path, int faceNumber, int size = 64)
+        {
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            float cornerRadius = 10f;
+            float cx = size / 2.0f;
+            float cy = size / 2.0f;
+            float rx = size / 2.0f - cornerRadius;
+            float ry = size / 2.0f - cornerRadius;
+            float rSq = cornerRadius * cornerRadius;
+
+            Color bgCol = Color.white;
+            Color borderCol = ColorFromHex("#BDC3C7");
+            Color dotCol = ColorFromHex("#2C3E50");
+            Color redDotCol = ColorFromHex("#E74C3C");
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = Mathf.Max(0, Mathf.Abs(x + 0.5f - cx) - rx);
+                    float dy = Mathf.Max(0, Mathf.Abs(y + 0.5f - cy) - ry);
+
+                    if (dx * dx + dy * dy > rSq)
+                    {
+                        tex.SetPixel(x, y, Color.clear);
+                    }
+                    else
+                    {
+                        if (x < 2 || x >= size - 2 || y < 2 || y >= size - 2 || (dx * dx + dy * dy > (cornerRadius - 2) * (cornerRadius - 2)))
+                        {
+                            tex.SetPixel(x, y, borderCol);
+                        }
+                        else
+                        {
+                            tex.SetPixel(x, y, bgCol);
+                        }
+                    }
+                }
+            }
+
+            float dotRadius = size * 0.08f;
+            float dotRadiusSq = dotRadius * dotRadius;
+
+            List<Vector2> dotCoords = new List<Vector2>();
+            Color finalDotCol = dotCol;
+
+            if (faceNumber == 1)
+            {
+                dotCoords.Add(new Vector2(0.5f, 0.5f));
+                finalDotCol = redDotCol;
+                dotRadius = size * 0.12f;
+                dotRadiusSq = dotRadius * dotRadius;
+            }
+            else if (faceNumber == 2)
+            {
+                dotCoords.Add(new Vector2(0.25f, 0.25f));
+                dotCoords.Add(new Vector2(0.75f, 0.75f));
+            }
+            else if (faceNumber == 3)
+            {
+                dotCoords.Add(new Vector2(0.25f, 0.25f));
+                dotCoords.Add(new Vector2(0.5f, 0.5f));
+                dotCoords.Add(new Vector2(0.75f, 0.75f));
+            }
+            else if (faceNumber == 4)
+            {
+                dotCoords.Add(new Vector2(0.25f, 0.25f));
+                dotCoords.Add(new Vector2(0.25f, 0.75f));
+                dotCoords.Add(new Vector2(0.75f, 0.25f));
+                dotCoords.Add(new Vector2(0.75f, 0.75f));
+            }
+            else if (faceNumber == 5)
+            {
+                dotCoords.Add(new Vector2(0.25f, 0.25f));
+                dotCoords.Add(new Vector2(0.25f, 0.75f));
+                dotCoords.Add(new Vector2(0.5f, 0.5f));
+                dotCoords.Add(new Vector2(0.75f, 0.25f));
+                dotCoords.Add(new Vector2(0.75f, 0.75f));
+            }
+            else if (faceNumber == 6)
+            {
+                dotCoords.Add(new Vector2(0.25f, 0.25f));
+                dotCoords.Add(new Vector2(0.25f, 0.5f));
+                dotCoords.Add(new Vector2(0.25f, 0.75f));
+                dotCoords.Add(new Vector2(0.75f, 0.25f));
+                dotCoords.Add(new Vector2(0.75f, 0.5f));
+                dotCoords.Add(new Vector2(0.75f, 0.75f));
+            }
+
+            foreach (Vector2 p in dotCoords)
+            {
+                float px = p.x * size;
+                float py = p.y * size;
+
+                for (int y = 0; y < size; y++)
+                {
+                    for (int x = 0; x < size; x++)
+                    {
+                        float dx = x + 0.5f - px;
+                        float dy = y + 0.5f - py;
+                        if (dx * dx + dy * dy <= dotRadiusSq)
+                        {
+                            tex.SetPixel(x, y, finalDotCol);
+                        }
+                    }
+                }
+            }
+
+            tex.Apply();
+            SaveUITexture(tex, path, false);
+        }
+
+        private static void GenerateSuitHeart(string path, int size = 32)
+        {
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            Color red = ColorFromHex("#EF4444");
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float nx = (x + 0.5f - size / 2f) / (size / 2f);
+                    float ny = (y + 0.5f - size / 2f) / (size / 2f);
+                    
+                    float xVal = nx * 1.2f;
+                    float yVal = ny * 1.2f - 0.2f;
+                    float f = xVal * xVal + yVal * yVal - 0.7f;
+                    if (f * f * f - xVal * xVal * yVal * yVal * yVal <= 0.0f)
+                    {
+                        tex.SetPixel(x, y, red);
+                    }
+                    else
+                    {
+                        tex.SetPixel(x, y, Color.clear);
+                    }
+                }
+            }
+            tex.Apply();
+            SaveUITexture(tex, path, false);
+        }
+
+        private static void GenerateSuitDiamond(string path, int size = 32)
+        {
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            Color red = ColorFromHex("#EF4444");
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float nx = (x + 0.5f - size / 2f) / (size / 2f);
+                    float ny = (y + 0.5f - size / 2f) / (size / 2f);
+                    if (Mathf.Abs(nx) + Mathf.Abs(ny) <= 0.8f)
+                    {
+                        tex.SetPixel(x, y, red);
+                    }
+                    else
+                    {
+                        tex.SetPixel(x, y, Color.clear);
+                    }
+                }
+            }
+            tex.Apply();
+            SaveUITexture(tex, path, false);
+        }
+
+        private static void GenerateSuitSpade(string path, int size = 32)
+        {
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            Color black = ColorFromHex("#2C3E50");
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float nx = (x + 0.5f - size / 2f) / (size / 2f);
+                    float ny = (y + 0.5f - size / 2f) / (size / 2f);
+                    
+                    float xVal = nx * 1.2f;
+                    float yVal = -ny * 1.2f - 0.2f;
+                    float f = xVal * xVal + yVal * yVal - 0.7f;
+                    bool inHeart = (f * f * f - xVal * xVal * yVal * yVal * yVal <= 0.0f);
+                    
+                    bool inStem = (ny <= -0.4f && ny >= -0.8f && Mathf.Abs(nx) <= (-ny - 0.4f) * 0.6f);
+
+                    if (inHeart || inStem)
+                    {
+                        tex.SetPixel(x, y, black);
+                    }
+                    else
+                    {
+                        tex.SetPixel(x, y, Color.clear);
+                    }
+                }
+            }
+            tex.Apply();
+            SaveUITexture(tex, path, false);
+        }
+
+        private static void GenerateSuitClub(string path, int size = 32)
+        {
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            Color black = ColorFromHex("#2C3E50");
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float nx = (x + 0.5f - size / 2f) / (size / 2f);
+                    float ny = (y + 0.5f - size / 2f) / (size / 2f);
+                    
+                    float distTop = Mathf.Sqrt(nx * nx + (ny - 0.25f) * (ny - 0.25f));
+                    float distLeft = Mathf.Sqrt((nx + 0.25f) * (nx + 0.25f) + (ny + 0.15f) * (ny + 0.15f));
+                    float distRight = Mathf.Sqrt((nx - 0.25f) * (nx - 0.25f) + (ny + 0.15f) * (ny + 0.15f));
+                    
+                    bool inCircles = (distTop <= 0.28f || distLeft <= 0.28f || distRight <= 0.28f);
+                    
+                    bool inStem = (ny <= -0.1f && ny >= -0.8f && Mathf.Abs(nx) <= (-ny - 0.1f) * 0.4f);
+
+                    if (inCircles || inStem)
+                    {
+                        tex.SetPixel(x, y, black);
+                    }
+                    else
+                    {
+                        tex.SetPixel(x, y, Color.clear);
+                    }
+                }
+            }
+            tex.Apply();
+            SaveUITexture(tex, path, false);
+        }
+
+        private static void GenerateCardBackground(string path, int width = 64, int height = 96, float cornerRadius = 6f)
+        {
+            Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            float rSq = cornerRadius * cornerRadius;
+            float cx = width / 2.0f;
+            float cy = height / 2.0f;
+            float rx = width / 2.0f - cornerRadius;
+            float ry = height / 2.0f - cornerRadius;
+            Color bgCol = Color.white;
+            Color borderCol = ColorFromHex("#D1D5DB");
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    float dx = Mathf.Max(0, Mathf.Abs(x + 0.5f - cx) - rx);
+                    float dy = Mathf.Max(0, Mathf.Abs(y + 0.5f - cy) - ry);
+
+                    if (dx * dx + dy * dy > rSq)
+                    {
+                        tex.SetPixel(x, y, Color.clear);
+                    }
+                    else
+                    {
+                        if (x < 1 || x >= width - 1 || y < 1 || y >= height - 1 || (dx * dx + dy * dy > (cornerRadius - 1) * (cornerRadius - 1)))
+                        {
+                            tex.SetPixel(x, y, borderCol);
+                        }
+                        else
+                        {
+                            tex.SetPixel(x, y, bgCol);
+                        }
+                    }
+                }
+            }
+            tex.Apply();
+            SaveUITexture(tex, path, false);
+        }
+
+        private static void GenerateBowl(string path, int width = 220, int height = 120)
+        {
+            Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            Color transparent = Color.clear;
+            Color ceramicWhite = ColorFromHex("#F5F6F8");
+            Color ceramicShadow = ColorFromHex("#D1D5DB");
+            Color royalBlue = ColorFromHex("#1F3A60");
+            Color gold = ColorFromHex("#D4AF37");
+
+            float cx = width / 2f;
+            float cy = 15f; // Bottom offset
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    float dx = x + 0.5f - cx;
+                    float dy = y + 0.5f - cy;
+
+                    float rx = width / 2f - 6f;
+                    float ry = height - 25f;
+
+                    if (dy < 0)
+                    {
+                        if (dy >= -8f && Mathf.Abs(dx) <= rx)
+                        {
+                            tex.SetPixel(x, y, gold);
+                        }
+                        else
+                        {
+                            tex.SetPixel(x, y, transparent);
+                        }
+                    }
+                    else
+                    {
+                        float val = (dx * dx) / (rx * rx) + (dy * dy) / (ry * ry);
+                        if (val <= 1.0f)
+                        {
+                            if (y >= height - 15f && Mathf.Abs(dx) <= 15f)
+                            {
+                                tex.SetPixel(x, y, gold); // Handle knob
+                            }
+                            else if (val >= 0.94f)
+                            {
+                                tex.SetPixel(x, y, gold); // Rim/Edge border
+                            }
+                            else if (y >= 45f && y <= 55f)
+                            {
+                                tex.SetPixel(x, y, royalBlue); // Porcelain pattern band
+                            }
+                            else
+                            {
+                                float shadow = Mathf.Clamp01((dx + rx) / (2f * rx));
+                                Color col = Color.Lerp(ceramicShadow, ceramicWhite, shadow);
+                                tex.SetPixel(x, y, col);
+                            }
+                        }
+                        else
+                        {
+                            tex.SetPixel(x, y, transparent);
+                        }
+                    }
+                }
+            }
+            tex.Apply();
+            SaveUITexture(tex, path, false);
+        }
+
+        private static void GenerateRouletteWheel(string path, int size = 256)
+        {
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            float center = size / 2f;
+            float outerRadius = size / 2f - 2f;
+            float innerRadius = size * 0.15f;
+            
+            Color gold = ColorFromHex("#D4AF37");
+            Color goldDark = ColorFromHex("#996515");
+            Color red = ColorFromHex("#C0392B");
+            Color black = ColorFromHex("#1C2833");
+            Color green = ColorFromHex("#27AE60");
+            Color white = Color.white;
+
+            int[] wheelSequence = { 0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26 };
+            int[] redNums = { 1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36 };
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = x + 0.5f - center;
+                    float dy = y + 0.5f - center;
+                    float distSq = dx * dx + dy * dy;
+                    float dist = Mathf.Sqrt(distSq);
+
+                    if (dist > outerRadius)
+                    {
+                        tex.SetPixel(x, y, Color.clear);
+                    }
+                    else if (dist > outerRadius - 6f)
+                    {
+                        tex.SetPixel(x, y, gold);
+                    }
+                    else if (dist > outerRadius - 10f)
+                    {
+                        tex.SetPixel(x, y, goldDark);
+                    }
+                    else if (dist < innerRadius)
+                    {
+                        if (dist < 8f) tex.SetPixel(x, y, white);
+                        else tex.SetPixel(x, y, gold);
+                    }
+                    else
+                    {
+                        float angle = Mathf.Atan2(dy, dx) * Mathf.Rad2Deg;
+                        if (angle < 0) angle += 360f;
+
+                        int slot = Mathf.FloorToInt(angle / (360f / 37f));
+                        slot = Mathf.Clamp(slot, 0, 36);
+
+                        int num = wheelSequence[slot];
+                        if (num == 0)
+                        {
+                            tex.SetPixel(x, y, green);
+                        }
+                        else if (System.Array.IndexOf(redNums, num) >= 0)
+                        {
+                            tex.SetPixel(x, y, red);
+                        }
+                        else
+                        {
+                            tex.SetPixel(x, y, black);
+                        }
+
+                        float nextAngle = (slot + 1) * (360f / 37f);
+                        float diff = Mathf.Abs(angle - nextAngle);
+                        if (diff < 1.0f || angle < 0.5f)
+                        {
+                            if (dist > innerRadius + 10f)
+                            {
+                                tex.SetPixel(x, y, goldDark);
+                            }
+                        }
                     }
                 }
             }

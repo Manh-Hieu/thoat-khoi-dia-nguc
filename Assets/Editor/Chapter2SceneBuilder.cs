@@ -60,6 +60,9 @@ namespace EscapeFromHell.Editor
         {
             Debug.Log("Building Chapter 2 Casino Scene...");
 
+            // Trigger sprite generation at edit-time when building the scene
+            SpriteGenerator.GenerateAll();
+
             // 1. Create a new Scene
             Scene newScene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
             newScene.name = "Chapter2_Cutscene";
@@ -141,15 +144,16 @@ namespace EscapeFromHell.Editor
 
             // Custom boundaries configured by user in editor
             CreateBoundary(environment.transform, "Boundary_Top (2)", new Vector3(-2.53f, -3.87f, -0.08f), new Vector2(4f, 1f), Quaternion.Euler(-35.161f, 93.175f, -87.697f));
-            CreateBoundary(environment.transform, "Boundary_Top (3)", new Vector3(-5.82f, -0.57f, 0.89f), new Vector2(2f, 1f), Quaternion.Euler(-86.985f, 7.12f, -1.389f));
+            CreateBoundary(environment.transform, "Boundary_Top (3)", new Vector3(-6.82f, -0.51f, 1.01f), new Vector2(2f, 1f), Quaternion.Euler(-86.985f, 7.12f, -1.389f));
             CreateBoundary(environment.transform, "Boundary_Top (4)", new Vector3(-5.38f, -3.81f, 0.34f), new Vector2(5f, 1f), Quaternion.Euler(-86.985f, 7.12f, -1.389f));
             // Shift Boundary_Top (5) to the right to leave a gap at X=1.73f for the entrance door
-            CreateBoundary(environment.transform, "Boundary_Top (5)", new Vector3(4.25f, -3.75f, -0.52f), new Vector2(2.5f, 1f), Quaternion.Euler(-86.985f, 7.12f, -1.389f));
+            CreateBoundary(environment.transform, "Boundary_Top (5)", new Vector3(3.26f, -3.75f, -0.42f), new Vector2(2.5f, 1f), Quaternion.Euler(-86.985f, 7.12f, -1.389f));
+            CreateBoundary(environment.transform, "Boundary_Top (6)", new Vector3(1.53f, -4.02f, -0.25f), new Vector2(1f, 1f), Quaternion.Euler(-54.569f, -85.81f, 268.404f));
 
             // 4. Create Player (Minh)
             GameObject playerObj = new GameObject("Player");
             playerObj.tag = "Player";
-            playerObj.transform.position = new Vector3(1.73f, -3.5f, 0); // Start near the casino entrance door
+            playerObj.transform.position = new Vector3(3.23f, -3.5f, 0); // Start near the casino entrance door
 
             SpriteRenderer playerSR = playerObj.AddComponent<SpriteRenderer>();
             Sprite playerSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Characters/Minh/Minh_Idle_Down.png");
@@ -213,13 +217,13 @@ namespace EscapeFromHell.Editor
             SpawnCasinoTable(propsParent.transform, "RouletteTable", new Vector3(4.3f, -6.38f, 0f), Chapter2PropType.RouletteTable, "Chơi Roulette", true, false);
 
             // Left Exit Door (placed exactly over the casino entrance door shown in the background illustration)
-            SpawnExitDoor(propsParent.transform, "LeftExitDoor", new Vector3(1.73f, -2.3f, 0f), 2.0f);
+            SpawnExitDoor(propsParent.transform, "LeftExitDoor", new Vector3(3.23f, -3.0f, 0f), 4.2f);
 
             // Left Door Guard 1 (stands to the left of the door, matching the left column background elements)
-            SpawnGuard(propsParent.transform, "LeftDoorGuard1", new Vector3(-0.9f, -2.4f, 0f), Chapter2PropType.LeftDoorGuard1, "Hỏi thăm bảo vệ");
-
+            SpawnGuard(propsParent.transform, "LeftDoorGuard1", new Vector3(1.75f, -3.51f, 0f), Chapter2PropType.LeftDoorGuard1, "Hỏi thăm bảo vệ");
+ 
             // Left Door Guard 2 (stands to the right of the door, matching the right column background elements)
-            SpawnGuard(propsParent.transform, "LeftDoorGuard2", new Vector3(4.4f, -2.4f, 0f), Chapter2PropType.LeftDoorGuard2, "Hỏi thăm bảo vệ");
+            SpawnGuard(propsParent.transform, "LeftDoorGuard2", new Vector3(4.71f, -3.46f, 0f), Chapter2PropType.LeftDoorGuard2, "Hỏi thăm bảo vệ");
 
             // Recruiter NPC (standing on the far right side)
             SpawnGuard(propsParent.transform, "RecruiterNPC", new Vector3(7.0f, -2.4f, 0f), Chapter2PropType.Recruiter, "Nói chuyện");
@@ -227,6 +231,17 @@ namespace EscapeFromHell.Editor
             // VIP Stairs Guard (guarding stairs to VIP floor)
             // Use wider collider width (1.5f) to prevent bypassing the stairs
             SpawnGuard(propsParent.transform, "VipStairsGuardNPC", new Vector3(-7.05f, 1.13f, 0f), Chapter2PropType.VipStairsGuard, "Hỏi thăm bảo vệ", 1.5f);
+
+            // VIP Stairs Block Trigger
+            GameObject stairsTriggerObj = new GameObject("VipStairsBlockTrigger");
+            stairsTriggerObj.transform.parent = propsParent.transform;
+            stairsTriggerObj.transform.position = new Vector3(-7.05f, 2.0f, 0f);
+            
+            BoxCollider2D stairsTriggerCollider = stairsTriggerObj.AddComponent<BoxCollider2D>();
+            stairsTriggerCollider.size = new Vector2(2.5f, 1.0f);
+            stairsTriggerCollider.isTrigger = true;
+            
+            stairsTriggerObj.AddComponent<VipStairsTrigger>();
 
             // 6. Create UI Canvas
             GameObject uiRoot = new GameObject("UI_Canvas");
@@ -287,56 +302,65 @@ namespace EscapeFromHell.Editor
             txOutline.effectColor = new Color(0.9f, 0.7f, 0.1f, 0.7f); // Beautiful Gold border outline
             txOutline.effectDistance = new Vector2(2, 2);
 
+            // Close button at top-right
+            CreateButton(taiXiuPanel, "CloseButton", new Vector2(275, -15), new Vector2(30, 30), "X", 14);
+
             // Title
-            CreateText(taiXiuPanel, "TitleText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -20), new Vector2(500, 40), "SÒNG BẠC HOÀNG GIA - TÀI XỈU", 24, new Color(0.9f, 0.7f, 0.1f));
+            CreateText(taiXiuPanel, "TitleText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -15), new Vector2(500, 40), "SÒNG BẠC HOÀNG GIA - TÀI XỈU", 24, new Color(0.9f, 0.7f, 0.1f));
 
             // Cash Display Text
-            GameObject cashTxtObj = CreateText(taiXiuPanel, "CashText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -65), new Vector2(500, 30), "Tiền mặt: 500.000đ", 18, Color.white);
-            TextMeshProUGUI cashTextComponent = cashTxtObj.GetComponent<TextMeshProUGUI>();
+            GameObject cashTxtObj = CreateText(taiXiuPanel, "CashText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -55), new Vector2(500, 30), "Tiền mặt: 500.000đ", 18, Color.white);
 
             // Bet Choice Label
-            CreateText(taiXiuPanel, "BetChoiceLabel", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -110), new Vector2(500, 25), "LỰA CHỌN CỬA ĐẶT", 13, new Color(0.7f, 0.7f, 0.7f));
+            CreateText(taiXiuPanel, "BetChoiceLabel", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -85), new Vector2(500, 20), "LỰA CHỌN CỬA ĐẶT", 13, new Color(0.7f, 0.7f, 0.7f));
 
             // Bet Type Buttons (Tai / Xiu)
-            Button taiBtn = CreateButton(taiXiuPanel, "TaiButton", new Vector2(-130, -150), new Vector2(220, 45), "TÀI (11-18)", 16);
-            Button xiuBtn = CreateButton(taiXiuPanel, "XiuButton", new Vector2(130, -150), new Vector2(220, 45), "XỈU (3-10)", 16);
+            CreateButton(taiXiuPanel, "TaiButton", new Vector2(-125, -110), new Vector2(220, 40), "TÀI (11-18)", 16);
+            CreateButton(taiXiuPanel, "XiuButton", new Vector2(125, -110), new Vector2(220, 40), "XỈU (3-10)", 16);
 
             // Bet Amount Label
-            CreateText(taiXiuPanel, "BetAmountLabel", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -195), new Vector2(500, 25), "MỨC TIỀN CƯỢC", 13, new Color(0.7f, 0.7f, 0.7f));
+            CreateText(taiXiuPanel, "BetAmountLabel", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -160), new Vector2(500, 20), "MỨC TIỀN CƯỢC", 13, new Color(0.7f, 0.7f, 0.7f));
 
-            // Bet Amount Selection Buttons
-            CreateButton(taiXiuPanel, "Bet100kButton", new Vector2(-180, -230), new Vector2(100, 35), "100.000đ", 13);
-            CreateButton(taiXiuPanel, "Bet200kButton", new Vector2(-60, -230), new Vector2(100, 35), "200.000đ", 13);
-            CreateButton(taiXiuPanel, "Bet500kButton", new Vector2(60, -230), new Vector2(100, 35), "500.000đ", 13);
-            CreateButton(taiXiuPanel, "BetAllInButton", new Vector2(180, -230), new Vector2(100, 35), "Tất Tay", 13);
+            // Custom Bet Selection Row
+            CreateButton(taiXiuPanel, "BetMinusButton", new Vector2(-175, -185), new Vector2(55, 40), "-100k", 12);
+            CreateInputField(taiXiuPanel, "BetInputField", new Vector2(-45, -185), new Vector2(170, 40), "Nhập số tiền");
+            CreateButton(taiXiuPanel, "BetPlusButton", new Vector2(80, -185), new Vector2(55, 40), "+100k", 12);
+            CreateButton(taiXiuPanel, "BetAllInButton", new Vector2(180, -185), new Vector2(90, 40), "Tất Tay", 13);
 
             // Status Panel Labels
-            CreateText(taiXiuPanel, "StatusLabel1", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-190, -35), new Vector2(100, 25), "Đặt cửa:", 14, new Color(0.7f, 0.7f, 0.7f), TextAlignmentOptions.Left);
-            GameObject betTypeTxtObj = CreateText(taiXiuPanel, "BetTypeText", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-120, -35), new Vector2(120, 25), "Chưa chọn", 14, new Color(0.9f, 0.7f, 0.1f), TextAlignmentOptions.Left);
-            TextMeshProUGUI betTypeComponent = betTypeTxtObj.GetComponent<TextMeshProUGUI>();
+            CreateText(taiXiuPanel, "StatusLabel1", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-170, -235), new Vector2(70, 25), "Đặt cửa:", 14, new Color(0.7f, 0.7f, 0.7f), TextAlignmentOptions.Left);
+            GameObject betTypeTxtObj = CreateText(taiXiuPanel, "BetTypeText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-100, -235), new Vector2(100, 25), "Chưa chọn", 14, new Color(0.9f, 0.7f, 0.1f), TextAlignmentOptions.Left);
 
-            CreateText(taiXiuPanel, "StatusLabel2", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(40, -35), new Vector2(100, 25), "Số tiền:", 14, new Color(0.7f, 0.7f, 0.7f), TextAlignmentOptions.Left);
-            GameObject betAmountTxtObj = CreateText(taiXiuPanel, "BetAmountText", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(110, -35), new Vector2(120, 25), "Chưa đặt", 14, new Color(0.9f, 0.7f, 0.1f), TextAlignmentOptions.Left);
-            TextMeshProUGUI betAmountComponent = betAmountTxtObj.GetComponent<TextMeshProUGUI>();
+            CreateText(taiXiuPanel, "StatusLabel2", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(30, -235), new Vector2(70, 25), "Số tiền:", 14, new Color(0.7f, 0.7f, 0.7f), TextAlignmentOptions.Left);
+            GameObject betAmountTxtObj = CreateText(taiXiuPanel, "BetAmountText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(105, -235), new Vector2(120, 25), "Chưa đặt", 14, new Color(0.9f, 0.7f, 0.1f), TextAlignmentOptions.Left);
 
             // Dice Result Label & Boxes
-            CreateText(taiXiuPanel, "DiceResultLabel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -80), new Vector2(500, 25), "KẾT QUẢ XÚC XẮC", 13, new Color(0.7f, 0.7f, 0.7f));
+            CreateText(taiXiuPanel, "DiceResultLabel", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -270), new Vector2(500, 20), "KẾT QUẢ XÚC XẮC", 13, new Color(0.7f, 0.7f, 0.7f));
 
-            TextMeshProUGUI dice1TextComponent = CreateDiceBox(taiXiuPanel, "Dice1Text", new Vector2(-60, -125));
-            TextMeshProUGUI dice2TextComponent = CreateDiceBox(taiXiuPanel, "Dice2Text", new Vector2(0, -125));
-            TextMeshProUGUI dice3TextComponent = CreateDiceBox(taiXiuPanel, "Dice3Text", new Vector2(60, -125));
+             Image dice1ImgComponent = CreateDiceImage(taiXiuPanel, "Dice1Image", new Vector2(-55, -315));
+             Image dice2ImgComponent = CreateDiceImage(taiXiuPanel, "Dice2Image", new Vector2(0, -315));
+             Image dice3ImgComponent = CreateDiceImage(taiXiuPanel, "Dice3Image", new Vector2(55, -315));
+ 
+             // Bát (Bowl Cover) covering the dice area
+             GameObject bowlObj = CreatePanel(taiXiuPanel, "TaiXiuBowl", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -275), new Vector2(220, 120), Color.white);
+             Image bowlImg = bowlObj.GetComponent<Image>();
+             Sprite bowlSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/TaiXiu_Bowl.png");
+             if (bowlSprite != null) bowlImg.sprite = bowlSprite;
 
             // Result Message Area
-            GameObject resultTxtObj = CreateText(taiXiuPanel, "ResultText", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -170), new Vector2(520, 45), "Chọn Tài/Xỉu & mức cược rồi bấm Xốc!", 15, new Color(0.9f, 0.7f, 0.1f));
-            TextMeshProUGUI resultComponent = resultTxtObj.GetComponent<TextMeshProUGUI>();
+            GameObject resultTxtObj = CreateText(taiXiuPanel, "ResultText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -360), new Vector2(520, 35), "Chọn Tài/Xỉu & mức cược rồi bấm Xốc!", 15, new Color(0.9f, 0.7f, 0.1f));
 
-            // Action Buttons
-            Button rollBtn = CreateButton(taiXiuPanel, "RollButton", new Vector2(-110, -220), new Vector2(200, 42), "XỐC XÚC XẮC!", 15);
-            // Highlight roll button outline with bright gold
+            // Action Button
+            Button rollBtn = CreateButton(taiXiuPanel, "RollButton", new Vector2(0, -410), new Vector2(240, 42), "XỐC XÚC XẮC!", 15);
             Outline rollOutline = rollBtn.GetComponent<Outline>();
             if (rollOutline != null) rollOutline.effectColor = new Color(0.9f, 0.7f, 0.1f, 1f);
 
-            Button closeBtn = CreateButton(taiXiuPanel, "CloseButton", new Vector2(110, -220), new Vector2(160, 42), "ĐÓNG BÀN", 14);
+            // Mở Bát Button (Initially overlayed on RollButton)
+            Button openBtn = CreateButton(taiXiuPanel, "OpenBowlButton", new Vector2(0, -410), new Vector2(240, 42), "MỞ BÁT!", 15);
+            Outline openOutline = openBtn.GetComponent<Outline>();
+            if (openOutline != null) openOutline.effectColor = new Color(0.9f, 0.7f, 0.1f, 1f);
+
+
 
             // 7b. Create Blackjack UI Panel
             GameObject blackjackPanel = CreatePanel(uiRoot, "BlackjackPanel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(600, 500), new Color(0f, 0f, 0f, 0.94f));
@@ -344,104 +368,157 @@ namespace EscapeFromHell.Editor
             bjOutline.effectColor = new Color(0.9f, 0.7f, 0.1f, 0.7f);
             bjOutline.effectDistance = new Vector2(2, 2);
 
+            // Close button at top-right
+            CreateButton(blackjackPanel, "CloseButton", new Vector2(275, -15), new Vector2(30, 30), "X", 14);
+
             // Title
-            CreateText(blackjackPanel, "TitleText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -20), new Vector2(500, 40), "SÒNG BẠC HOÀNG GIA - BLACKJACK (XÌ DÁCH)", 22, new Color(0.9f, 0.7f, 0.1f));
+            CreateText(blackjackPanel, "TitleText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -15), new Vector2(500, 40), "SÒNG BẠC HOÀNG GIA - BLACKJACK (XÌ DÁCH)", 22, new Color(0.9f, 0.7f, 0.1f));
 
             // Cash Display Text
-            CreateText(blackjackPanel, "CashText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -60), new Vector2(500, 30), "Tiền mặt: 500.000đ", 18, Color.white);
+            CreateText(blackjackPanel, "CashText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -55), new Vector2(500, 30), "Tiền mặt: 500.000đ", 18, Color.white);
 
-            // Cards display area
-            CreateText(blackjackPanel, "DealerCardsLabel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-150, 110), new Vector2(150, 25), "Bài nhà cái:", 14, new Color(0.7f, 0.7f, 0.7f), TextAlignmentOptions.Left);
-            CreateText(blackjackPanel, "DealerCardsText", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(20, 110), new Vector2(300, 30), "-", 16, Color.white, TextAlignmentOptions.Left);
+            // Cards display containers (Horizontally aligned and centered)
+            CreateText(blackjackPanel, "DealerCardsLabel", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-170, -115), new Vector2(110, 25), "Bài nhà cái:", 14, new Color(0.7f, 0.7f, 0.7f), TextAlignmentOptions.Left);
+            
+            GameObject dealerCardsContainer = CreatePanel(blackjackPanel, "DealerCardsContainer", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(60, -90), new Vector2(340, 75), Color.clear);
+            HorizontalLayoutGroup dealerHLG = dealerCardsContainer.AddComponent<HorizontalLayoutGroup>();
+            dealerHLG.spacing = 8f;
+            dealerHLG.childAlignment = TextAnchor.MiddleCenter;
+            dealerHLG.childControlWidth = false;
+            dealerHLG.childControlHeight = false;
+            dealerHLG.childForceExpandWidth = false;
+            dealerHLG.childForceExpandHeight = false;
 
-            CreateText(blackjackPanel, "PlayerCardsLabel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-150, 60), new Vector2(150, 25), "Bài của bạn:", 14, new Color(0.7f, 0.7f, 0.7f), TextAlignmentOptions.Left);
-            CreateText(blackjackPanel, "PlayerCardsText", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(20, 60), new Vector2(300, 30), "-", 16, Color.white, TextAlignmentOptions.Left);
+            CreateText(blackjackPanel, "PlayerCardsLabel", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-170, -205), new Vector2(110, 25), "Bài của bạn:", 14, new Color(0.7f, 0.7f, 0.7f), TextAlignmentOptions.Left);
+            
+            GameObject playerCardsContainer = CreatePanel(blackjackPanel, "PlayerCardsContainer", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(60, -180), new Vector2(340, 75), Color.clear);
+            HorizontalLayoutGroup playerHLG = playerCardsContainer.AddComponent<HorizontalLayoutGroup>();
+            playerHLG.spacing = 8f;
+            playerHLG.childAlignment = TextAnchor.MiddleCenter;
+            playerHLG.childControlWidth = false;
+            playerHLG.childControlHeight = false;
+            playerHLG.childForceExpandWidth = false;
+            playerHLG.childForceExpandHeight = false;
 
             // Bet Selection Label
-            CreateText(blackjackPanel, "BetLabel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 10), new Vector2(500, 25), "MỨC TIỀN CƯỢC", 13, new Color(0.7f, 0.7f, 0.7f));
+            CreateText(blackjackPanel, "BetLabel", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -270), new Vector2(500, 20), "MỨC TIỀN CƯỢC", 13, new Color(0.7f, 0.7f, 0.7f));
 
-            // Bet Buttons
-            CreateButton(blackjackPanel, "Bet100kButton", new Vector2(-180, -30), new Vector2(100, 35), "100.000đ", 13);
-            CreateButton(blackjackPanel, "Bet200kButton", new Vector2(-60, -30), new Vector2(100, 35), "200.000đ", 13);
-            CreateButton(blackjackPanel, "Bet500kButton", new Vector2(60, -30), new Vector2(100, 35), "500.000đ", 13);
-            CreateButton(blackjackPanel, "BetAllInButton", new Vector2(180, -30), new Vector2(100, 35), "Tất Tay", 13);
+            // Custom Bet Selection Row
+            CreateButton(blackjackPanel, "BJBetMinusButton", new Vector2(-175, -295), new Vector2(55, 40), "-100k", 12);
+            CreateInputField(blackjackPanel, "BJBetInputField", new Vector2(-45, -295), new Vector2(170, 40), "Nhập số tiền");
+            CreateButton(blackjackPanel, "BJBetPlusButton", new Vector2(80, -295), new Vector2(55, 40), "+100k", 12);
+            CreateButton(blackjackPanel, "BetAllInButton", new Vector2(180, -295), new Vector2(90, 40), "Tất Tay", 13);
 
             // Selected Bet Status
-            CreateText(blackjackPanel, "StatusLabel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-80, -75), new Vector2(120, 25), "Tiền đặt cược:", 14, new Color(0.7f, 0.7f, 0.7f), TextAlignmentOptions.Left);
-            CreateText(blackjackPanel, "BetAmountText", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(20, -75), new Vector2(150, 25), "Chưa đặt", 14, new Color(0.9f, 0.7f, 0.1f), TextAlignmentOptions.Left);
+            CreateText(blackjackPanel, "StatusLabel", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-60, -345), new Vector2(110, 25), "Tiền đặt cược:", 14, new Color(0.7f, 0.7f, 0.7f), TextAlignmentOptions.Left);
+            CreateText(blackjackPanel, "BetAmountText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(60, -345), new Vector2(120, 25), "Chưa đặt", 14, new Color(0.9f, 0.7f, 0.1f), TextAlignmentOptions.Left);
 
             // Result Text
-            CreateText(blackjackPanel, "ResultText", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -125), new Vector2(500, 35), "Đặt tiền cược rồi bấm Chia Bài!", 15, new Color(0.9f, 0.7f, 0.1f));
+            CreateText(blackjackPanel, "ResultText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -380), new Vector2(500, 35), "Đặt tiền cược rồi bấm Chia Bài!", 15, new Color(0.9f, 0.7f, 0.1f));
 
             // Action Buttons
-            Button hitBtn = CreateButton(blackjackPanel, "HitButton", new Vector2(-180, -200), new Vector2(120, 42), "RÚT BÀI", 14);
-            Button standBtn = CreateButton(blackjackPanel, "StandButton", new Vector2(-40, -200), new Vector2(120, 42), "DẰN BÀI", 14);
-            Button dealBtn = CreateButton(blackjackPanel, "DealButton", new Vector2(110, -200), new Vector2(140, 42), "CHIA BÀI", 14);
+            Button hitBtn = CreateButton(blackjackPanel, "HitButton", new Vector2(-160, -425), new Vector2(130, 40), "RÚT BÀI", 14);
+            Button standBtn = CreateButton(blackjackPanel, "StandButton", new Vector2(0, -425), new Vector2(130, 40), "DẰN BÀI", 14);
+            Button dealBtn = CreateButton(blackjackPanel, "DealButton", new Vector2(160, -425), new Vector2(130, 40), "CHIA BÀI", 14);
             Outline dealOutline = dealBtn.GetComponent<Outline>();
             if (dealOutline != null) dealOutline.effectColor = new Color(0.9f, 0.7f, 0.1f, 1f);
 
-            // Close button at top-right
-            CreateButton(blackjackPanel, "CloseButton", new Vector2(245, 215), new Vector2(70, 30), "ĐÓNG", 12);
 
-
-            // 7c. Create Roulette UI Panel
-            GameObject roulettePanel = CreatePanel(uiRoot, "RoulettePanel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(600, 500), new Color(0f, 0f, 0f, 0.94f));
+            // 7c. Create Roulette UI Panel (Side-by-side Layout)
+            GameObject roulettePanel = CreatePanel(uiRoot, "RoulettePanel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(650, 500), new Color(0f, 0f, 0f, 0.94f));
             Outline rlOutline = roulettePanel.AddComponent<Outline>();
             rlOutline.effectColor = new Color(0.9f, 0.7f, 0.1f, 0.7f);
             rlOutline.effectDistance = new Vector2(2, 2);
 
+            // Close button at top-right
+            CreateButton(roulettePanel, "CloseButton", new Vector2(300, -15), new Vector2(30, 30), "X", 14);
+
             // Title
-            CreateText(roulettePanel, "TitleText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -20), new Vector2(500, 40), "SÒNG BẠC HOÀNG GIA - VÒNG QUAY ROULETTE", 20, new Color(0.9f, 0.7f, 0.1f));
+            CreateText(roulettePanel, "TitleText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -15), new Vector2(500, 40), "SÒNG BẠC HOÀNG GIA - VÒNG QUAY ROULETTE", 20, new Color(0.9f, 0.7f, 0.1f));
 
             // Cash Display Text
-            CreateText(roulettePanel, "CashText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -60), new Vector2(500, 30), "Tiền mặt: 500.000đ", 18, Color.white);
+            CreateText(roulettePanel, "CashText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -55), new Vector2(500, 30), "Tiền mặt: 500.000đ", 18, Color.white);
 
+            // --- LEFT SIDE: Spinning Roulette Wheel Graphic ---
+            GameObject wheelObj = CreatePanel(roulettePanel, "RouletteWheel", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-160, -210), new Vector2(220, 220), Color.white);
+            Image wheelImg = wheelObj.GetComponent<Image>();
+            Sprite wheelSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/Roulette_Wheel.png");
+            if (wheelSprite != null) wheelImg.sprite = wheelSprite;
+
+            // Spawn 37 pocket number labels clockwise on the wheel
+            int[] wheelSequence = { 0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26 };
+            for (int i = 0; i < 37; i++)
+            {
+                float slotAngle = i * (360f / 37f) + (180f / 37f);
+                float angleRad = slotAngle * Mathf.Deg2Rad;
+                float radius = 78f;
+                Vector2 numPos = new Vector2(radius * Mathf.Cos(angleRad), radius * Mathf.Sin(angleRad));
+                
+                GameObject numTextObj = CreateText(wheelObj, $"Num_{wheelSequence[i]}", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), numPos, new Vector2(24, 16), wheelSequence[i].ToString(), 9, Color.white);
+                RectTransform numRect = numTextObj.GetComponent<RectTransform>();
+                numRect.localRotation = Quaternion.Euler(0, 0, slotAngle - 90f);
+            }
+
+            // Needle pointer at top of wheel
+            GameObject needleObj = CreateText(roulettePanel, "Needle", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-160, -85), new Vector2(20, 24), "▼", 24, new Color(0.9f, 0.7f, 0.1f));
+
+            // --- RIGHT SIDE: Betting Options ---
             // Bet Choice Label
-            CreateText(roulettePanel, "BetChoiceLabel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 115), new Vector2(500, 25), "LỰA CHỌN CỬA ĐẶT", 13, new Color(0.7f, 0.7f, 0.7f));
+            CreateText(roulettePanel, "BetChoiceLabel", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(160, -90), new Vector2(250, 20), "LỰA CHỌN CỬA ĐẶT", 13, new Color(0.7f, 0.7f, 0.7f));
 
-            // Bet Type Buttons (Red / Black / Even / Odd)
-            Button rBtn = CreateButton(roulettePanel, "RedButton", new Vector2(-180, 75), new Vector2(100, 35), "ĐỎ", 14);
+            // Bet Type Buttons (Red / Black / Even / Odd) in 2x2 grid
+            Button rBtn = CreateButton(roulettePanel, "RedButton", new Vector2(100, -115), new Vector2(105, 32), "ĐỎ", 14);
             Outline rOutline = rBtn.GetComponent<Outline>();
             if (rOutline != null) rOutline.effectColor = Color.red;
 
-            Button bBtn = CreateButton(roulettePanel, "BlackButton", new Vector2(-60, 75), new Vector2(100, 35), "ĐEN", 14);
+            Button bBtn = CreateButton(roulettePanel, "BlackButton", new Vector2(220, -115), new Vector2(105, 32), "ĐEN", 14);
             Outline bOutline = bBtn.GetComponent<Outline>();
             if (bOutline != null) bOutline.effectColor = Color.black;
 
-            CreateButton(roulettePanel, "EvenButton", new Vector2(60, 75), new Vector2(100, 35), "CHẴN", 14);
-            CreateButton(roulettePanel, "OddButton", new Vector2(180, 75), new Vector2(100, 35), "LẺ", 14);
+            CreateButton(roulettePanel, "EvenButton", new Vector2(100, -152), new Vector2(105, 32), "CHẴN", 14);
+            CreateButton(roulettePanel, "OddButton", new Vector2(220, -152), new Vector2(105, 32), "LẺ", 14);
 
             // Bet Amount Label
-            CreateText(roulettePanel, "BetAmountLabel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 20), new Vector2(500, 25), "MỨC TIỀN CƯỢC", 13, new Color(0.7f, 0.7f, 0.7f));
+            CreateText(roulettePanel, "BetAmountLabel", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(160, -195), new Vector2(250, 20), "MỨC TIỀN CƯỢC", 13, new Color(0.7f, 0.7f, 0.7f));
 
-            // Bet Amount Selection Buttons
-            CreateButton(roulettePanel, "Bet100kButton", new Vector2(-180, -20), new Vector2(100, 35), "100.000đ", 13);
-            CreateButton(roulettePanel, "Bet200kButton", new Vector2(-60, -20), new Vector2(100, 35), "200.000đ", 13);
-            CreateButton(roulettePanel, "Bet500kButton", new Vector2(60, -20), new Vector2(100, 35), "500.000đ", 13);
-            CreateButton(roulettePanel, "BetAllInButton", new Vector2(180, -20), new Vector2(100, 35), "Tất Tay", 13);
+            // Custom Bet Selection Row (fits neatly in right column)
+            CreateButton(roulettePanel, "RLBetMinusButton", new Vector2(45, -220), new Vector2(40, 40), "-100k", 11);
+            CreateInputField(roulettePanel, "RLBetInputField", new Vector2(135, -220), new Vector2(115, 40), "Nhập số tiền");
+            CreateButton(roulettePanel, "RLBetPlusButton", new Vector2(220, -220), new Vector2(40, 40), "+100k", 11);
+            CreateButton(roulettePanel, "BetAllInButton", new Vector2(285, -220), new Vector2(75, 40), "Tất Tay", 12);
 
             // Status Panel Labels
-            CreateText(roulettePanel, "StatusLabel1", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-190, -65), new Vector2(100, 25), "Đặt cửa:", 14, new Color(0.7f, 0.7f, 0.7f), TextAlignmentOptions.Left);
-            CreateText(roulettePanel, "BetTypeText", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-120, -65), new Vector2(120, 25), "Chưa chọn", 14, new Color(0.9f, 0.7f, 0.1f), TextAlignmentOptions.Left);
+            CreateText(roulettePanel, "StatusLabel1", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(90, -270), new Vector2(70, 20), "Đặt cửa:", 14, new Color(0.7f, 0.7f, 0.7f), TextAlignmentOptions.Left);
+            CreateText(roulettePanel, "BetTypeText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(150, -270), new Vector2(80, 20), "Chưa chọn", 14, new Color(0.9f, 0.7f, 0.1f), TextAlignmentOptions.Left);
 
-            CreateText(roulettePanel, "StatusLabel2", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(40, -65), new Vector2(100, 25), "Số tiền:", 14, new Color(0.7f, 0.7f, 0.7f), TextAlignmentOptions.Left);
-            CreateText(roulettePanel, "BetAmountText", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(110, -65), new Vector2(120, 25), "Chưa đặt", 14, new Color(0.9f, 0.7f, 0.1f), TextAlignmentOptions.Left);
+            CreateText(roulettePanel, "StatusLabel2", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(210, -270), new Vector2(60, 20), "Số tiền:", 14, new Color(0.7f, 0.7f, 0.7f), TextAlignmentOptions.Left);
+            CreateText(roulettePanel, "BetAmountText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(270, -270), new Vector2(90, 20), "Chưa đặt", 14, new Color(0.9f, 0.7f, 0.1f), TextAlignmentOptions.Left);
 
             // Result Message Area
-            CreateText(roulettePanel, "ResultText", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -115), new Vector2(520, 35), "Chọn cửa đặt & tiền rồi bấm Quay!", 15, new Color(0.9f, 0.7f, 0.1f));
+            CreateText(roulettePanel, "ResultText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(160, -305), new Vector2(280, 35), "Chọn cửa đặt & tiền rồi bấm Quay!", 14, new Color(0.9f, 0.7f, 0.1f));
 
-            // Spin Button
-            Button spinBtn = CreateButton(roulettePanel, "SpinButton", new Vector2(-100, -200), new Vector2(220, 42), "QUAY VÒNG QUAY", 15);
+            // Spin Button at bottom-center
+            Button spinBtn = CreateButton(roulettePanel, "SpinButton", new Vector2(0, -380), new Vector2(240, 42), "QUAY VÒNG", 15);
             Outline spinOutline = spinBtn.GetComponent<Outline>();
             if (spinOutline != null) spinOutline.effectColor = new Color(0.9f, 0.7f, 0.1f, 1f);
-
-            // Close button at bottom-right
-            CreateButton(roulettePanel, "CloseButton", new Vector2(120, -200), new Vector2(140, 42), "ĐÓNG BÀN", 14);
 
 
             // 8. Create Chapter2Controller
             GameObject controllerObj = new GameObject("Chapter2Controller");
             Chapter2Controller c2 = controllerObj.AddComponent<Chapter2Controller>();
+
+            // Assign sprites to controller fields for runtime reference
+            List<Sprite> diceSprites = new List<Sprite>();
+            for (int i = 1; i <= 6; i++)
+            {
+                diceSprites.Add(AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Sprites/UI/Dice_{i}.png"));
+            }
+            c2.diceSprites = diceSprites;
+            c2.cardBackgroundSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/Card_Background.png");
+            c2.suitHeartSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/Suit_Heart.png");
+            c2.suitDiamondSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/Suit_Diamond.png");
+            c2.suitSpadeSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/Suit_Spade.png");
+            c2.suitClubSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/Suit_Club.png");
 
             // 9. GameManager setup in scene
             GameObject gmObj = new GameObject("GameManager");
@@ -575,6 +652,9 @@ namespace EscapeFromHell.Editor
             GameObject btnObj = new GameObject(name);
             btnObj.transform.SetParent(parent.transform, false);
             RectTransform rect = btnObj.AddComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 1f);
+            rect.anchorMax = new Vector2(0.5f, 1f);
+            rect.pivot = new Vector2(0.5f, 1f);
             rect.anchoredPosition = pos;
             rect.sizeDelta = size;
 
@@ -590,8 +670,8 @@ namespace EscapeFromHell.Editor
             }
 
             Outline outline = btnObj.AddComponent<Outline>();
-            outline.effectColor = new Color(0.9f, 0.7f, 0.1f, 0.4f); // Subtle Gold border outline
-            outline.effectDistance = new Vector2(1, 1);
+            outline.effectColor = new Color(0.9f, 0.7f, 0.1f, 0.8f); // Subtle Gold border outline
+            outline.effectDistance = new Vector2(1.5f, 1.5f);
 
             Button btn = btnObj.AddComponent<Button>();
             btn.targetGraphic = img;
@@ -627,38 +707,101 @@ namespace EscapeFromHell.Editor
             return btn;
         }
 
-        private static TextMeshProUGUI CreateDiceBox(GameObject parent, string name, Vector2 pos)
+        private static TMP_InputField CreateInputField(GameObject parent, string name, Vector2 pos, Vector2 size, string placeholderText)
+        {
+            GameObject valObj = new GameObject(name);
+            valObj.transform.SetParent(parent.transform, false);
+            RectTransform rect = valObj.AddComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 1f);
+            rect.anchorMax = new Vector2(0.5f, 1f);
+            rect.pivot = new Vector2(0.5f, 1f);
+            rect.anchoredPosition = pos;
+            rect.sizeDelta = size;
+
+            Image img = valObj.AddComponent<Image>();
+            img.color = new Color(0.08f, 0.08f, 0.1f, 1f); // Dark background
+            Sprite roundedRect = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/RoundedRect.png");
+            if (roundedRect != null)
+            {
+                img.sprite = roundedRect;
+                img.type = Image.Type.Sliced;
+            }
+            
+            Outline outline = valObj.AddComponent<Outline>();
+            outline.effectColor = new Color(0.9f, 0.7f, 0.1f, 0.8f);
+            outline.effectDistance = new Vector2(1.5f, 1.5f);
+
+            // TextArea child
+            GameObject textArea = new GameObject("TextArea");
+            textArea.transform.SetParent(valObj.transform, false);
+            RectTransform textRect = textArea.AddComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = new Vector2(8, 2);
+            textRect.offsetMax = new Vector2(-8, -2);
+            textArea.AddComponent<RectMask2D>();
+
+            // Placeholder Text
+            GameObject placeholderObj = new GameObject("Placeholder");
+            placeholderObj.transform.SetParent(textArea.transform, false);
+            RectTransform placeholderRect = placeholderObj.AddComponent<RectTransform>();
+            placeholderRect.anchorMin = Vector2.zero;
+            placeholderRect.anchorMax = Vector2.one;
+            placeholderRect.offsetMin = Vector2.zero;
+            placeholderRect.offsetMax = Vector2.zero;
+            TextMeshProUGUI placeholderTMP = placeholderObj.AddComponent<TextMeshProUGUI>();
+            placeholderTMP.text = placeholderText;
+            placeholderTMP.fontSize = 13;
+            placeholderTMP.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+            placeholderTMP.alignment = TextAlignmentOptions.Center;
+
+            // Input Text
+            GameObject textObj = new GameObject("Text");
+            textObj.transform.SetParent(textArea.transform, false);
+            RectTransform textValRect = textObj.AddComponent<RectTransform>();
+            textValRect.anchorMin = Vector2.zero;
+            textValRect.anchorMax = Vector2.one;
+            textValRect.offsetMin = Vector2.zero;
+            textValRect.offsetMax = Vector2.zero;
+            TextMeshProUGUI textTMP = textObj.AddComponent<TextMeshProUGUI>();
+            textTMP.text = "";
+            textTMP.fontSize = 13;
+            textTMP.color = Color.white;
+            textTMP.alignment = TextAlignmentOptions.Center;
+
+            // Setup TMP_InputField component
+            TMP_InputField inputField = valObj.AddComponent<TMP_InputField>();
+            inputField.targetGraphic = img;
+            inputField.textViewport = textRect;
+            inputField.textComponent = textTMP;
+            inputField.placeholder = placeholderTMP;
+            inputField.contentType = TMP_InputField.ContentType.IntegerNumber;
+
+            return inputField;
+        }
+
+        private static Image CreateDiceImage(GameObject parent, string name, Vector2 pos)
         {
             GameObject boxObj = new GameObject(name);
             boxObj.transform.SetParent(parent.transform, false);
             RectTransform rect = boxObj.AddComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 1f);
+            rect.anchorMax = new Vector2(0.5f, 1f);
+            rect.pivot = new Vector2(0.5f, 1f);
             rect.anchoredPosition = pos;
-            rect.sizeDelta = new Vector2(45, 45);
+            rect.sizeDelta = new Vector2(42, 42);
 
             Image img = boxObj.AddComponent<Image>();
-            img.color = new Color(0.18f, 0.18f, 0.22f, 1f); // Dark dice box face
+            img.color = Color.white;
             
+            Sprite defaultDice = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/Dice_1.png");
+            if (defaultDice != null) img.sprite = defaultDice;
+
             Outline outline = boxObj.AddComponent<Outline>();
             outline.effectColor = new Color(0.9f, 0.7f, 0.1f, 0.4f);
             outline.effectDistance = new Vector2(1, 1);
 
-            GameObject textObj = new GameObject("Text");
-            textObj.transform.SetParent(boxObj.transform, false);
-            RectTransform txtRect = textObj.AddComponent<RectTransform>();
-            txtRect.anchorMin = Vector2.zero;
-            txtRect.anchorMax = Vector2.one;
-            txtRect.offsetMin = Vector2.zero;
-            txtRect.offsetMax = Vector2.zero;
-
-            TextMeshProUGUI tmpText = textObj.AddComponent<TextMeshProUGUI>();
-            tmpText.text = "-";
-            tmpText.fontSize = 24;
-            tmpText.fontStyle = FontStyles.Bold;
-            tmpText.alignment = TextAlignmentOptions.Center;
-            tmpText.color = Color.white;
-            tmpText.raycastTarget = false;
-
-            return tmpText;
+            return img;
         }
 
         private static void SpawnCasinoTable(Transform parent, string tableName, Vector3 tablePos, Chapter2PropType propType, string interactionPrompt, bool hasGamblersSide = false, bool hasGamblersBack = false)
@@ -684,7 +827,7 @@ namespace EscapeFromHell.Editor
 
             // Physical boundary collider (at group level for 1:1 scale)
             BoxCollider2D bc = tableGroup.AddComponent<BoxCollider2D>();
-            bc.size = new Vector2(2.5f, 0.8f);
+            bc.size = new Vector2(1.5f, 0.4f);
             bc.offset = new Vector2(0f, -0.4f);
 
             // Interaction Trigger (at group level)
@@ -747,7 +890,8 @@ namespace EscapeFromHell.Editor
             guardObj.transform.position = guardPos;
 
             SpriteRenderer guardSR = guardObj.AddComponent<SpriteRenderer>();
-            guardSR.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Characters/Guards/Guard_Idle_Down.png");
+            string spriteName = propType == Chapter2PropType.Recruiter ? "Recruiter_Idle_Down.png" : "Guard_Idle_Down.png";
+            guardSR.sprite = AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Sprites/Characters/Guards/{spriteName}");
             guardSR.sortingOrder = 5;
 
             BoxCollider2D guardCollider = guardObj.AddComponent<BoxCollider2D>();
@@ -762,15 +906,25 @@ namespace EscapeFromHell.Editor
             guardProp.Initialize(propType, interactionPrompt);
         }
 
-        private static void SpawnExitDoor(Transform parent, string doorName, Vector3 doorPos, float scale = 2.0f)
+        private static void SpawnExitDoor(Transform parent, string doorName, Vector3 doorPos, float scale = 4.2f)
         {
             GameObject doorObj = new GameObject(doorName);
             doorObj.transform.parent = parent;
             doorObj.transform.position = doorPos;
             doorObj.transform.localScale = new Vector3(scale, scale, 1f);
 
-            // Do not add a visible SpriteRenderer, because the beautiful casino doors are already drawn on the background!
-            // This leaves the door visual as drawn by the background but provides the required interactive zone.
+            // Add visible SpriteRenderer and DoorOcclusionFade component configured to scale
+            // and hide/fade out completely when the player walks into it.
+            SpriteRenderer sr = doorObj.AddComponent<SpriteRenderer>();
+            sr.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/Door.png");
+            sr.sortingOrder = 6; // Render in front of player (sortingOrder 5)
+            sr.color = Color.white;
+
+            DoorOcclusionFade fade = doorObj.AddComponent<DoorOcclusionFade>();
+            fade.normalAlpha = 1.0f;
+            fade.fadedAlpha = 0.0f; // Hide the door completely!
+            fade.fadeSpeed = 8f;
+            fade.triggerRadius = 2.2f; // Trigger slightly earlier so it is fully faded when player reaches it
 
             BoxCollider2D doorTrigger = doorObj.AddComponent<BoxCollider2D>();
             doorTrigger.size = new Vector2(2.5f, 1.5f); // Larger collider box matching the double doors width

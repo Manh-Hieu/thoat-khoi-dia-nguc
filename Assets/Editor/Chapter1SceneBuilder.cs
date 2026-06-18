@@ -2910,9 +2910,9 @@ namespace EscapeFromHell.Editor
                     importer.spriteImportMode = SpriteImportMode.Single;
                     changed = true;
                 }
-                if (importer.spritePixelsPerUnit != 32)
+                if (importer.spritePixelsPerUnit != 38)
                 {
-                    importer.spritePixelsPerUnit = 32;
+                    importer.spritePixelsPerUnit = 38;
                     changed = true;
                 }
                 if (importer.filterMode != FilterMode.Point)

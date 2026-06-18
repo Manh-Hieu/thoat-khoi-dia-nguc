@@ -2,10 +2,30 @@
 Built from '6000.4/staging' branch; Version is '6000.4.9f1 (f7258d6eebbe) revision 16197005'; Using compiler version '194234433'; Build Type 'Release'
 OS: 'Windows 11  (10.0.26200) Professional' Language: 'vi' Physical Memory: 16197 MB
 BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1
-[Licensing::IpcConnector] Successfully connected to: "LicenseClient-hieua" at "2026-06-11T10:01:35.1348886Z"
 System  architecture: x64
 Process architecture: x64
-Date: 2026-06-11T10:01:35Z
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-hieua" at "2026-06-14T18:20:59.2876624Z"
+Date: 2026-06-14T18:20:59Z
+[Licensing::Client] Code 10 while verifying Licensing Client signature (process Id: 468, path: "C:/unity/6000.4.9f1/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client.exe")
+[Licensing::Module] LicensingClient has failed validation; ignoring
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.18.1+9fbee8e
+  Session Id:              06310e1a71ad4dbbb4cfcba084feceb9
+  Correlation Id:          b82bd94bb56ade0985ca02884fb9c7a5
+  External correlation Id: 6862375803709276246
+  Machine Id:              mnD5vwWal9wUUc2ofMA3UuGGfkA=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-hieua" (connect: 0.00s, validation: 0.01s, handshake: 0.09s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-hieua-notifications" at "2026-06-14T18:20:59.3881867Z"
+[Licensing::Module] Error: Access token is unavailable; failed to update
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: 18968086856330-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+[Licensing::Client] Successfully updated license, isAsync: True, time: 0.01
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] Licensing Background thread has ended after 0.12s
 
 COMMAND LINE ARGUMENTS:
 C:\unity\6000.4.9f1\Editor\Unity.com
@@ -13,7 +33,7 @@ C:\unity\6000.4.9f1\Editor\Unity.com
 -projectPath
 c:\code\thoat khoi dia nguc
 -executeMethod
-EscapeFromHell.Editor.Chapter1SceneBuilder.BuildScene
+EscapeFromHell.Editor.Chapter2SceneBuilder.BuildChapter2
 -logFile
 build_scene_log.txt
 -quit

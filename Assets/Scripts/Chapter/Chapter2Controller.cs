@@ -17,6 +17,15 @@ namespace EscapeFromHell.Chapter
 
         [Header("Shared Game State")]
         private int currentCash = 500000;
+        public int CurrentCash
+        {
+            get => currentCash;
+            set
+            {
+                currentCash = value;
+                UpdateAllCashUI();
+            }
+        }
         private int betCount = 0;
 
         // ── TÀI XỈU (DICE) UI & STATE ──────────────────────────────────────
@@ -24,21 +33,27 @@ namespace EscapeFromHell.Chapter
         private TextMeshProUGUI cashText;
         private TextMeshProUGUI betTypeText;
         private TextMeshProUGUI betAmountText;
-        private TextMeshProUGUI dice1Text;
-        private TextMeshProUGUI dice2Text;
-        private TextMeshProUGUI dice3Text;
+        private Image dice1Image;
+        private Image dice2Image;
+        private Image dice3Image;
         private TextMeshProUGUI resultText;
 
         private string selectedBetType = ""; // "Tai" or "Xiu"
         private int selectedBetAmount = 0;
         private bool isRolling = false;
+        private TMP_InputField betInputField;
+        private Image taiXiuBowlImage;
+        private Button openBowlBtn;
+        private Button rollDiceBtn;
+        private int finalD1, finalD2, finalD3, finalTotal;
+        private bool finalIsTaiResult;
 
         // ── BLACKJACK (XÌ DÁCH) UI & STATE ─────────────────────────────────
         private GameObject blackjackPanel;
         private TextMeshProUGUI bjCashText;
         private TextMeshProUGUI bjBetAmountText;
-        private TextMeshProUGUI bjPlayerCardsText;
-        private TextMeshProUGUI bjDealerCardsText;
+        private Transform bjPlayerCardsContainer;
+        private Transform bjDealerCardsContainer;
         private TextMeshProUGUI bjResultText;
         private Button bjHitBtn;
         private Button bjStandBtn;
@@ -48,6 +63,7 @@ namespace EscapeFromHell.Chapter
         private List<string> bjPlayerHand = new List<string>();
         private List<string> bjDealerHand = new List<string>();
         private bool bjIsGameActive = false;
+        private TMP_InputField bjBetInputField;
 
         // ── ROULETTE UI & STATE ────────────────────────────────────────────
         private GameObject roulettePanel;
@@ -55,10 +71,20 @@ namespace EscapeFromHell.Chapter
         private TextMeshProUGUI rlBetTypeText;
         private TextMeshProUGUI rlBetAmountText;
         private TextMeshProUGUI rlResultText;
+        private RectTransform rlWheelRect;
 
         private string rlSelectedBetType = ""; // "Red", "Black", "Even", "Odd"
         private int rlSelectedBetAmount = 0;
         private bool rlIsSpinning = false;
+        private TMP_InputField rlBetInputField;
+
+        [Header("Procedural Assets Assigned by Builder")]
+        public List<Sprite> diceSprites = new List<Sprite>();
+        public Sprite cardBackgroundSprite;
+        public Sprite suitHeartSprite;
+        public Sprite suitDiamondSprite;
+        public Sprite suitSpadeSprite;
+        public Sprite suitClubSprite;
 
         private void Awake()
         {
@@ -159,19 +185,39 @@ namespace EscapeFromHell.Chapter
                 cashText = FindTextRecursive(txT, "CashText");
                 betTypeText = FindTextRecursive(txT, "BetTypeText");
                 betAmountText = FindTextRecursive(txT, "BetAmountText");
-                dice1Text = FindTextRecursive(txT, "Dice1Text");
-                dice2Text = FindTextRecursive(txT, "Dice2Text");
-                dice3Text = FindTextRecursive(txT, "Dice3Text");
+                
+                Transform d1 = FindTransformRecursive(txT, "Dice1Image");
+                if (d1 != null) dice1Image = d1.GetComponent<Image>();
+                Transform d2 = FindTransformRecursive(txT, "Dice2Image");
+                if (d2 != null) dice2Image = d2.GetComponent<Image>();
+                Transform d3 = FindTransformRecursive(txT, "Dice3Image");
+                if (d3 != null) dice3Image = d3.GetComponent<Image>();
+                
                 resultText = FindTextRecursive(txT, "ResultText");
 
                 BindButton(txT, "TaiButton", () => SelectBetType("Tai"));
                 BindButton(txT, "XiuButton", () => SelectBetType("Xiu"));
-                BindButton(txT, "Bet100kButton", () => SelectBetAmount(100000));
-                BindButton(txT, "Bet200kButton", () => SelectBetAmount(200000));
-                BindButton(txT, "Bet500kButton", () => SelectBetAmount(500000));
+                BindButton(txT, "BetMinusButton", () => AdjustBetAmount(-100000));
+                BindButton(txT, "BetPlusButton", () => AdjustBetAmount(100000));
                 BindButton(txT, "BetAllInButton", () => SelectBetAmount(-1));
-                BindButton(txT, "RollButton", RollDice);
+                rollDiceBtn = BindButton(txT, "RollButton", RollDice);
                 BindButton(txT, "CloseButton", CloseTaiXiuUI);
+
+                Transform bowlT = FindTransformRecursive(txT, "TaiXiuBowl");
+                if (bowlT != null) taiXiuBowlImage = bowlT.GetComponent<Image>();
+
+                openBowlBtn = BindButton(txT, "OpenBowlButton", OpenBowl);
+
+                Transform inputTx = FindTransformRecursive(txT, "BetInputField");
+                if (inputTx != null)
+                {
+                    betInputField = inputTx.GetComponent<TMP_InputField>();
+                    if (betInputField != null)
+                    {
+                        betInputField.onEndEdit.RemoveAllListeners();
+                        betInputField.onEndEdit.AddListener(OnBetInputEndEdit);
+                    }
+                }
             }
 
             // 2. BLACKJACK PANEL BINDINGS
@@ -181,19 +227,29 @@ namespace EscapeFromHell.Chapter
                 blackjackPanel = bjT.gameObject;
                 bjCashText = FindTextRecursive(bjT, "CashText");
                 bjBetAmountText = FindTextRecursive(bjT, "BetAmountText");
-                bjPlayerCardsText = FindTextRecursive(bjT, "PlayerCardsText");
-                bjDealerCardsText = FindTextRecursive(bjT, "DealerCardsText");
+                bjPlayerCardsContainer = FindTransformRecursive(bjT, "PlayerCardsContainer");
+                bjDealerCardsContainer = FindTransformRecursive(bjT, "DealerCardsContainer");
                 bjResultText = FindTextRecursive(bjT, "ResultText");
 
                 bjHitBtn = BindButton(bjT, "HitButton", BJHit);
                 bjStandBtn = BindButton(bjT, "StandButton", BJStand);
                 bjDealBtn = BindButton(bjT, "DealButton", BJStartGame);
 
-                BindButton(bjT, "Bet100kButton", () => BJSelectBetAmount(100000));
-                BindButton(bjT, "Bet200kButton", () => BJSelectBetAmount(200000));
-                BindButton(bjT, "Bet500kButton", () => BJSelectBetAmount(500000));
+                BindButton(bjT, "BJBetMinusButton", () => BJAdjustBetAmount(-100000));
+                BindButton(bjT, "BJBetPlusButton", () => BJAdjustBetAmount(100000));
                 BindButton(bjT, "BetAllInButton", () => BJSelectBetAmount(-1));
                 BindButton(bjT, "CloseButton", CloseBlackjackUI);
+
+                Transform inputBj = FindTransformRecursive(bjT, "BJBetInputField");
+                if (inputBj != null)
+                {
+                    bjBetInputField = inputBj.GetComponent<TMP_InputField>();
+                    if (bjBetInputField != null)
+                    {
+                        bjBetInputField.onEndEdit.RemoveAllListeners();
+                        bjBetInputField.onEndEdit.AddListener(BJOnBetInputEndEdit);
+                    }
+                }
             }
 
             // 3. ROULETTE PANEL BINDINGS
@@ -205,18 +261,31 @@ namespace EscapeFromHell.Chapter
                 rlBetTypeText = FindTextRecursive(rlT, "BetTypeText");
                 rlBetAmountText = FindTextRecursive(rlT, "BetAmountText");
                 rlResultText = FindTextRecursive(rlT, "ResultText");
+                
+                Transform wh = FindTransformRecursive(rlT, "RouletteWheel");
+                if (wh != null) rlWheelRect = wh as RectTransform;
 
                 BindButton(rlT, "RedButton", () => RLSelectBetType("Red"));
                 BindButton(rlT, "BlackButton", () => RLSelectBetType("Black"));
                 BindButton(rlT, "EvenButton", () => RLSelectBetType("Even"));
                 BindButton(rlT, "OddButton", () => RLSelectBetType("Odd"));
 
-                BindButton(rlT, "Bet100kButton", () => RLSelectBetAmount(100000));
-                BindButton(rlT, "Bet200kButton", () => RLSelectBetAmount(200000));
-                BindButton(rlT, "Bet500kButton", () => RLSelectBetAmount(500000));
+                BindButton(rlT, "RLBetMinusButton", () => RLAdjustBetAmount(-100000));
+                BindButton(rlT, "RLBetPlusButton", () => RLAdjustBetAmount(100000));
                 BindButton(rlT, "BetAllInButton", () => RLSelectBetAmount(-1));
                 BindButton(rlT, "SpinButton", RLSpin);
                 BindButton(rlT, "CloseButton", CloseRouletteUI);
+
+                Transform inputRl = FindTransformRecursive(rlT, "RLBetInputField");
+                if (inputRl != null)
+                {
+                    rlBetInputField = inputRl.GetComponent<TMP_InputField>();
+                    if (rlBetInputField != null)
+                    {
+                        rlBetInputField.onEndEdit.RemoveAllListeners();
+                        rlBetInputField.onEndEdit.AddListener(RLOnBetInputEndEdit);
+                    }
+                }
             }
         }
 
@@ -265,12 +334,25 @@ namespace EscapeFromHell.Chapter
             if (taiXiuPanel != null)
             {
                 selectedBetType = "";
-                selectedBetAmount = 0;
+                selectedBetAmount = ValidateBetAmount(100000);
                 if (resultText != null) resultText.text = "Chọn Tài/Xỉu & mức cược rồi bấm Xốc!";
-                if (dice1Text != null) dice1Text.text = "-";
-                if (dice2Text != null) dice2Text.text = "-";
-                if (dice3Text != null) dice3Text.text = "-";
+                if (dice1Image != null && diceSprites.Count > 0) dice1Image.sprite = diceSprites[0];
+                if (dice2Image != null && diceSprites.Count > 0) dice2Image.sprite = diceSprites[0];
+                if (dice3Image != null && diceSprites.Count > 0) dice3Image.sprite = diceSprites[0];
                 
+                if (taiXiuBowlImage != null)
+                {
+                    taiXiuBowlImage.gameObject.SetActive(false); // Initially hidden/lifted
+                }
+                if (openBowlBtn != null)
+                {
+                    openBowlBtn.gameObject.SetActive(false); // Hide Open Bowl button initially
+                }
+                if (rollDiceBtn != null)
+                {
+                    rollDiceBtn.gameObject.SetActive(true); // Show Xốc button initially
+                }
+
                 UpdateTaiXiuUI();
                 UpdateAllCashUI();
                 taiXiuPanel.SetActive(true);
@@ -298,6 +380,31 @@ namespace EscapeFromHell.Chapter
             UpdateTaiXiuUI();
         }
 
+        private int ValidateBetAmount(int amount)
+        {
+            if (currentCash <= 0) return 0;
+            
+            if (currentCash < 100000)
+            {
+                return currentCash;
+            }
+
+            if (amount < 100000)
+            {
+                return 100000;
+            }
+
+            int rounded = (amount / 100000) * 100000;
+            
+            if (rounded > currentCash)
+            {
+                rounded = (currentCash / 100000) * 100000;
+                if (rounded < 100000) rounded = currentCash;
+            }
+
+            return rounded;
+        }
+
         public void SelectBetAmount(int amount)
         {
             if (isRolling) return;
@@ -308,12 +415,28 @@ namespace EscapeFromHell.Chapter
             }
             else
             {
-                if (amount > currentCash)
-                {
-                    if (resultText != null) resultText.text = "<color=#ff4d4d>Bạn không có đủ tiền!</color>";
-                    return;
-                }
-                selectedBetAmount = amount;
+                selectedBetAmount = ValidateBetAmount(amount);
+            }
+            UpdateTaiXiuUI();
+        }
+
+        public void AdjustBetAmount(int delta)
+        {
+            if (isRolling) return;
+            int target = selectedBetAmount + delta;
+            selectedBetAmount = ValidateBetAmount(target);
+            UpdateTaiXiuUI();
+        }
+
+        private void OnBetInputEndEdit(string text)
+        {
+            if (int.TryParse(text, out int amount))
+            {
+                selectedBetAmount = ValidateBetAmount(amount);
+            }
+            else
+            {
+                selectedBetAmount = ValidateBetAmount(0);
             }
             UpdateTaiXiuUI();
         }
@@ -322,6 +445,10 @@ namespace EscapeFromHell.Chapter
         {
             if (betTypeText != null) betTypeText.text = string.IsNullOrEmpty(selectedBetType) ? "Chưa chọn" : (selectedBetType == "Tai" ? "Tài" : "Xỉu");
             if (betAmountText != null) betAmountText.text = selectedBetAmount == 0 ? "Chưa đặt" : $"{selectedBetAmount.ToString("N0")}đ";
+            if (betInputField != null && betInputField.text != selectedBetAmount.ToString())
+            {
+                betInputField.text = selectedBetAmount.ToString();
+            }
         }
 
         public void RollDice()
@@ -341,57 +468,56 @@ namespace EscapeFromHell.Chapter
             StartCoroutine(RollDiceRoutine());
         }
 
-        private IEnumerator RollDiceRoutine()
+        public void OpenBowl()
         {
-            isRolling = true;
-            if (resultText != null) resultText.text = "Đang xốc xúc xắc...";
+            StartCoroutine(OpenBowlRoutine());
+        }
 
-            for (int i = 0; i < 10; i++)
+        private IEnumerator OpenBowlRoutine()
+        {
+            if (openBowlBtn != null) openBowlBtn.gameObject.SetActive(false);
+
+            float duration = 0.6f;
+            float elapsed = 0f;
+            Vector2 startPos = new Vector2(0, -275);
+            Vector2 endPos = new Vector2(0, -215);
+
+            while (elapsed < duration)
             {
-                if (dice1Text != null) dice1Text.text = Random.Range(1, 7).ToString();
-                if (dice2Text != null) dice2Text.text = Random.Range(1, 7).ToString();
-                if (dice3Text != null) dice3Text.text = Random.Range(1, 7).ToString();
-                yield return new WaitForSeconds(0.1f);
+                elapsed += Time.deltaTime;
+                float t = elapsed / duration;
+                
+                // Lift-and-fade animation
+                if (taiXiuBowlImage != null)
+                {
+                    taiXiuBowlImage.rectTransform.anchoredPosition = Vector2.Lerp(startPos, endPos, t);
+                    Color col = taiXiuBowlImage.color;
+                    col.a = Mathf.Lerp(1f, 0f, t);
+                    taiXiuBowlImage.color = col;
+                }
+                yield return null;
             }
 
-            // Rigged calculation (Win first 3 bets, then lose)
-            bool shouldWin = (betCount < 3) && (Random.value < 0.75f);
+            if (taiXiuBowlImage != null) taiXiuBowlImage.gameObject.SetActive(false);
+            if (rollDiceBtn != null) rollDiceBtn.gameObject.SetActive(true);
 
-            int d1, d2, d3, total;
-            bool isTaiResult;
-            int attempts = 0;
+            ResolveRollResult();
+        }
 
-            do
-            {
-                d1 = Random.Range(1, 7);
-                d2 = Random.Range(1, 7);
-                d3 = Random.Range(1, 7);
-                total = d1 + d2 + d3;
-                isTaiResult = (total >= 11);
-                attempts++;
-
-                bool matchesChoice = (selectedBetType == "Tai" && isTaiResult) || (selectedBetType == "Xiu" && !isTaiResult);
-                if (shouldWin && matchesChoice) break;
-                if (!shouldWin && !matchesChoice) break;
-
-            } while (attempts < 100);
-
-            if (dice1Text != null) dice1Text.text = d1.ToString();
-            if (dice2Text != null) dice2Text.text = d2.ToString();
-            if (dice3Text != null) dice3Text.text = d3.ToString();
-
-            string resultStr = isTaiResult ? "Tài" : "Xỉu";
-            bool playerWon = (selectedBetType == "Tai" && isTaiResult) || (selectedBetType == "Xiu" && !isTaiResult);
+        private void ResolveRollResult()
+        {
+            string resultStr = finalIsTaiResult ? "Tài" : "Xỉu";
+            bool playerWon = (selectedBetType == "Tai" && finalIsTaiResult) || (selectedBetType == "Xiu" && !finalIsTaiResult);
 
             if (playerWon)
             {
                 currentCash += selectedBetAmount;
-                if (resultText != null) resultText.text = $"<color=#5cb85c>Thắng! {d1}+{d2}+{d3}={total} ({resultStr})\nBạn nhận +{selectedBetAmount.ToString("N0")}đ</color>";
+                if (resultText != null) resultText.text = $"<color=#5cb85c>Thắng! {finalD1}+{finalD2}+{finalD3}={finalTotal} ({resultStr})\nBạn nhận +{selectedBetAmount.ToString("N0")}đ</color>";
             }
             else
             {
                 currentCash -= selectedBetAmount;
-                if (resultText != null) resultText.text = $"<color=#ff4d4d>Thua! {d1}+{d2}+{d3}={total} ({resultStr})\nBạn mất -{selectedBetAmount.ToString("N0")}đ</color>";
+                if (resultText != null) resultText.text = $"<color=#ff4d4d>Thua! {finalD1}+{finalD2}+{finalD3}={finalTotal} ({resultStr})\nBạn mất -{selectedBetAmount.ToString("N0")}đ</color>";
             }
 
             betCount++;
@@ -402,6 +528,76 @@ namespace EscapeFromHell.Chapter
             UpdateTaiXiuUI();
 
             CheckBankruptcy(taiXiuPanel);
+        }
+
+        private IEnumerator RollDiceRoutine()
+        {
+            isRolling = true;
+            if (resultText != null) resultText.text = "Đang xốc xốc xốc...";
+
+            if (taiXiuBowlImage != null)
+            {
+                taiXiuBowlImage.gameObject.SetActive(true);
+                taiXiuBowlImage.rectTransform.anchoredPosition = new Vector2(0, -275);
+                Color col = taiXiuBowlImage.color;
+                col.a = 1f;
+                taiXiuBowlImage.color = col;
+            }
+
+            if (rollDiceBtn != null) rollDiceBtn.gameObject.SetActive(false);
+
+            // Shaking animation
+            int shakeFrames = 15;
+            for (int i = 0; i < shakeFrames; i++)
+            {
+                if (taiXiuBowlImage != null)
+                {
+                    // Vigorously shake bowl!
+                    taiXiuBowlImage.rectTransform.anchoredPosition = new Vector2(Random.Range(-15f, 15f), -275f + Random.Range(-10f, 10f));
+                }
+
+                // Cycle random dice faces under the bowl (invisible, but good for timing/realism!)
+                if (dice1Image != null && diceSprites.Count >= 6) dice1Image.sprite = diceSprites[Random.Range(0, 6)];
+                if (dice2Image != null && diceSprites.Count >= 6) dice2Image.sprite = diceSprites[Random.Range(0, 6)];
+                if (dice3Image != null && diceSprites.Count >= 6) dice3Image.sprite = diceSprites[Random.Range(0, 6)];
+
+                yield return new WaitForSeconds(0.06f);
+            }
+
+            // Restore bowl to center position
+            if (taiXiuBowlImage != null)
+            {
+                taiXiuBowlImage.rectTransform.anchoredPosition = new Vector2(0, -275);
+            }
+
+            // Rigged calculation (Win first 3 bets, then lose)
+            bool shouldWin = (betCount < 3) && (Random.value < 0.75f);
+
+            int attempts = 0;
+            do
+            {
+                finalD1 = Random.Range(1, 7);
+                finalD2 = Random.Range(1, 7);
+                finalD3 = Random.Range(1, 7);
+                finalTotal = finalD1 + finalD2 + finalD3;
+                finalIsTaiResult = (finalTotal >= 11);
+                attempts++;
+
+                bool matchesChoice = (selectedBetType == "Tai" && finalIsTaiResult) || (selectedBetType == "Xiu" && !finalIsTaiResult);
+                if (shouldWin && matchesChoice) break;
+                if (!shouldWin && !matchesChoice) break;
+
+            } while (attempts < 100);
+
+            // Apply final resolved values to dice faces under the cover
+            if (dice1Image != null && diceSprites.Count >= finalD1) dice1Image.sprite = diceSprites[finalD1 - 1];
+            if (dice2Image != null && diceSprites.Count >= finalD2) dice2Image.sprite = diceSprites[finalD2 - 1];
+            if (dice3Image != null && diceSprites.Count >= finalD3) dice3Image.sprite = diceSprites[finalD3 - 1];
+
+            if (resultText != null) resultText.text = "Đã xốc xong! Hãy mở bát.";
+
+            // Show Mở Bát Button
+            if (openBowlBtn != null) openBowlBtn.gameObject.SetActive(true);
         }
 
 
@@ -416,15 +612,16 @@ namespace EscapeFromHell.Chapter
 
             if (blackjackPanel != null)
             {
-                bjSelectedBet = 0;
+                bjSelectedBet = ValidateBetAmount(100000);
                 bjIsGameActive = false;
                 bjPlayerHand.Clear();
                 bjDealerHand.Clear();
                 
-                if (bjPlayerCardsText != null) bjPlayerCardsText.text = "-";
-                if (bjDealerCardsText != null) bjDealerCardsText.text = "-";
+                ClearContainer(bjPlayerCardsContainer);
+                ClearContainer(bjDealerCardsContainer);
                 if (bjResultText != null) bjResultText.text = "Đặt tiền cược rồi bấm Chia Bài!";
 
+                UpdateBJUI();
                 UpdateBlackjackButtons();
                 UpdateAllCashUI();
                 blackjackPanel.SetActive(true);
@@ -455,15 +652,39 @@ namespace EscapeFromHell.Chapter
             }
             else
             {
-                if (amount > currentCash)
-                {
-                    if (bjResultText != null) bjResultText.text = "<color=#ff4d4d>Bạn không có đủ tiền!</color>";
-                    return;
-                }
-                bjSelectedBet = amount;
+                bjSelectedBet = ValidateBetAmount(amount);
             }
+            UpdateBJUI();
+        }
 
-            if (bjBetAmountText != null) bjBetAmountText.text = $"{bjSelectedBet.ToString("N0")}đ";
+        public void BJAdjustBetAmount(int delta)
+        {
+            if (bjIsGameActive) return;
+            int target = bjSelectedBet + delta;
+            bjSelectedBet = ValidateBetAmount(target);
+            UpdateBJUI();
+        }
+
+        private void BJOnBetInputEndEdit(string text)
+        {
+            if (int.TryParse(text, out int amount))
+            {
+                bjSelectedBet = ValidateBetAmount(amount);
+            }
+            else
+            {
+                bjSelectedBet = ValidateBetAmount(0);
+            }
+            UpdateBJUI();
+        }
+
+        private void UpdateBJUI()
+        {
+            if (bjBetAmountText != null) bjBetAmountText.text = bjSelectedBet == 0 ? "Chưa đặt" : $"{bjSelectedBet.ToString("N0")}đ";
+            if (bjBetInputField != null && bjBetInputField.text != bjSelectedBet.ToString())
+            {
+                bjBetInputField.text = bjSelectedBet.ToString();
+            }
         }
 
         public void BJStartGame()
@@ -597,7 +818,7 @@ namespace EscapeFromHell.Chapter
 
             betCount++;
             bjSelectedBet = Mathf.Min(bjSelectedBet, currentCash);
-            if (bjBetAmountText != null) bjBetAmountText.text = $"{bjSelectedBet.ToString("N0")}đ";
+            UpdateBJUI();
 
             UpdateAllCashUI();
             UpdateBlackjackButtons();
@@ -606,21 +827,235 @@ namespace EscapeFromHell.Chapter
 
         private void UpdateBJDisplay(bool showAllDealerCards)
         {
-            int pScore = CalculateHandScore(bjPlayerHand);
-            if (bjPlayerCardsText != null) bjPlayerCardsText.text = $"{string.Join(", ", bjPlayerHand)} ({pScore}đ)";
-
-            if (showAllDealerCards)
+            ClearContainer(bjPlayerCardsContainer);
+            foreach (var cardStr in bjPlayerHand)
             {
-                int dScore = CalculateHandScore(bjDealerHand);
-                if (bjDealerCardsText != null) bjDealerCardsText.text = $"{string.Join(", ", bjDealerHand)} ({dScore}đ)";
+                CreateCardUI(cardStr, bjPlayerCardsContainer, false);
+            }
+
+            ClearContainer(bjDealerCardsContainer);
+            for (int i = 0; i < bjDealerHand.Count; i++)
+            {
+                bool isHidden = (i == 1 && !showAllDealerCards);
+                CreateCardUI(bjDealerHand[i], bjDealerCardsContainer, isHidden);
+            }
+            
+            int pScore = CalculateHandScore(bjPlayerHand);
+            int dScore = CalculateHandScore(bjDealerHand);
+            
+            string scoreInfo = $"Bạn: {pScore}đ | Nhà cái: {(showAllDealerCards ? dScore.ToString() + "đ" : "?")}";
+            if (bjResultText != null && bjIsGameActive)
+            {
+                bjResultText.text = $"Rút bài hoặc Dằn bài?\n<size=13><color=#aaaaaa>{scoreInfo}</color></size>";
+            }
+        }
+
+        private void ClearContainer(Transform container)
+        {
+            if (container == null) return;
+            foreach (Transform child in container)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+        private void CreateCardUI(string cardStr, Transform parent, bool isHidden)
+        {
+            if (parent == null) return;
+
+            GameObject cardObj = new GameObject("Card");
+            cardObj.transform.SetParent(parent, false);
+            RectTransform rect = cardObj.AddComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(50, 75);
+
+            Image bgImg = cardObj.AddComponent<Image>();
+            bgImg.sprite = cardBackgroundSprite;
+            bgImg.type = Image.Type.Sliced;
+
+            if (isHidden)
+            {
+                // Base background color: Luxury Dark Navy Blue
+                bgImg.color = ColorFromHex("#111E2E");
+
+                // Gold Border: Size 46x71 (leaves a 2px margin around 50x75 card)
+                GameObject goldBorderObj = new GameObject("GoldBorder");
+                goldBorderObj.transform.SetParent(cardObj.transform, false);
+                RectTransform borderRect = goldBorderObj.AddComponent<RectTransform>();
+                borderRect.anchorMin = new Vector2(0.5f, 0.5f);
+                borderRect.anchorMax = new Vector2(0.5f, 0.5f);
+                borderRect.pivot = new Vector2(0.5f, 0.5f);
+                borderRect.anchoredPosition = Vector2.zero;
+                borderRect.sizeDelta = new Vector2(46, 71);
+
+                Image borderImg = goldBorderObj.AddComponent<Image>();
+                borderImg.sprite = cardBackgroundSprite;
+                borderImg.type = Image.Type.Sliced;
+                borderImg.color = ColorFromHex("#D4AF37"); // Royal Gold
+
+                // Inner Pattern Background: Size 42x67
+                GameObject innerBgObj = new GameObject("InnerBg");
+                innerBgObj.transform.SetParent(goldBorderObj.transform, false);
+                RectTransform innerRect = innerBgObj.AddComponent<RectTransform>();
+                innerRect.anchorMin = new Vector2(0.5f, 0.5f);
+                innerRect.anchorMax = new Vector2(0.5f, 0.5f);
+                innerRect.pivot = new Vector2(0.5f, 0.5f);
+                innerRect.anchoredPosition = Vector2.zero;
+                innerRect.sizeDelta = new Vector2(42, 67);
+
+                Image innerImg = innerBgObj.AddComponent<Image>();
+                innerImg.sprite = cardBackgroundSprite;
+                innerImg.type = Image.Type.Sliced;
+                innerImg.color = ColorFromHex("#111E2E");
+
+                // Gold Spade Logo at center
+                GameObject logoObj = new GameObject("Logo");
+                logoObj.transform.SetParent(innerBgObj.transform, false);
+                RectTransform logoRect = logoObj.AddComponent<RectTransform>();
+                logoRect.anchorMin = new Vector2(0.5f, 0.5f);
+                logoRect.anchorMax = new Vector2(0.5f, 0.5f);
+                logoRect.pivot = new Vector2(0.5f, 0.5f);
+                logoRect.anchoredPosition = Vector2.zero;
+                logoRect.sizeDelta = new Vector2(18, 18);
+
+                Image logoImg = logoObj.AddComponent<Image>();
+                logoImg.sprite = suitSpadeSprite;
+                logoImg.color = ColorFromHex("#D4AF37"); // Gold spade logo
+                return;
+            }
+
+            // --- Card Front ---
+            bgImg.color = Color.white;
+
+            string rank = "";
+            string suit = "";
+            
+            if (cardStr.Contains("Cheat"))
+            {
+                string clean = cardStr.Split('♦')[0];
+                rank = clean.Trim();
+                suit = "♦";
             }
             else
             {
-                if (bjDealerHand.Count > 0)
-                {
-                    if (bjDealerCardsText != null) bjDealerCardsText.text = $"{bjDealerHand[0]}, [Ẩn]";
-                }
+                rank = cardStr.Substring(0, cardStr.Length - 1);
+                suit = cardStr.Substring(cardStr.Length - 1);
             }
+
+            bool isRed = (suit == "♥" || suit == "♦");
+            Color cardColor = isRed ? ColorFromHex("#E74C3C") : ColorFromHex("#2C3E50");
+
+            Sprite suitSprite = suitSpadeSprite;
+            if (suit == "♥") suitSprite = suitHeartSprite;
+            else if (suit == "♦") suitSprite = suitDiamondSprite;
+            else if (suit == "♠") suitSprite = suitSpadeSprite;
+            else if (suit == "♣") suitSprite = suitClubSprite;
+
+            // 1. Top-Left Corner Group
+            GameObject topLeftGroup = new GameObject("TopLeftGroup");
+            topLeftGroup.transform.SetParent(cardObj.transform, false);
+            RectTransform tlRect = topLeftGroup.AddComponent<RectTransform>();
+            tlRect.anchorMin = new Vector2(0f, 1f);
+            tlRect.anchorMax = new Vector2(0f, 1f);
+            tlRect.pivot = new Vector2(0.5f, 0.5f);
+            tlRect.anchoredPosition = new Vector2(10, -15);
+            tlRect.sizeDelta = new Vector2(14, 25);
+
+            // Top-Left Value Text
+            GameObject tlTextObj = new GameObject("ValueText");
+            tlTextObj.transform.SetParent(topLeftGroup.transform, false);
+            RectTransform tlTextRect = tlTextObj.AddComponent<RectTransform>();
+            tlTextRect.anchorMin = new Vector2(0.5f, 0.5f);
+            tlTextRect.anchorMax = new Vector2(0.5f, 0.5f);
+            tlTextRect.pivot = new Vector2(0.5f, 0.5f);
+            tlTextRect.anchoredPosition = new Vector2(0, 6);
+            tlTextRect.sizeDelta = new Vector2(14, 12);
+
+            TextMeshProUGUI tlTmp = tlTextObj.AddComponent<TextMeshProUGUI>();
+            tlTmp.text = rank;
+            tlTmp.fontSize = 11;
+            tlTmp.fontStyle = FontStyles.Bold;
+            tlTmp.color = cardColor;
+            tlTmp.alignment = TextAlignmentOptions.Center;
+
+            // Top-Left Mini-Suit
+            GameObject tlSuitObj = new GameObject("SuitImage");
+            tlSuitObj.transform.SetParent(topLeftGroup.transform, false);
+            RectTransform tlSuitRect = tlSuitObj.AddComponent<RectTransform>();
+            tlSuitRect.anchorMin = new Vector2(0.5f, 0.5f);
+            tlSuitRect.anchorMax = new Vector2(0.5f, 0.5f);
+            tlSuitRect.pivot = new Vector2(0.5f, 0.5f);
+            tlSuitRect.anchoredPosition = new Vector2(0, -6);
+            tlSuitRect.sizeDelta = new Vector2(10, 10);
+
+            Image tlSuitImg = tlSuitObj.AddComponent<Image>();
+            tlSuitImg.sprite = suitSprite;
+            tlSuitImg.color = cardColor;
+
+            // 2. Bottom-Right Corner Group (Rotated 180 degrees)
+            GameObject bottomRightGroup = new GameObject("BottomRightGroup");
+            bottomRightGroup.transform.SetParent(cardObj.transform, false);
+            RectTransform brRect = bottomRightGroup.AddComponent<RectTransform>();
+            brRect.anchorMin = new Vector2(1f, 0f);
+            brRect.anchorMax = new Vector2(1f, 0f);
+            brRect.pivot = new Vector2(0.5f, 0.5f);
+            brRect.anchoredPosition = new Vector2(-10, 15);
+            brRect.sizeDelta = new Vector2(14, 25);
+            brRect.localEulerAngles = new Vector3(0, 0, 180f); // Rotate 180 degrees
+
+            // Bottom-Right Value Text
+            GameObject brTextObj = new GameObject("ValueText");
+            brTextObj.transform.SetParent(bottomRightGroup.transform, false);
+            RectTransform brTextRect = brTextObj.AddComponent<RectTransform>();
+            brTextRect.anchorMin = new Vector2(0.5f, 0.5f);
+            brTextRect.anchorMax = new Vector2(0.5f, 0.5f);
+            brTextRect.pivot = new Vector2(0.5f, 0.5f);
+            brTextRect.anchoredPosition = new Vector2(0, 6);
+            brTextRect.sizeDelta = new Vector2(14, 12);
+
+            TextMeshProUGUI brTmp = brTextObj.AddComponent<TextMeshProUGUI>();
+            brTmp.text = rank;
+            brTmp.fontSize = 11;
+            brTmp.fontStyle = FontStyles.Bold;
+            brTmp.color = cardColor;
+            brTmp.alignment = TextAlignmentOptions.Center;
+
+            // Bottom-Right Mini-Suit
+            GameObject brSuitObj = new GameObject("SuitImage");
+            brSuitObj.transform.SetParent(bottomRightGroup.transform, false);
+            RectTransform brSuitRect = brSuitObj.AddComponent<RectTransform>();
+            brSuitRect.anchorMin = new Vector2(0.5f, 0.5f);
+            brSuitRect.anchorMax = new Vector2(0.5f, 0.5f);
+            brSuitRect.pivot = new Vector2(0.5f, 0.5f);
+            brSuitRect.anchoredPosition = new Vector2(0, -6);
+            brSuitRect.sizeDelta = new Vector2(10, 10);
+
+            Image brSuitImg = brSuitObj.AddComponent<Image>();
+            brSuitImg.sprite = suitSprite;
+            brSuitImg.color = cardColor;
+
+            // 3. Center Large Suit Image
+            GameObject centerSuitObj = new GameObject("CenterSuitImage");
+            centerSuitObj.transform.SetParent(cardObj.transform, false);
+            RectTransform centerSuitRect = centerSuitObj.AddComponent<RectTransform>();
+            centerSuitRect.anchorMin = new Vector2(0.5f, 0.5f);
+            centerSuitRect.anchorMax = new Vector2(0.5f, 0.5f);
+            centerSuitRect.pivot = new Vector2(0.5f, 0.5f);
+            centerSuitRect.anchoredPosition = Vector2.zero; // Centered
+            centerSuitRect.sizeDelta = new Vector2(20, 20);
+
+            Image centerSuitImg = centerSuitObj.AddComponent<Image>();
+            centerSuitImg.sprite = suitSprite;
+            centerSuitImg.color = cardColor;
+        }
+
+        private Color ColorFromHex(string hex)
+        {
+            Color col;
+            if (ColorUtility.TryParseHtmlString(hex, out col))
+            {
+                return col;
+            }
+            return Color.white;
         }
 
         private void UpdateBlackjackButtons()
@@ -700,7 +1135,7 @@ namespace EscapeFromHell.Chapter
             if (roulettePanel != null)
             {
                 rlSelectedBetType = "";
-                rlSelectedBetAmount = 0;
+                rlSelectedBetAmount = ValidateBetAmount(100000);
                 if (rlResultText != null) rlResultText.text = "Chọn cửa đặt & tiền rồi bấm Quay!";
 
                 UpdateRouletteUI();
@@ -740,12 +1175,28 @@ namespace EscapeFromHell.Chapter
             }
             else
             {
-                if (amount > currentCash)
-                {
-                    if (rlResultText != null) rlResultText.text = "<color=#ff4d4d>Bạn không có đủ tiền!</color>";
-                    return;
-                }
-                rlSelectedBetAmount = amount;
+                rlSelectedBetAmount = ValidateBetAmount(amount);
+            }
+            UpdateRouletteUI();
+        }
+
+        public void RLAdjustBetAmount(int delta)
+        {
+            if (rlIsSpinning) return;
+            int target = rlSelectedBetAmount + delta;
+            rlSelectedBetAmount = ValidateBetAmount(target);
+            UpdateRouletteUI();
+        }
+
+        private void RLOnBetInputEndEdit(string text)
+        {
+            if (int.TryParse(text, out int amount))
+            {
+                rlSelectedBetAmount = ValidateBetAmount(amount);
+            }
+            else
+            {
+                rlSelectedBetAmount = ValidateBetAmount(0);
             }
             UpdateRouletteUI();
         }
@@ -760,6 +1211,10 @@ namespace EscapeFromHell.Chapter
 
             if (rlBetTypeText != null) rlBetTypeText.text = typeVN;
             if (rlBetAmountText != null) rlBetAmountText.text = rlSelectedBetAmount == 0 ? "Chưa đặt" : $"{rlSelectedBetAmount.ToString("N0")}đ";
+            if (rlBetInputField != null && rlBetInputField.text != rlSelectedBetAmount.ToString())
+            {
+                rlBetInputField.text = rlSelectedBetAmount.ToString();
+            }
         }
 
         public void RLSpin()
@@ -784,15 +1239,6 @@ namespace EscapeFromHell.Chapter
             rlIsSpinning = true;
             if (rlResultText != null) rlResultText.text = "Vòng quay đang quay...";
 
-            string[] colors = { "Đỏ", "Đen" };
-            for (int i = 0; i < 15; i++)
-            {
-                int num = Random.Range(1, 37);
-                string col = colors[Random.Range(0, 2)];
-                if (rlResultText != null) rlResultText.text = $"Đang quay: <color=#ffb732>{num} ({col})</color>";
-                yield return new WaitForSeconds(0.08f);
-            }
-
             // Rigged Roulette
             bool shouldWin = (betCount < 3) && (Random.value < 0.75f);
 
@@ -801,13 +1247,22 @@ namespace EscapeFromHell.Chapter
             bool isEven = false;
             int attempts = 0;
 
+            int[] wheelSequence = { 0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26 };
             int[] redNums = { 1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36 };
 
             do
             {
-                finalNum = Random.Range(1, 37);
-                finalColor = System.Array.IndexOf(redNums, finalNum) >= 0 ? "Red" : "Black";
-                isEven = (finalNum % 2 == 0);
+                finalNum = Random.Range(0, 37); // Include 0
+                if (finalNum == 0)
+                {
+                    finalColor = "Green";
+                    isEven = false;
+                }
+                else
+                {
+                    finalColor = System.Array.IndexOf(redNums, finalNum) >= 0 ? "Red" : "Black";
+                    isEven = (finalNum % 2 == 0);
+                }
                 attempts++;
 
                 bool matchesChoice = false;
@@ -821,9 +1276,50 @@ namespace EscapeFromHell.Chapter
 
             } while (attempts < 100);
 
-            string colorVN = finalColor == "Red" ? "Đỏ" : "Đen";
-            string parityVN = isEven ? "Chẵn" : "Lẻ";
-            string colorHex = finalColor == "Red" ? "#ff4d4d" : "#555555";
+            // Spin animation
+            float spinDuration = 2.2f;
+            float elapsed = 0f;
+            
+            while (elapsed < spinDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / spinDuration;
+                float speed = Mathf.Lerp(900f, 60f, t);
+                
+                if (rlWheelRect != null)
+                {
+                    rlWheelRect.Rotate(0, 0, -speed * Time.deltaTime);
+                }
+
+                int tempNum = Random.Range(0, 37);
+                string tempCol = tempNum == 0 ? "Xanh lá" : (System.Array.IndexOf(redNums, tempNum) >= 0 ? "Đỏ" : "Đen");
+                if (rlResultText != null) rlResultText.text = $"Đang quay: <color=#ffb732>{tempNum} ({tempCol})</color>";
+
+                yield return null;
+            }
+
+            // Target landing angle for finalNum
+            int slotIndex = System.Array.IndexOf(wheelSequence, finalNum);
+            if (slotIndex < 0) slotIndex = 0;
+            float targetAngle = 90f - (slotIndex * 360f / 37f + 180f / 37f);
+            
+            // Settle smoothly
+            if (rlWheelRect != null)
+            {
+                float currentZ = rlWheelRect.localEulerAngles.z;
+                float tSettle = 0f;
+                while (tSettle < 1f)
+                {
+                    tSettle += Time.deltaTime * 2.5f; // 0.4 seconds
+                    rlWheelRect.localRotation = Quaternion.Euler(0, 0, Mathf.LerpAngle(currentZ, targetAngle, tSettle));
+                    yield return null;
+                }
+                rlWheelRect.localRotation = Quaternion.Euler(0, 0, targetAngle);
+            }
+
+            string colorVN = finalColor == "Red" ? "Đỏ" : (finalColor == "Black" ? "Đen" : "Xanh lá");
+            string parityVN = finalNum == 0 ? "Không" : (isEven ? "Chẵn" : "Lẻ");
+            string colorHex = finalColor == "Red" ? "#ff4d4d" : (finalColor == "Black" ? "#555555" : "#27ae60");
 
             bool playerWon = false;
             if (rlSelectedBetType == "Red" && finalColor == "Red") playerWon = true;
