@@ -17,6 +17,11 @@ namespace EscapeFromHell.Editor
         [MenuItem("Escape From Hell/Build Main Menu Scene")]
         public static void BuildMainMenuScene()
         {
+            if (EditorApplication.isPlaying)
+            {
+                EditorUtility.DisplayDialog("Build Error", "Không thể build scene khi đang ở chế độ Play Mode! Vui lòng nhấn nút Dừng (Stop) chơi game trong Unity Editor trước khi chạy lệnh này.", "OK");
+                return;
+            }
             Debug.Log("Building Main Menu Scene...");
 
             // Ensure sprites exist

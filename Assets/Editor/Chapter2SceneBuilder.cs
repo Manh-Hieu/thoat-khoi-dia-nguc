@@ -19,6 +19,11 @@ namespace EscapeFromHell.Editor
         [MenuItem("Escape From Hell/Build Chapter 2 Scene")]
         public static void BuildChapter2()
         {
+            if (EditorApplication.isPlaying)
+            {
+                EditorUtility.DisplayDialog("Build Error", "Không thể build scene khi đang ở chế độ Play Mode! Vui lòng nhấn nút Dừng (Stop) chơi game trong Unity Editor trước khi chạy lệnh này.", "OK");
+                return;
+            }
             Debug.Log("Starting Chapter 2 Scene Build...");
             AssetDatabase.Refresh();
             BuildChapter2Scene();
@@ -29,6 +34,11 @@ namespace EscapeFromHell.Editor
         [MenuItem("Escape From Hell/Build Chapter 3 Scene")]
         public static void BuildChapter3()
         {
+            if (EditorApplication.isPlaying)
+            {
+                EditorUtility.DisplayDialog("Build Error", "Không thể build scene khi đang ở chế độ Play Mode! Vui lòng nhấn nút Dừng (Stop) chơi game trong Unity Editor trước khi chạy lệnh này.", "OK");
+                return;
+            }
             Debug.Log("Starting Chapter 3 Scene Build...");
             AssetDatabase.Refresh();
             BuildChapter3PlaceholderScene();
@@ -39,6 +49,11 @@ namespace EscapeFromHell.Editor
         [MenuItem("Escape From Hell/Build All Scenes")]
         public static void BuildAllScenes()
         {
+            if (EditorApplication.isPlaying)
+            {
+                EditorUtility.DisplayDialog("Build Error", "Không thể build scene khi đang ở chế độ Play Mode! Vui lòng nhấn nút Dừng (Stop) chơi game trong Unity Editor trước khi chạy lệnh này.", "OK");
+                return;
+            }
             Debug.Log("=== STARTING BUILD ALL SCENES ===");
             
             Debug.Log("1/4: Building Main Menu...");
@@ -135,6 +150,36 @@ namespace EscapeFromHell.Editor
                 Debug.LogError("Failed to load Casino Background Sprite at path: " + bgPath);
             }
 
+            // Spawn the 24 sliced railing pieces with dynamic Y-sorting
+            GameObject railingParent = new GameObject("Stairs_Railing");
+            railingParent.transform.parent = environment.transform;
+            railingParent.transform.position = Vector3.zero;
+            
+            for (int i = 0; i < 24; i++)
+            {
+                string slicePath = $"Assets/Sprites/Backgrounds/StairsRailing/Railing_{i}.png";
+                ConfigureSpriteImportSettings(slicePath, 64);
+                
+                float xCenter = -8.0f + 0.5f * i + 0.25f;
+                GameObject sliceObj = new GameObject($"Railing_Slice_{i}");
+                sliceObj.transform.parent = railingParent.transform;
+                sliceObj.transform.position = new Vector3(xCenter, 0f, 0f);
+                
+                SpriteRenderer sr = sliceObj.AddComponent<SpriteRenderer>();
+                sr.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(slicePath);
+                
+                // Configure YSortSprite for dynamic depth sorting
+                // Right-side railing (x >= -4.25): uses formula so railing appears in front
+                // when player walks BEHIND it (going toward casino door).
+                // Left-side railing (x < -4.25): player is NEVER behind this (VipStairsTrigger blocks entry),
+                // so keep its sortingOrder LOW (behind player) — fixedSortY = -3.0 → order = 200.
+                YSortSprite ySort = sliceObj.AddComponent<YSortSprite>();
+                float fixedSortY = (xCenter < -4.25f)
+                    ? -3.0f                              // Always behind player on casino floor
+                    : (-1.28125f - xCenter * 0.75f);    // Dynamic front-edge for right railing
+                ySort.Configure(baseOrder: 500, yScale: 100f, yOffset: 0f, useFixedY: true, fixedSortY: fixedSortY);
+            }
+
             // Boundary colliders for walking area in sòng bạc (Wider room)
             CreateBoundary(environment.transform, "Boundary_Left", new Vector3(-8.44f, 0.11f, 0f), new Vector2(1f, 16f));
             CreateBoundary(environment.transform, "Boundary_Right", new Vector3(8.4f, -0.01f, 0f), new Vector2(1f, 16f));
@@ -158,7 +203,10 @@ namespace EscapeFromHell.Editor
             SpriteRenderer playerSR = playerObj.AddComponent<SpriteRenderer>();
             Sprite playerSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Characters/Minh/Minh_Idle_Down.png");
             playerSR.sprite = playerSprite;
-            playerSR.sortingOrder = 5;
+            // YSortSprite: baseOrder=500 ensures player stays above background (-20)
+            // and participates in depth sorting with tables/NPCs
+            YSortSprite playerYSort = playerObj.AddComponent<YSortSprite>();
+            playerYSort.Configure(baseOrder: 500, yScale: 100f, yOffset: -0.7f);
 
             Rigidbody2D playerRB = playerObj.AddComponent<Rigidbody2D>();
             playerRB.gravityScale = 0f;
@@ -216,8 +264,12 @@ namespace EscapeFromHell.Editor
             SpawnCasinoTable(propsParent.transform, "TaiXiuTableProp", new Vector3(0.47f, -6.71f, 0f), Chapter2PropType.TaiXiuTable, "Chơi Tài Xỉu", false, true);
             SpawnCasinoTable(propsParent.transform, "RouletteTable", new Vector3(4.3f, -6.38f, 0f), Chapter2PropType.RouletteTable, "Chơi Roulette", true, false);
 
+            // Spawn the 2 VIP gaming tables on the 2nd floor balcony (scaled to 0.75f for perspective)
+            SpawnCasinoTable(propsParent.transform, "VipPokerTable", new Vector3(-2.0f, 2.4f, 0f), Chapter2PropType.PokerTable, "Chơi Blackjack VIP", true, false, 0.75f);
+            SpawnCasinoTable(propsParent.transform, "VipRouletteTable", new Vector3(3.0f, 2.4f, 0f), Chapter2PropType.RouletteTable, "Chơi Roulette VIP", true, false, 0.75f);
+
             // Left Exit Door (placed exactly over the casino entrance door shown in the background illustration)
-            SpawnExitDoor(propsParent.transform, "LeftExitDoor", new Vector3(3.23f, -3.0f, 0f), 4.2f);
+            SpawnExitDoor(propsParent.transform, "LeftExitDoor", new Vector3(3.23f, -2.2f, 0f), 4.2f);
 
             // Left Door Guard 1 (stands to the left of the door, matching the left column background elements)
             SpawnGuard(propsParent.transform, "LeftDoorGuard1", new Vector3(1.75f, -3.51f, 0f), Chapter2PropType.LeftDoorGuard1, "Hỏi thăm bảo vệ");
@@ -228,17 +280,15 @@ namespace EscapeFromHell.Editor
             // Recruiter NPC (standing on the far right side)
             SpawnGuard(propsParent.transform, "RecruiterNPC", new Vector3(7.0f, -2.4f, 0f), Chapter2PropType.Recruiter, "Nói chuyện");
 
-            // VIP Stairs Guard (guarding stairs to VIP floor)
-            // Use wider collider width (1.5f) to prevent bypassing the stairs
-            SpawnGuard(propsParent.transform, "VipStairsGuardNPC", new Vector3(-7.05f, 1.13f, 0f), Chapter2PropType.VipStairsGuard, "Hỏi thăm bảo vệ", 1.5f);
+            SpawnGuard(propsParent.transform, "VipStairsGuardNPC", new Vector3(-7.05f, 1.13f, 0f), Chapter2PropType.VipStairsGuard, "Hỏi thăm bảo vệ");
 
-            // VIP Stairs Block Trigger
+            // VIP Stairs Block Trigger - positioned AT the guard's level to catch player early
             GameObject stairsTriggerObj = new GameObject("VipStairsBlockTrigger");
             stairsTriggerObj.transform.parent = propsParent.transform;
-            stairsTriggerObj.transform.position = new Vector3(-7.05f, 2.0f, 0f);
+            stairsTriggerObj.transform.position = new Vector3(-7.05f, 1.5f, 0f);
             
             BoxCollider2D stairsTriggerCollider = stairsTriggerObj.AddComponent<BoxCollider2D>();
-            stairsTriggerCollider.size = new Vector2(2.5f, 1.0f);
+            stairsTriggerCollider.size = new Vector2(4f, 1.2f); // wider + taller to catch player
             stairsTriggerCollider.isTrigger = true;
             
             stairsTriggerObj.AddComponent<VipStairsTrigger>();
@@ -525,6 +575,10 @@ namespace EscapeFromHell.Editor
             GameManager gm = gmObj.AddComponent<GameManager>();
             gm.ChangeState(GameState.Playing);
 
+            // 10. Debug money panel (Editor/Development only - Press F12 to toggle)
+            GameObject debugObj = new GameObject("DebugMoneyPanel");
+            debugObj.AddComponent<DebugMoneyPanel>();
+
             // 10. Save the scene
             if (!Directory.Exists("Assets/Scenes"))
             {
@@ -804,7 +858,7 @@ namespace EscapeFromHell.Editor
             return img;
         }
 
-        private static void SpawnCasinoTable(Transform parent, string tableName, Vector3 tablePos, Chapter2PropType propType, string interactionPrompt, bool hasGamblersSide = false, bool hasGamblersBack = false)
+        private static void SpawnCasinoTable(Transform parent, string tableName, Vector3 tablePos, Chapter2PropType propType, string interactionPrompt, bool hasGamblersSide = false, bool hasGamblersBack = false, float scaleFactor = 1.0f)
         {
             GameObject tableGroup = new GameObject(tableName);
             tableGroup.transform.parent = parent;
@@ -820,20 +874,25 @@ namespace EscapeFromHell.Editor
             GameObject tableVisual = new GameObject("TableVisual");
             tableVisual.transform.parent = tableGroup.transform;
             tableVisual.transform.localPosition = Vector3.zero;
-            tableVisual.transform.localScale = new Vector3(0.25f, 0.25f, 1f);
+            tableVisual.transform.localScale = new Vector3(0.25f * scaleFactor, 0.25f * scaleFactor, 1f);
             SpriteRenderer tableSR = tableVisual.AddComponent<SpriteRenderer>();
             tableSR.sprite = tableSprite;
-            tableSR.sortingOrder = 3;
+            // Table uses fixed Y-sort at its FRONT EDGE (tablePos.y - 0.5 * scaleFactor = front edge of table)
+            // This means: player above this Y = player behind table (table renders in front)
+            //             player below this Y = player in front of table (player renders in front)
+            YSortSprite tableYSort = tableVisual.AddComponent<YSortSprite>();
+            float tableFrontY = tablePos.y - 0.5f * scaleFactor; // front edge of table
+            tableYSort.Configure(baseOrder: 500, yScale: 100f, useFixedY: true, fixedSortY: tableFrontY);
 
             // Physical boundary collider (at group level for 1:1 scale)
             BoxCollider2D bc = tableGroup.AddComponent<BoxCollider2D>();
-            bc.size = new Vector2(1.5f, 0.4f);
-            bc.offset = new Vector2(0f, -0.4f);
+            bc.size = new Vector2(1.5f * scaleFactor, 0.4f * scaleFactor);
+            bc.offset = new Vector2(0f, -0.4f * scaleFactor);
 
             // Interaction Trigger (at group level)
             BoxCollider2D trigger = tableGroup.AddComponent<BoxCollider2D>();
-            trigger.size = new Vector2(3.2f, 1.6f);
-            trigger.offset = new Vector2(0f, -0.3f);
+            trigger.size = new Vector2(3.2f * scaleFactor, 1.6f * scaleFactor);
+            trigger.offset = new Vector2(0f, -0.3f * scaleFactor);
             trigger.isTrigger = true;
             Chapter2Prop prop = tableGroup.AddComponent<Chapter2Prop>();
             prop.Initialize(propType, interactionPrompt);
@@ -841,8 +900,8 @@ namespace EscapeFromHell.Editor
             // 2. Dealer NPC (Behind the table)
             GameObject dealer = new GameObject("Dealer");
             dealer.transform.parent = tableGroup.transform;
-            dealer.transform.localPosition = new Vector3(0f, 0.5f, 0f);
-            dealer.transform.localScale = new Vector3(0.14f, 0.14f, 1f);
+            dealer.transform.localPosition = new Vector3(0f, 0.5f * scaleFactor, 0f);
+            dealer.transform.localScale = new Vector3(0.14f * scaleFactor, 0.14f * scaleFactor, 1f);
             SpriteRenderer dealerSR = dealer.AddComponent<SpriteRenderer>();
             dealerSR.sprite = dealerSprite;
             dealerSR.sortingOrder = 2; // Render behind table felt
@@ -852,34 +911,34 @@ namespace EscapeFromHell.Editor
             {
                 GameObject gamblerL = new GameObject("Gambler_Left");
                 gamblerL.transform.parent = tableGroup.transform;
-                gamblerL.transform.localPosition = new Vector3(-0.6f, -0.3f, 0f);
-                gamblerL.transform.localScale = new Vector3(0.13f, 0.13f, 1f);
+                gamblerL.transform.localPosition = new Vector3(-0.6f * scaleFactor, -0.3f * scaleFactor, 0f);
+                gamblerL.transform.localScale = new Vector3(0.13f * scaleFactor, 0.13f * scaleFactor, 1f);
                 gamblerL.AddComponent<SpriteRenderer>().sprite = gBack;
-                gamblerL.GetComponent<SpriteRenderer>().sortingOrder = 4; // Render in front of table
+                gamblerL.GetComponent<SpriteRenderer>().sortingOrder = 1300; // Render above table (YSort table ~1200)
 
                 GameObject gamblerR = new GameObject("Gambler_Right");
                 gamblerR.transform.parent = tableGroup.transform;
-                gamblerR.transform.localPosition = new Vector3(0.6f, -0.3f, 0f);
-                gamblerR.transform.localScale = new Vector3(0.13f, 0.13f, 1f);
+                gamblerR.transform.localPosition = new Vector3(0.6f * scaleFactor, -0.3f * scaleFactor, 0f);
+                gamblerR.transform.localScale = new Vector3(0.13f * scaleFactor, 0.13f * scaleFactor, 1f);
                 gamblerR.AddComponent<SpriteRenderer>().sprite = gBack;
-                gamblerR.GetComponent<SpriteRenderer>().sortingOrder = 4;
+                gamblerR.GetComponent<SpriteRenderer>().sortingOrder = 1300;
             }
 
             if (hasGamblersSide)
             {
                 GameObject gamblerL = new GameObject("Gambler_Left");
                 gamblerL.transform.parent = tableGroup.transform;
-                gamblerL.transform.localPosition = new Vector3(-0.9f, -0.1f, 0f);
-                gamblerL.transform.localScale = new Vector3(0.13f, 0.13f, 1f);
+                gamblerL.transform.localPosition = new Vector3(-0.9f * scaleFactor, -0.1f * scaleFactor, 0f);
+                gamblerL.transform.localScale = new Vector3(0.13f * scaleFactor, 0.13f * scaleFactor, 1f);
                 gamblerL.AddComponent<SpriteRenderer>().sprite = gRight; // Face right towards table
-                gamblerL.GetComponent<SpriteRenderer>().sortingOrder = 4;
+                gamblerL.GetComponent<SpriteRenderer>().sortingOrder = 1300;
 
                 GameObject gamblerR = new GameObject("Gambler_Right");
                 gamblerR.transform.parent = tableGroup.transform;
-                gamblerR.transform.localPosition = new Vector3(0.9f, -0.1f, 0f);
-                gamblerR.transform.localScale = new Vector3(0.13f, 0.13f, 1f);
+                gamblerR.transform.localPosition = new Vector3(0.9f * scaleFactor, -0.1f * scaleFactor, 0f);
+                gamblerR.transform.localScale = new Vector3(0.13f * scaleFactor, 0.13f * scaleFactor, 1f);
                 gamblerR.AddComponent<SpriteRenderer>().sprite = gLeft; // Face left towards table
-                gamblerR.GetComponent<SpriteRenderer>().sortingOrder = 4;
+                gamblerR.GetComponent<SpriteRenderer>().sortingOrder = 1300;
             }
         }
 
@@ -899,7 +958,8 @@ namespace EscapeFromHell.Editor
             guardCollider.offset = new Vector2(0f, -0.7f); // Physical body blocker
 
             BoxCollider2D guardTrigger = guardObj.AddComponent<BoxCollider2D>();
-            guardTrigger.size = new Vector2(1.8f, 1.8f);
+            guardTrigger.size = new Vector2(1f, 1.8f);
+            guardTrigger.offset = Vector2.zero;
             guardTrigger.isTrigger = true; // Proximity trigger
 
             Chapter2Prop guardProp = guardObj.AddComponent<Chapter2Prop>();
@@ -912,19 +972,6 @@ namespace EscapeFromHell.Editor
             doorObj.transform.parent = parent;
             doorObj.transform.position = doorPos;
             doorObj.transform.localScale = new Vector3(scale, scale, 1f);
-
-            // Add visible SpriteRenderer and DoorOcclusionFade component configured to scale
-            // and hide/fade out completely when the player walks into it.
-            SpriteRenderer sr = doorObj.AddComponent<SpriteRenderer>();
-            sr.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/Door.png");
-            sr.sortingOrder = 6; // Render in front of player (sortingOrder 5)
-            sr.color = Color.white;
-
-            DoorOcclusionFade fade = doorObj.AddComponent<DoorOcclusionFade>();
-            fade.normalAlpha = 1.0f;
-            fade.fadedAlpha = 0.0f; // Hide the door completely!
-            fade.fadeSpeed = 8f;
-            fade.triggerRadius = 2.2f; // Trigger slightly earlier so it is fully faded when player reaches it
 
             BoxCollider2D doorTrigger = doorObj.AddComponent<BoxCollider2D>();
             doorTrigger.size = new Vector2(2.5f, 1.5f); // Larger collider box matching the double doors width

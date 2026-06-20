@@ -83,7 +83,7 @@ namespace EscapeFromHell.Editor
                 Debug.Log("Running Python Sprite Generator...");
                 var startInfo = new System.Diagnostics.ProcessStartInfo
                 {
-                    FileName = "python",
+                    FileName = Application.platform == RuntimePlatform.WindowsEditor ? "python" : "python3",
                     Arguments = $"\"{scriptPath}\"",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
@@ -151,7 +151,7 @@ namespace EscapeFromHell.Editor
                 Debug.Log("Running Python NPC Generator...");
                 var startInfo = new System.Diagnostics.ProcessStartInfo
                 {
-                    FileName = "python",
+                    FileName = Application.platform == RuntimePlatform.WindowsEditor ? "python" : "python3",
                     Arguments = $"\"{scriptPath}\"",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,

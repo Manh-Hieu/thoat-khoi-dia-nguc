@@ -8,7 +8,8 @@ namespace EscapeFromHell.Chapter
         Phone,
         Laptop,
         Bills,
-        Door
+        Door,
+        Newspaper
     }
 
     public class Chapter1Prop : InteractableObject
@@ -43,6 +44,9 @@ namespace EscapeFromHell.Chapter
                     break;
                 case Chapter1PropType.Door:
                     Chapter1Controller.Instance.InteractWithDoor();
+                    break;
+                case Chapter1PropType.Newspaper:
+                    Chapter1Controller.Instance.ReadNewspaper();
                     break;
             }
         }

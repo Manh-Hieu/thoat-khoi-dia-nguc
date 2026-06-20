@@ -388,7 +388,9 @@ def assemble_sprite(head, torso, legs, shift_down=False):
     return img
 
 def main():
-    dest_dir = r'c:\code\thoat khoi dia nguc\Assets\Sprites\Characters\Minh'
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(script_dir)
+    dest_dir = os.path.join(project_root, "Assets", "Sprites", "Characters", "Minh")
     os.makedirs(dest_dir, exist_ok=True)
     
     # 1. Idle Sprites

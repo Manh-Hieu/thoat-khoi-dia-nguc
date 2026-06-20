@@ -59,11 +59,13 @@ namespace EscapeFromHell.Chapter
         private bool happyEndingTriggered = false;
         private bool readyToGoToCasino = false;
 
+        public bool IsReadyToGoToCasino => readyToGoToCasino;
+
         private void Start()
         {
             // Start the game by playing intro dialogue after a brief delay
             StartCoroutine(StartIntroRoutine());
-            SpawnDoorRuntime();
+            // SpawnDoorRuntime(); // Ẩn cửa
         }
 
         private void Update()
@@ -210,6 +212,14 @@ namespace EscapeFromHell.Chapter
                 hasReadLaptop = true;
                 DialogueSystem.Instance.StartDialogue(laptopDialogue);
                 CheckProgress();
+            }
+        }
+
+        public void ReadNewspaper()
+        {
+            if (NewspaperUI.Instance != null)
+            {
+                NewspaperUI.Instance.OpenNewspaper();
             }
         }
 

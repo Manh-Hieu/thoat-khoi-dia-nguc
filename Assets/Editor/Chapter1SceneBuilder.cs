@@ -73,6 +73,11 @@ namespace EscapeFromHell.Editor
         [MenuItem("Escape From Hell/Build Chapter 1 Scene")]
         public static void BuildScene()
         {
+            if (EditorApplication.isPlaying)
+            {
+                EditorUtility.DisplayDialog("Build Error", "Không thể build scene khi đang ở chế độ Play Mode! Vui lòng nhấn nút Dừng (Stop) chơi game trong Unity Editor trước khi chạy lệnh này.", "OK");
+                return;
+            }
             Debug.Log("Starting Chapter 1 Scene Build...");
 
             // Refresh asset database first to ensure all imported changes are captured
@@ -127,19 +132,19 @@ namespace EscapeFromHell.Editor
                 CameraFollow camFollow = mainCam.gameObject.AddComponent<CameraFollow>();
             }
 
-            // Add URP 2D Global Light with a dim cool blue tint for a gloomy, damp atmosphere
+            // Add URP 2D Global Light - bright daylight feel
             GameObject globalLightObj = new GameObject("GlobalLight2D");
             var globalLight = globalLightObj.AddComponent<UnityEngine.Rendering.Universal.Light2D>();
             globalLight.lightType = UnityEngine.Rendering.Universal.Light2D.LightType.Global;
-            globalLight.color = new Color(0.55f, 0.62f, 0.75f, 1f); // Moody cool blue/gray
-            globalLight.intensity = 0.35f;
+            globalLight.color = new Color(1f, 0.97f, 0.92f, 1f); // Warm white daylight
+            globalLight.intensity = 1.0f;
 
             // Find and dim the Directional Light for Built-in Pipeline
             Light dirLight = FindAnyObjectByType<Light>();
             if (dirLight != null)
             {
-                dirLight.intensity = 0.35f;
-                dirLight.color = new Color(0.55f, 0.62f, 0.75f, 1f); // Damp moody tint
+                dirLight.intensity = 1.0f;
+                dirLight.color = Color.white;
             }
 
 
@@ -388,6 +393,9 @@ namespace EscapeFromHell.Editor
             // Create the Phone UI
             CreatePhoneUI(uiRoot);
 
+            // Create the Newspaper UI
+            CreateNewspaperUI(uiRoot);
+
             // 8. Create Props (Invisible triggers matching background illustration)
             GameObject propsParent = new GameObject("Props");
             propsParent.transform.position = Vector3.zero;
@@ -403,6 +411,24 @@ namespace EscapeFromHell.Editor
             SpriteRenderer phoneSR = phoneSpriteObj.AddComponent<SpriteRenderer>();
             phoneSR.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/Phone.png");
             phoneSR.sortingOrder = 1; // Render on top of background sheets, below player
+
+            // Newspaper on low table (bottom-left area of room, covering cartridge boxes)
+            ConfigureSpriteImportSettings("Assets/Sprites/Props/Newspaper.png");
+            Sprite newspaperSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Props/Newspaper.png");
+            GameObject newspaperObj = CreateProp(propsParent.transform, "Newspaper", new Vector3(-2.25f, -3.6f, 0), Chapter1PropType.Newspaper);
+            // Override collider size for newspaper
+            BoxCollider2D nbcOld = newspaperObj.GetComponent<BoxCollider2D>();
+            if (nbcOld != null) { nbcOld.size = new Vector2(0.8f, 0.8f); nbcOld.offset = Vector2.zero; }
+            newspaperObj.GetComponent<Chapter1Prop>().Initialize(Chapter1PropType.Newspaper, "Đọc báo");
+            // Add visible sprite
+            GameObject nSprite = new GameObject("Sprite");
+            nSprite.transform.SetParent(newspaperObj.transform, false);
+            nSprite.transform.localPosition = new Vector3(-0.55f, -0.25f, 0f);
+            nSprite.transform.localRotation = Quaternion.Euler(-1.406f, -0.051f, 35.182f);
+            nSprite.transform.localScale = new Vector3(0.10f, 0.10f, 1f);
+            SpriteRenderer nSR = nSprite.AddComponent<SpriteRenderer>();
+            nSR.sprite = newspaperSprite;
+            nSR.sortingOrder = 2;
 
             // 9. Create Chapter1Controller
             GameObject controllerObj = new GameObject("Chapter1Controller");
@@ -460,8 +486,7 @@ namespace EscapeFromHell.Editor
             bc.isTrigger = true;
             
             Chapter1Prop prop = obj.AddComponent<Chapter1Prop>();
-            SetPrivateField(prop, "propType", type);
-            SetPrivateField(prop, "promptMessage", $"Xem {name}");
+            prop.Initialize(type, $"Xem {name}");
 
             return obj;
         }
@@ -638,6 +663,465 @@ namespace EscapeFromHell.Editor
                 EditorUtility.SetDirty(importer);
                 importer.SaveAndReimport();
             }
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        //  NEWSPAPER UI
+        // ─────────────────────────────────────────────────────────────────
+        private static void CreateNewspaperUI(GameObject uiRoot)
+        {
+            // Root object with NewspaperUI component
+            GameObject root = new GameObject("NewspaperUI");
+            root.transform.SetParent(uiRoot.transform, false);
+            RectTransform rootRT = root.AddComponent<RectTransform>();
+            rootRT.anchorMin = Vector2.zero;
+            rootRT.anchorMax = Vector2.one;
+            rootRT.offsetMin = rootRT.offsetMax = Vector2.zero;
+            NewspaperUI newsUI = root.AddComponent<NewspaperUI>();
+
+            // ── Main newspaper panel (Full-screen dark backdrop overlay) ──
+            GameObject panel = new GameObject("NewspaperPanel");
+            panel.transform.SetParent(root.transform, false);
+            Image panelImg = panel.AddComponent<Image>();
+            panelImg.color = new Color(0f, 0f, 0f, 0.75f); // translucent black backdrop
+            RectTransform panelRT = panel.GetComponent<RectTransform>();
+            panelRT.anchorMin = Vector2.zero;
+            panelRT.anchorMax = Vector2.one;
+            panelRT.offsetMin = panelRT.offsetMax = Vector2.zero;
+
+            SetPrivateField(newsUI, "newspaperPanel", panel);
+
+            // ── Actual Paper Sheet ────────────────────────────────────────
+            GameObject paperSheet = new GameObject("PaperSheet");
+            paperSheet.transform.SetParent(panel.transform, false);
+            Image paperImg = paperSheet.AddComponent<Image>();
+            paperImg.color = new Color(0.96f, 0.92f, 0.80f, 0f); // transparent background so Page 4 can look torn
+            RectTransform paperRT = paperSheet.GetComponent<RectTransform>();
+            paperRT.anchorMin = new Vector2(0.08f, 0.05f);
+            paperRT.anchorMax = new Vector2(0.92f, 0.95f);
+            paperRT.offsetMin = paperRT.offsetMax = Vector2.zero;
+
+            // Shadow effect via second image behind paperSheet
+            GameObject shadowPanel = new GameObject("Shadow");
+            shadowPanel.transform.SetParent(panel.transform, false);
+            shadowPanel.transform.SetSiblingIndex(0); // behind paperSheet
+            Image shadowImg = shadowPanel.AddComponent<Image>();
+            shadowImg.color = new Color(0, 0, 0, 0.35f);
+            RectTransform shadowRT = shadowPanel.GetComponent<RectTransform>();
+            shadowRT.anchorMin = new Vector2(0.08f, 0.05f);
+            shadowRT.anchorMax = new Vector2(0.92f, 0.95f);
+            shadowRT.offsetMin = new Vector2(6, -6);
+            shadowRT.offsetMax = new Vector2(6, -6);
+
+            // ── Page indicator + Close button (header bar) ───────────────
+            GameObject header = new GameObject("Header");
+            header.transform.SetParent(paperSheet.transform, false);
+            RectTransform headerRT = header.AddComponent<RectTransform>();
+            headerRT.anchorMin = new Vector2(0, 0.92f);
+            headerRT.anchorMax = Vector2.one;
+            headerRT.offsetMin = headerRT.offsetMax = Vector2.zero;
+            Image headerImg = header.AddComponent<Image>();
+            headerImg.color = new Color(0.15f, 0.10f, 0.05f, 1f); // dark brown
+
+            // Page indicator label
+            GameObject pageIndObj = new GameObject("PageIndicator");
+            pageIndObj.transform.SetParent(header.transform, false);
+            TextMeshProUGUI pageInd = pageIndObj.AddComponent<TextMeshProUGUI>();
+            pageInd.text = "Trang 1/4";
+            pageInd.fontSize = 16;
+            pageInd.fontStyle = FontStyles.Bold;
+            pageInd.color = new Color(0.96f, 0.92f, 0.80f, 1f);
+            pageInd.alignment = TextAlignmentOptions.Center;
+            RectTransform piRT = pageIndObj.GetComponent<RectTransform>();
+            piRT.anchorMin = new Vector2(0.1f, 0); piRT.anchorMax = new Vector2(0.9f, 1);
+            piRT.offsetMin = piRT.offsetMax = Vector2.zero;
+            SetPrivateField(newsUI, "pageIndicator", pageInd);
+
+            // Close button [X]
+            GameObject closeObj = new GameObject("CloseButton");
+            closeObj.transform.SetParent(header.transform, false);
+            Image closeImg = closeObj.AddComponent<Image>();
+            closeImg.color = new Color(0.8f, 0.1f, 0.1f, 1f);
+            Button closeBtn = closeObj.AddComponent<Button>();
+            RectTransform closeRT = closeObj.GetComponent<RectTransform>();
+            closeRT.anchorMin = new Vector2(0.88f, 0.1f); closeRT.anchorMax = new Vector2(0.99f, 0.9f);
+            closeRT.offsetMin = closeRT.offsetMax = Vector2.zero;
+            GameObject closeTxt = new GameObject("Text");
+            closeTxt.transform.SetParent(closeObj.transform, false);
+            TextMeshProUGUI closeTMP = closeTxt.AddComponent<TextMeshProUGUI>();
+            closeTMP.text = "✕";
+            closeTMP.fontSize = 18; closeTMP.fontStyle = FontStyles.Bold;
+            closeTMP.color = Color.white; closeTMP.alignment = TextAlignmentOptions.Center;
+            RectTransform ctRT = closeTxt.GetComponent<RectTransform>();
+            ctRT.anchorMin = Vector2.zero; ctRT.anchorMax = Vector2.one;
+            ctRT.offsetMin = ctRT.offsetMax = Vector2.zero;
+            SetPrivateField(newsUI, "closeButton", closeBtn);
+
+            // ── Pages container ──────────────────────────────────────────
+            GameObject pagesContainer = new GameObject("Pages");
+            pagesContainer.transform.SetParent(paperSheet.transform, false);
+            RectTransform pcRT = pagesContainer.AddComponent<RectTransform>();
+            pcRT.anchorMin = new Vector2(0, 0.1f);
+            pcRT.anchorMax = new Vector2(1, 0.92f);
+            pcRT.offsetMin = new Vector2(10, 0); pcRT.offsetMax = new Vector2(-10, 0);
+
+            Color paperBg = new Color(0.96f, 0.92f, 0.80f, 1f);
+            Color darkInk = new Color(0.10f, 0.08f, 0.05f, 1f);
+            Color redAccent = new Color(0.75f, 0.05f, 0.05f, 1f);
+
+            // Build all 4 pages
+            GameObject[] pageObjs = new GameObject[4];
+            pageObjs[0] = BuildPage1(pagesContainer.transform, paperBg, darkInk, redAccent);
+            pageObjs[1] = BuildPage2(pagesContainer.transform, paperBg, darkInk);
+            pageObjs[2] = BuildPage3(pagesContainer.transform, paperBg, darkInk);
+            pageObjs[3] = BuildPage4(pagesContainer.transform, paperBg, darkInk, redAccent, newsUI);
+
+            // Hide all except page 1
+            for (int i = 1; i < pageObjs.Length; i++)
+                pageObjs[i].SetActive(false);
+
+            SetPrivateField(newsUI, "pages", pageObjs);
+
+            // ── Navigation buttons ───────────────────────────────────────
+            GameObject navBar = new GameObject("NavBar");
+            navBar.transform.SetParent(paperSheet.transform, false);
+            RectTransform navRT = navBar.AddComponent<RectTransform>();
+            navRT.anchorMin = new Vector2(0, 0); navRT.anchorMax = new Vector2(1, 0.1f);
+            navRT.offsetMin = navRT.offsetMax = Vector2.zero;
+
+            // Prev button
+            Button prevBtn = CreateNavButton(navBar.transform, "← Trang trước", new Vector2(0.02f, 0.1f), new Vector2(0.25f, 0.9f), darkInk);
+            SetPrivateField(newsUI, "prevButton", prevBtn);
+
+            // Next button
+            Button nextBtn = CreateNavButton(navBar.transform, "Trang tiếp →", new Vector2(0.75f, 0.1f), new Vector2(0.98f, 0.9f), darkInk);
+            SetPrivateField(newsUI, "nextButton", nextBtn);
+
+            // Initially disable prev (on page 1)
+            prevBtn.interactable = false;
+
+            // Deactivate the entire panel by default (so it starts hidden in Editor and Play Mode)
+            panel.SetActive(false);
+        }
+
+        private static Button CreateNavButton(Transform parent, string label, Vector2 anchorMin, Vector2 anchorMax, Color bgColor)
+        {
+            GameObject obj = new GameObject(label);
+            obj.transform.SetParent(parent, false);
+            Image img = obj.AddComponent<Image>();
+            img.color = bgColor;
+            Button btn = obj.AddComponent<Button>();
+            ColorBlock cb = btn.colors;
+            cb.highlightedColor = new Color(bgColor.r + 0.15f, bgColor.g + 0.15f, bgColor.b + 0.15f, 1f);
+            btn.colors = cb;
+            RectTransform rt = obj.GetComponent<RectTransform>();
+            rt.anchorMin = anchorMin; rt.anchorMax = anchorMax;
+            rt.offsetMin = rt.offsetMax = Vector2.zero;
+            // Label
+            GameObject lbl = new GameObject("Label");
+            lbl.transform.SetParent(obj.transform, false);
+            TextMeshProUGUI tmp = lbl.AddComponent<TextMeshProUGUI>();
+            tmp.text = label; tmp.fontSize = 13; tmp.fontStyle = FontStyles.Bold;
+            tmp.color = new Color(0.96f, 0.92f, 0.80f, 1f);
+            tmp.alignment = TextAlignmentOptions.Center;
+            RectTransform lblRT = lbl.GetComponent<RectTransform>();
+            lblRT.anchorMin = Vector2.zero; lblRT.anchorMax = Vector2.one;
+            lblRT.offsetMin = lblRT.offsetMax = Vector2.zero;
+            return btn;
+        }
+
+        private static TextMeshProUGUI AddText(Transform parent, string name, string text, float fontSize,
+            FontStyles style, Color color, TextAlignmentOptions align,
+            Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin = default, Vector2 offsetMax = default)
+        {
+            GameObject obj = new GameObject(name);
+            obj.transform.SetParent(parent, false);
+            TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
+            tmp.text = text; tmp.fontSize = fontSize; tmp.fontStyle = style;
+            tmp.color = color; tmp.alignment = align;
+            tmp.enableWordWrapping = true;
+            RectTransform rt = obj.GetComponent<RectTransform>();
+            rt.anchorMin = anchorMin; rt.anchorMax = anchorMax;
+            rt.offsetMin = offsetMin; rt.offsetMax = offsetMax;
+            return tmp;
+        }
+
+        private static Image AddDivider(Transform parent, string name, Color color,
+            Vector2 anchorMin, Vector2 anchorMax)
+        {
+            GameObject obj = new GameObject(name);
+            obj.transform.SetParent(parent, false);
+            Image img = obj.AddComponent<Image>();
+            img.color = color;
+            RectTransform rt = obj.GetComponent<RectTransform>();
+            rt.anchorMin = anchorMin; rt.anchorMax = anchorMax;
+            rt.offsetMin = rt.offsetMax = Vector2.zero;
+            rt.sizeDelta = new Vector2(0, 2);
+            return img;
+        }
+
+        // ── PAGE 1: Trang bìa ──────────────────────────────────────────
+        private static GameObject BuildPage1(Transform parent, Color bg, Color ink, Color red)
+        {
+            GameObject page = new GameObject("Page1_Cover");
+            page.transform.SetParent(parent, false);
+            RectTransform rt = page.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+            rt.offsetMin = rt.offsetMax = Vector2.zero;
+
+            // Add full page background image
+            Image bgImg = page.AddComponent<Image>();
+            bgImg.color = bg;
+
+            Color darkRed = new Color(0.6f, 0.02f, 0.02f, 1f);
+
+            // Masthead
+            AddText(page.transform, "Masthead", "THỜI BÁO NHÂN DÂN", 28, FontStyles.Bold | FontStyles.UpperCase,
+                darkRed, TextAlignmentOptions.Center,
+                new Vector2(0.02f, 0.88f), new Vector2(0.98f, 1f));
+
+            // Subtitle line
+            AddText(page.transform, "Subtitle", "SỐ 184  ●  THỨ SÁU, 15/3/2024  ●  GIÁ: 5.000đ", 11, FontStyles.Normal,
+                ink, TextAlignmentOptions.Center,
+                new Vector2(0.02f, 0.82f), new Vector2(0.98f, 0.89f));
+
+            AddDivider(page.transform, "Line1", darkRed, new Vector2(0.02f, 0.815f), new Vector2(0.98f, 0.815f));
+            AddDivider(page.transform, "Line2", ink, new Vector2(0.02f, 0.808f), new Vector2(0.98f, 0.808f));
+
+            // Headlines
+            string[] headlines = {
+                "■  KINH TẾ: Lạm phát tháng 3 tăng 4,2% — chuyên gia lo ngại sức mua giảm sút",
+                "■  XÃ HỘI: Hàng chục công nhân bị quỵt lương tại KCN Bình Dương — khởi kiện không thành",
+                "■  PHÁP LUẬT: Triệt phá đường dây lừa đảo online chiếm đoạt 87 tỷ đồng",
+                "■  GIẢI TRÍ: Sòng bạc Hoàng Gia khai trương hoành tráng — hứa hẹn làn gió mới <color=#8B0000>► Trang 4</color>",
+                "■  THỂ THAO: Đội tuyển quốc gia thất bại trận ra quân vòng loại World Cup"
+            };
+
+            float yTop = 0.80f;
+            float step = 0.145f;
+            for (int i = 0; i < headlines.Length; i++)
+            {
+                AddDivider(page.transform, $"HDivider{i}", new Color(ink.r, ink.g, ink.b, 0.3f),
+                    new Vector2(0.02f, yTop - i * step + 0.005f), new Vector2(0.98f, yTop - i * step + 0.005f));
+                AddText(page.transform, $"Headline{i}", headlines[i], 13.5f, FontStyles.Normal,
+                    ink, TextAlignmentOptions.Left,
+                    new Vector2(0.03f, yTop - (i + 1) * step + 0.01f), new Vector2(0.97f, yTop - i * step));
+            }
+
+            AddDivider(page.transform, "FooterLine", darkRed, new Vector2(0.02f, 0.015f), new Vector2(0.98f, 0.015f));
+            AddText(page.transform, "Footer", "Tất cả quyền được bảo lưu © Thời Báo Nhân Dân 2024", 10, FontStyles.Italic,
+                new Color(ink.r, ink.g, ink.b, 0.5f), TextAlignmentOptions.Center,
+                new Vector2(0.02f, 0f), new Vector2(0.98f, 0.05f));
+
+            return page;
+        }
+
+        // ── PAGE 2: Kinh tế & Xã hội ──────────────────────────────────
+        private static GameObject BuildPage2(Transform parent, Color bg, Color ink)
+        {
+            GameObject page = new GameObject("Page2");
+            page.transform.SetParent(parent, false);
+            RectTransform rt = page.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+            rt.offsetMin = rt.offsetMax = Vector2.zero;
+
+            // Add full page background image
+            Image bgImg = page.AddComponent<Image>();
+            bgImg.color = bg;
+
+            Color darkRed = new Color(0.6f, 0.02f, 0.02f, 1f);
+
+            AddText(page.transform, "PageNum", "TRANG 2", 11, FontStyles.Bold, darkRed,
+                TextAlignmentOptions.Right, new Vector2(0.7f, 0.95f), new Vector2(0.98f, 1f));
+
+            // Article 1
+            AddText(page.transform, "Art1Head", "LẠM PHÁT THÁNG 3 TĂNG 4,2%", 17, FontStyles.Bold, ink,
+                TextAlignmentOptions.Left, new Vector2(0.03f, 0.83f), new Vector2(0.97f, 0.95f));
+            AddDivider(page.transform, "D1", darkRed, new Vector2(0.03f, 0.832f), new Vector2(0.97f, 0.832f));
+            AddText(page.transform, "Art1Link", "thoisu.vn/lam-phat-hang-thang", 10.5f, FontStyles.Bold | FontStyles.Underline,
+                new Color(0.05f, 0.2f, 0.7f, 1f), TextAlignmentOptions.Left,
+                new Vector2(0.03f, 0.80f), new Vector2(0.97f, 0.83f));
+            AddText(page.transform, "Art1Body",
+                "Theo số liệu Tổng cục Thống kê công bố hôm qua, chỉ số giá tiêu dùng (CPI) tháng 3/2024 tăng 4,2% so với cùng kỳ năm ngoái. Đây là mức tăng cao nhất kể từ quý II/2023.\n\nGiá thực phẩm, xăng dầu và tiền thuê nhà là ba nhóm tăng mạnh nhất. Nhiều hộ gia đình thu nhập thấp cho biết họ phải cắt giảm chi tiêu xuống mức tối thiểu để trang trải qua tháng.\n\nChuyên gia kinh tế Trần Văn Minh (Đại học Kinh tế TP.HCM) nhận định: \"Nếu lạm phát tiếp tục đà này, sức mua của người dân sẽ suy giảm nghiêm trọng trong các quý tới.\"",
+                11.5f, FontStyles.Normal, ink, TextAlignmentOptions.Justified,
+                new Vector2(0.03f, 0.55f), new Vector2(0.97f, 0.80f));
+
+            AddDivider(page.transform, "D2", new Color(ink.r, ink.g, ink.b, 0.4f),
+                new Vector2(0.03f, 0.545f), new Vector2(0.97f, 0.545f));
+
+            // Article 2
+            AddText(page.transform, "Art2Head", "CÔNG NHÂN BỊ QUỴT LƯƠNG: KHỞI KIỆN KHÔNG THÀNH", 15, FontStyles.Bold, ink,
+                TextAlignmentOptions.Left, new Vector2(0.03f, 0.45f), new Vector2(0.97f, 0.545f));
+            AddDivider(page.transform, "D3", darkRed, new Vector2(0.03f, 0.452f), new Vector2(0.97f, 0.452f));
+            AddText(page.transform, "Art2Link", "laodong.vn/tin-tuc-cong-doan", 10.5f, FontStyles.Bold | FontStyles.Underline,
+                new Color(0.05f, 0.2f, 0.7f, 1f), TextAlignmentOptions.Left,
+                new Vector2(0.03f, 0.42f), new Vector2(0.97f, 0.45f));
+            AddText(page.transform, "Art2Body",
+                "Hơn 60 công nhân tại khu công nghiệp Bình Dương đã tập trung trước cổng nhà máy để phản đối việc bị nợ lương ba tháng liên tiếp. Công ty TNHH sản xuất Ánh Dương (chủ sở hữu nhà máy) tuyên bố \"đang gặp khó khăn tài chính tạm thời\" và hứa sẽ thanh toán trong vòng 30 ngày.\n\nTuy nhiên đây là lần thứ tư công ty đưa ra lời hứa tương tự. Nhiều công nhân cho biết họ không có tiền mua gạo hay trả tiền thuê phòng trọ. Đơn khởi kiện tập thể bị tòa án trả lại vì thiếu chứng từ hợp lệ.",
+                11.5f, FontStyles.Normal, ink, TextAlignmentOptions.Justified,
+                new Vector2(0.03f, 0.25f), new Vector2(0.97f, 0.42f));
+
+            AddDivider(page.transform, "FootLine", darkRed, new Vector2(0.02f, 0.015f), new Vector2(0.98f, 0.015f));
+            AddText(page.transform, "Footer", "Thời Báo Nhân Dân  ●  Số 184  ●  15/3/2024", 10, FontStyles.Italic,
+                new Color(ink.r, ink.g, ink.b, 0.45f), TextAlignmentOptions.Center,
+                new Vector2(0.02f, 0f), new Vector2(0.98f, 0.05f));
+
+            return page;
+        }
+
+        // ── PAGE 3: Pháp luật ─────────────────────────────────────────
+        private static GameObject BuildPage3(Transform parent, Color bg, Color ink)
+        {
+            GameObject page = new GameObject("Page3");
+            page.transform.SetParent(parent, false);
+            RectTransform rt = page.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+            rt.offsetMin = rt.offsetMax = Vector2.zero;
+
+            // Add full page background image
+            Image bgImg = page.AddComponent<Image>();
+            bgImg.color = bg;
+
+            Color darkRed = new Color(0.6f, 0.02f, 0.02f, 1f);
+            Color warnOrange = new Color(0.85f, 0.35f, 0.05f, 1f);
+
+            AddText(page.transform, "PageNum", "TRANG 3", 11, FontStyles.Bold, darkRed,
+                TextAlignmentOptions.Right, new Vector2(0.7f, 0.95f), new Vector2(0.98f, 1f));
+
+            AddText(page.transform, "Art1Head", "TRIỆT PHÁ ĐƯỜNG DÂY LỪA ĐẢO ONLINE: 87 TỶ ĐỒNG BỊ CHIẾM ĐOẠT", 16, FontStyles.Bold, ink,
+                TextAlignmentOptions.Left, new Vector2(0.03f, 0.84f), new Vector2(0.97f, 0.95f));
+            AddDivider(page.transform, "D1", darkRed, new Vector2(0.03f, 0.842f), new Vector2(0.97f, 0.842f));
+
+            AddText(page.transform, "Art1Link", "phapluat.vn/tin-tuc-hinh-su", 10.5f, FontStyles.Bold | FontStyles.Underline,
+                new Color(0.05f, 0.2f, 0.7f, 1f), TextAlignmentOptions.Left,
+                new Vector2(0.03f, 0.81f), new Vector2(0.97f, 0.84f));
+
+            // Warning box (shifted down)
+            GameObject warnBox = new GameObject("WarnBox");
+            warnBox.transform.SetParent(page.transform, false);
+            Image warnImg = warnBox.AddComponent<Image>();
+            warnImg.color = new Color(1f, 0.95f, 0.80f, 1f);
+            RectTransform warnRT = warnBox.GetComponent<RectTransform>();
+            warnRT.anchorMin = new Vector2(0.03f, 0.67f); warnRT.anchorMax = new Vector2(0.97f, 0.81f);
+            warnRT.offsetMin = warnRT.offsetMax = Vector2.zero;
+            AddText(warnBox.transform, "WarnText",
+                "⚠  CẢNH BÁO: Các chiêu trò lừa đảo phổ biến hiện nay:\n• Mời làm việc online lương cao, cần đặt cọc trước\n• Mạo danh ngân hàng/công an yêu cầu chuyển tiền\n• Hứa lãi suất đầu tư 30-50%/tháng\n• Tuyển cộng tác viên đặt hàng ảo trên sàn TMĐT",
+                11f, FontStyles.Normal, new Color(0.5f, 0.2f, 0f, 1f), TextAlignmentOptions.Left,
+                new Vector2(0.02f, 0.02f), new Vector2(0.98f, 0.98f),
+                new Vector2(4, 2), new Vector2(-4, -2));
+
+            // Art1Body (shifted down)
+            AddText(page.transform, "Art1Body",
+                "Cơ quan Cảnh sát điều tra (Bộ Công an) vừa phá thành công đường dây lừa đảo trực tuyến quy mô lớn, bắt giữ 14 đối tượng và thu giữ tang vật trị giá hàng chục tỷ đồng.\n\nĐường dây này hoạt động từ năm 2022, nhắm vào những người đang tìm việc làm hoặc muốn kiếm thêm thu nhập. Các đối tượng sử dụng mạng xã hội để tiếp cận nạn nhân, dụ dỗ họ đặt cọc \"phí bảo lãnh\" hoặc \"vốn khởi động\" với lời hứa hão về công việc lương cao tại nước ngoài.\n\nTheo điều tra, tổng số tiền bị chiếm đoạt lên đến 87 tỷ đồng từ hơn 400 nạn nhân tại 23 tỉnh thành. Nhiều nạn nhân đã phải bán đất, vay nặng lãi để có tiền theo yêu cầu của bọn lừa đảo.",
+                11.5f, FontStyles.Normal, ink, TextAlignmentOptions.Justified,
+                new Vector2(0.03f, 0.27f), new Vector2(0.97f, 0.67f));
+
+            // Quote (shifted down)
+            AddText(page.transform, "Quote",
+                "\"Tôi đã chuyển tất cả 150 triệu tiết kiệm của cả gia đình. Đến lúc biết bị lừa thì mọi thứ đã không còn.\" — Nạn nhân, 34 tuổi, Đà Nẵng",
+                11f, FontStyles.Italic, new Color(0.3f, 0.1f, 0.1f, 1f), TextAlignmentOptions.Center,
+                new Vector2(0.05f, 0.16f), new Vector2(0.95f, 0.27f));
+
+            AddDivider(page.transform, "FootLine", darkRed, new Vector2(0.02f, 0.015f), new Vector2(0.98f, 0.015f));
+            AddText(page.transform, "Footer", "Thời Báo Nhân Dân  ●  Số 184  ●  15/3/2024", 10, FontStyles.Italic,
+                new Color(ink.r, ink.g, ink.b, 0.45f), TextAlignmentOptions.Center,
+                new Vector2(0.02f, 0f), new Vector2(0.98f, 0.05f));
+
+            return page;
+        }
+
+        // ── PAGE 4: Sòng bạc Hoàng Gia (bị xé một phần) ──────────────
+        private static GameObject BuildPage4(Transform parent, Color bg, Color ink, Color red, NewspaperUI newsUI)
+        {
+            GameObject page = new GameObject("Page4_Torn");
+            page.transform.SetParent(parent, false);
+            RectTransform rt = page.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+            rt.offsetMin = rt.offsetMax = Vector2.zero;
+
+            Color darkRed = new Color(0.6f, 0.02f, 0.02f, 1f);
+
+            // Add background ONLY for the top half (since the bottom half is torn off)
+            GameObject bgObj = new GameObject("Page4_Bg");
+            bgObj.transform.SetParent(page.transform, false);
+            RectTransform bgRT = bgObj.AddComponent<RectTransform>();
+            bgRT.anchorMin = new Vector2(0f, 0.50f); bgRT.anchorMax = new Vector2(1f, 1f);
+            bgRT.offsetMin = bgRT.offsetMax = Vector2.zero;
+            Image bgImg = bgObj.AddComponent<Image>();
+            bgImg.color = bg;
+
+            AddText(page.transform, "PageNum", "TRANG 4", 11, FontStyles.Bold, darkRed,
+                TextAlignmentOptions.Right, new Vector2(0.7f, 0.95f), new Vector2(0.98f, 1f));
+
+            // Article header (intact)
+            AddText(page.transform, "Art1Head", "SÒNG BẠC HOÀNG GIA KHAI TRƯƠNG HOÀNH TRÁNG", 18, FontStyles.Bold, ink,
+                TextAlignmentOptions.Left, new Vector2(0.03f, 0.84f), new Vector2(0.97f, 0.95f));
+            AddDivider(page.transform, "D1", darkRed, new Vector2(0.03f, 0.842f), new Vector2(0.97f, 0.842f));
+
+            // Byline
+            AddText(page.transform, "Byline", "Phóng viên: Lê Thanh Hương  |  15/03/2024", 10, FontStyles.Italic,
+                new Color(ink.r, ink.g, ink.b, 0.6f), TextAlignmentOptions.Left,
+                new Vector2(0.03f, 0.80f), new Vector2(0.97f, 0.84f));
+
+            // Source website line (placed directly below the Byline)
+            AddText(page.transform, "SourceWebsite", "hoanggia.com", 10.5f, FontStyles.Bold | FontStyles.Underline,
+                new Color(0.05f, 0.2f, 0.7f, 1f), TextAlignmentOptions.Left,
+                new Vector2(0.03f, 0.76f), new Vector2(0.97f, 0.80f));
+
+            // Intact body text (top part, shifted down to make room for source website below byline)
+            AddText(page.transform, "BodyTop",
+                "Sòng bạc Hoàng Gia chính thức mở cửa tại số 88 đường Lê Lợi vào tối hôm qua với lễ khai trương hoành tráng có sự tham dự của nhiều nhân vật nổi tiếng trong giới doanh nhân và giải trí.\n\nVới vốn đầu tư lên đến 500 tỷ đồng, đây được xem là sòng bạc hợp pháp đầu tiên được cấp phép hoạt động tại khu vực này. Khách hàng sẽ được trải nghiệm các trò chơi như blackjack, roulette và tài xỉu đặc biệt trên hệ thống bàn chơi nhập khẩu từ châu Âu...",
+                11.5f, FontStyles.Normal, ink, TextAlignmentOptions.Justified,
+                new Vector2(0.03f, 0.51f), new Vector2(0.97f, 0.76f));
+
+            // ── TORN SECTION ──────────────────────────────────────────────
+            // Jagged tear edge (procedurally generated jagged line using page background color)
+            GameObject tornEdge = new GameObject("TornEdge");
+            tornEdge.transform.SetParent(page.transform, false);
+            Image tornImg = tornEdge.AddComponent<Image>();
+            tornImg.sprite = CreateTornEdgeSprite(bg);
+            tornImg.color = Color.white;
+            RectTransform tornRT = tornEdge.GetComponent<RectTransform>();
+            tornRT.anchorMin = new Vector2(0f, 0.468f); tornRT.anchorMax = new Vector2(1f, 0.50f);
+            tornRT.offsetMin = tornRT.offsetMax = Vector2.zero;
+
+            // Set null references to NewspaperUI since button is torn away
+            SetPrivateField(newsUI, "casinoLinkButton", null);
+            SetPrivateField(newsUI, "casinoLinkText", null);
+
+            return page;
+        }
+
+        private static Sprite CreateTornEdgeSprite(Color color)
+        {
+            int width = 512;
+            int height = 32;
+            Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            tex.filterMode = FilterMode.Point;
+            tex.wrapMode = TextureWrapMode.Clamp;
+
+            // Generate jagged edge using noise and sine waves
+            float scale = 0.08f;
+            for (int x = 0; x < width; x++)
+            {
+                // Simple sine wave combined with random noise for a natural torn look
+                int tearHeight = (int)(12f + Mathf.Sin(x * scale) * 4f + Mathf.PingPong(x * 0.7f, 3f) + (float)(new System.Random(x).NextDouble() * 3.0));
+                tearHeight = Mathf.Clamp(tearHeight, 0, height - 1);
+
+                for (int y = 0; y < height; y++)
+                {
+                    if (y <= tearHeight)
+                    {
+                        tex.SetPixel(x, y, color);
+                    }
+                    else
+                    {
+                        tex.SetPixel(x, y, Color.clear);
+                    }
+                }
+            }
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f));
         }
 
         private static void CreateComputerUI(GameObject uiRoot)
@@ -1237,6 +1721,12 @@ namespace EscapeFromHell.Editor
             addrtTxt.color = new Color(0.85f, 0.85f, 0.85f, 1f);
             addrtTxt.verticalAlignment = VerticalAlignmentOptions.Middle;
 
+            // Setup TMP_InputField component
+            TMP_InputField inputField = addrBox.AddComponent<TMP_InputField>();
+            inputField.targetGraphic = addrImg;
+            inputField.textComponent = addrtTxt;
+            inputField.text = "<color=#5cb85c>• Secure</color> | https://topcv.vn/tim-kiem?q=unity+fresher";
+
             GameObject chromeContent = new GameObject("Content");
             chromeContent.transform.SetParent(chromeWin.transform, false);
             RectTransform crcRect = chromeContent.AddComponent<RectTransform>();
@@ -1268,8 +1758,11 @@ namespace EscapeFromHell.Editor
                           "• Mức lương: 6.000.000đ - 8.000.000đ. Phỏng vấn kỹ thuật 3 vòng.<br><br>" +
                           "<color=#33cc66><size=13><b>3. [HOT] Việc Làm Nước Ngoài Lương Cao - Tuyển Kỹ Thuật Viên Máy Tính (Campuchia)</b></size></color><br>" +
                           "<color=#9aa0a6><size=10>https://vieclamnuocngoai.com/tuyen-dung/cambodia-tech</size></color><br>" +
-                          "• Mức lương: 1.000.000đ - 1.500.000đ/ngày (Bao ăn ở toàn bộ, hỗ trợ xe đưa đón, không phí trung gian).<br>" +
-                          "• Yêu cầu: Biết sử dụng máy tính cơ bản, gõ phím nhanh. Không yêu cầu bằng cấp hay kinh nghiệm.<br><br>" +
+                          "• Mức lương: 1.000.000đ - 1.500.000đ/ngày (Bao ăn ở toàn bộ, xe đưa đón).<br><br>" +
+                          "<color=#ff3366><size=13><b>4. [ĐỔI VẬN] Bạn Đang Gặp Xui Xẻo? Không Tìm Được Việc Làm? Click Ngay!</b></size></color><br>" +
+                          "<color=#9aa0a6><size=10>https://thaydoivanmenh.com.vn/dich-vu-giai-han</size></color><br>" +
+                          "• Bạn cảm thấy bế tắc vì thất nghiệp, nợ nần chồng chất? Chúng tôi có giải pháp thay đổi vận mệnh của bạn ngay lập tức.<br>" +
+                          "• Đăng ký dịch vụ giải hạn tâm linh đặc biệt giúp tăng cơ hội trúng tuyển lên 100%.<br><br>" +
                           "<color=#ffcc00><i>Cảnh báo thị trường:</i></color> <i>Thị trường tuyển dụng IT năm 2026 đang có mức độ cạnh tranh rất cao. Cảnh giác với các tin tuyển dụng việc nhẹ lương cao ở nước ngoài, nạp tiền cọc làm nhiệm vụ.</i>";
             crtTxt.fontSize = 11;
             crtTxt.color = Color.white;
@@ -1279,8 +1772,8 @@ namespace EscapeFromHell.Editor
             GameObject job1BtnObj = new GameObject("Job1Button");
             job1BtnObj.transform.SetParent(chromeContent.transform, false);
             RectTransform job1Rect = job1BtnObj.AddComponent<RectTransform>();
-            job1Rect.anchorMin = new Vector2(0f, 0.83f);
-            job1Rect.anchorMax = new Vector2(1f, 0.91f);
+            job1Rect.anchorMin = new Vector2(0f, 0.78f);
+            job1Rect.anchorMax = new Vector2(1f, 0.95f);
             job1Rect.offsetMin = new Vector2(12, 0);
             job1Rect.offsetMax = new Vector2(-12, 0);
             Image job1Img = job1BtnObj.AddComponent<Image>();
@@ -1298,8 +1791,8 @@ namespace EscapeFromHell.Editor
             GameObject job2BtnObj = new GameObject("Job2Button");
             job2BtnObj.transform.SetParent(chromeContent.transform, false);
             RectTransform job2Rect = job2BtnObj.AddComponent<RectTransform>();
-            job2Rect.anchorMin = new Vector2(0f, 0.66f);
-            job2Rect.anchorMax = new Vector2(1f, 0.74f);
+            job2Rect.anchorMin = new Vector2(0f, 0.58f);
+            job2Rect.anchorMax = new Vector2(1f, 0.75f);
             job2Rect.offsetMin = new Vector2(12, 0);
             job2Rect.offsetMax = new Vector2(-12, 0);
             Image job2Img = job2BtnObj.AddComponent<Image>();
@@ -1317,8 +1810,8 @@ namespace EscapeFromHell.Editor
             GameObject scamBtnObj = new GameObject("ScamJobButton");
             scamBtnObj.transform.SetParent(chromeContent.transform, false);
             RectTransform scamRect = scamBtnObj.AddComponent<RectTransform>();
-            scamRect.anchorMin = new Vector2(0f, 0.32f); // Expanded down to cover the entire block (Title + Details)
-            scamRect.anchorMax = new Vector2(1f, 0.58f);
+            scamRect.anchorMin = new Vector2(0f, 0.35f);
+            scamRect.anchorMax = new Vector2(1f, 0.55f);
             scamRect.offsetMin = new Vector2(12, 0);
             scamRect.offsetMax = new Vector2(-12, 0);
             Image scamImg = scamBtnObj.AddComponent<Image>();
@@ -1331,6 +1824,45 @@ namespace EscapeFromHell.Editor
             scamCb.pressedColor = new Color(1f, 1f, 1f, 0.1f);
             scamCb.selectedColor = Color.clear;
             scamBtn.colors = scamCb;
+
+            // 4. Scam Luck Button (Invisible overlay on Scam Luck Title)
+            GameObject scamLuckBtnObj = new GameObject("ScamLuckButton");
+            scamLuckBtnObj.transform.SetParent(chromeContent.transform, false);
+            RectTransform scamLuckRect = scamLuckBtnObj.AddComponent<RectTransform>();
+            scamLuckRect.anchorMin = new Vector2(0f, 0.12f);
+            scamLuckRect.anchorMax = new Vector2(1f, 0.32f);
+            scamLuckRect.offsetMin = new Vector2(12, 0);
+            scamLuckRect.offsetMax = new Vector2(-12, 0);
+            Image scamLuckImg = scamLuckBtnObj.AddComponent<Image>();
+            scamLuckImg.color = Color.clear;
+            Button scamLuckBtn = scamLuckBtnObj.AddComponent<Button>();
+            scamLuckBtn.targetGraphic = scamLuckImg;
+            ColorBlock scamLuckCb = scamLuckBtn.colors;
+            scamLuckCb.normalColor = Color.clear;
+            scamLuckCb.highlightedColor = new Color(1f, 1f, 1f, 0.05f);
+            scamLuckCb.pressedColor = new Color(1f, 1f, 1f, 0.1f);
+            scamLuckCb.selectedColor = Color.clear;
+            scamLuckBtn.colors = scamLuckCb;
+
+            // 5. Casino Search Button (Invisible overlay for the search result when searching hoanggia.com)
+            GameObject casinoSearchBtnObj = new GameObject("CasinoSearchButton");
+            casinoSearchBtnObj.transform.SetParent(chromeContent.transform, false);
+            RectTransform casinoSearchRect = casinoSearchBtnObj.AddComponent<RectTransform>();
+            casinoSearchRect.anchorMin = new Vector2(0f, 0.75f);
+            casinoSearchRect.anchorMax = new Vector2(1f, 0.95f);
+            casinoSearchRect.offsetMin = new Vector2(12, 0);
+            casinoSearchRect.offsetMax = new Vector2(-12, 0);
+            Image casinoSearchImg = casinoSearchBtnObj.AddComponent<Image>();
+            casinoSearchImg.color = Color.clear;
+            Button casinoSearchBtn = casinoSearchBtnObj.AddComponent<Button>();
+            casinoSearchBtn.targetGraphic = casinoSearchImg;
+            ColorBlock casinoSearchCb = casinoSearchBtn.colors;
+            casinoSearchCb.normalColor = Color.clear;
+            casinoSearchCb.highlightedColor = new Color(1f, 1f, 1f, 0.05f);
+            casinoSearchCb.pressedColor = new Color(1f, 1f, 1f, 0.1f);
+            casinoSearchCb.selectedColor = Color.clear;
+            casinoSearchBtn.colors = casinoSearchCb;
+            casinoSearchBtnObj.SetActive(false); // Hidden by default
 
             // Chrome Back Button (used on detail pages, initially hidden)
             GameObject chromeBackBtnObj = new GameObject("ChromeBackButton");

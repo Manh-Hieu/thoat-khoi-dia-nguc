@@ -28,6 +28,7 @@ namespace EscapeFromHell.Systems
         [SerializeField] private GameObject mapsWindow;
         [SerializeField] private GameObject finCreditWindow;
         [SerializeField] private GameObject bankWindow;
+        private GameObject bankTransferBtnObj = null;
         
         [Header("Contacts UI")]
         [SerializeField] private GameObject contactGStar;
@@ -68,6 +69,7 @@ namespace EscapeFromHell.Systems
         [HideInInspector] public bool hasSeenJob1 = false;
         [HideInInspector] public bool hasSeenJob2 = false;
         [HideInInspector] public bool hasSeenScamJob = false;
+        [HideInInspector] public bool hasSavedScamLuck = false;
 
         // Whether the scam chat message has been revealed (climax event)
         private bool scamChatVisible = false;
@@ -1018,6 +1020,49 @@ namespace EscapeFromHell.Systems
             if (bankWindow == null)
             {
                 bankWindow = CreateRuntimeAppWindow("BankWindow", "MB Bank", out bankContentText, () => CloseBankApp());
+
+                // Create transfer button inside bankWindow
+                bankTransferBtnObj = new GameObject("TransferButton");
+                bankTransferBtnObj.transform.SetParent(bankWindow.transform, false);
+                RectTransform tfRt = bankTransferBtnObj.AddComponent<RectTransform>();
+                // Position at bottom center of the bank app
+                tfRt.anchorMin = new Vector2(0.1f, 0.05f);
+                tfRt.anchorMax = new Vector2(0.9f, 0.13f);
+                tfRt.anchoredPosition = Vector2.zero;
+                tfRt.sizeDelta = Vector2.zero;
+
+                Image tfImg = bankTransferBtnObj.AddComponent<Image>();
+                Sprite roundedRectSprite = null;
+#if UNITY_EDITOR
+                roundedRectSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/RoundedRect.png");
+#endif
+                if (roundedRectSprite != null)
+                {
+                    tfImg.sprite = roundedRectSprite;
+                    tfImg.type = Image.Type.Sliced;
+                }
+                tfImg.color = new Color(0.1f, 0.45f, 0.8f, 1f); // Blue button
+
+                Button tfBtn = bankTransferBtnObj.AddComponent<Button>();
+                tfBtn.onClick.AddListener(() => ClickBankTransfer());
+
+                GameObject tfTextObj = new GameObject("Text");
+                tfTextObj.transform.SetParent(bankTransferBtnObj.transform, false);
+                RectTransform tftRt = tfTextObj.AddComponent<RectTransform>();
+                tftRt.anchorMin = Vector2.zero;
+                tftRt.anchorMax = Vector2.one;
+                tftRt.sizeDelta = Vector2.zero;
+
+                TextMeshProUGUI tftTxt = tfTextObj.AddComponent<TextMeshProUGUI>();
+                tftTxt.text = "Chuyển khoản 100.000đ";
+                tftTxt.fontSize = 12;
+                tftTxt.fontStyle = FontStyles.Bold;
+                tftTxt.color = Color.white;
+                tftTxt.alignment = TextAlignmentOptions.Center;
+                tftTxt.verticalAlignment = VerticalAlignmentOptions.Middle;
+                tftTxt.raycastTarget = false;
+
+                bankTransferBtnObj.SetActive(false); // Initially hidden
             }
             if (finCreditWindow == null)
             {
@@ -1308,17 +1353,84 @@ namespace EscapeFromHell.Systems
             if (bankWindow != null)
             {
                 bankWindow.SetActive(true);
-                if (bankContentText != null)
+                
+                // Show or hide the transfer button based on scam status
+                if (bankTransferBtnObj != null)
                 {
-                    bankContentText.text = "<b><size=14><color=#005691>NGÂN HÀNG MB BANK</color></size></b>\n" +
-                                           "-------------------------\n" +
-                                           "• <b>Chủ tài khoản:</b> NGUYEN HOAI MINH\n" +
-                                           "• <b>Số tài khoản:</b> 9907123456789\n" +
-                                           "• <b>Số dư khả dụng:</b> <color=#5cb85c><b>500.000đ</b></color>\n" +
-                                           "• <b>Liên kết thẻ:</b> Không có hoạt động\n\n" +
-                                           "<i>Số dư chỉ đủ để trang trải tạm thời cuộc sống, không đủ để thanh toán tiền nhà trọ (3.500.000đ) hay trả hết nợ nần...</i>";
+                    bool showBtn = hasSavedScamLuck && !(EscapeFromHell.Core.GameManager.Instance != null && EscapeFromHell.Core.GameManager.Instance.hasTransferredScamLuck);
+                    bankTransferBtnObj.SetActive(showBtn);
                 }
-                // Note: dialogue is triggered on Close to avoid blocking button input
+
+                UpdateBankContentText();
+            }
+        }
+
+        public void UpdateBankContentText()
+        {
+            if (bankContentText != null)
+            {
+                string luckAccount = "";
+                string balanceStr = "500.000đ";
+                string noteStr = "<i>Số dư chỉ đủ để trang trải tạm thời cuộc sống, không đủ để thanh toán tiền nhà trọ (3.500.000đ) hay trả hết nợ nần...</i>";
+                
+                bool isTransferred = (EscapeFromHell.Core.GameManager.Instance != null && EscapeFromHell.Core.GameManager.Instance.hasTransferredScamLuck);
+
+                if (hasSavedScamLuck)
+                {
+                    if (isTransferred)
+                    {
+                        balanceStr = "400.000đ";
+                        luckAccount = "\n\n<b><color=#005691>TÀI KHOẢN ĐÃ LƯU CHUYỂN TIỀN:</color></b>\n" +
+                                      "• <b>Tên thụ hưởng:</b> DV THAY DOI VAN MENH\n" +
+                                      "• <b>Số tài khoản:</b> 666688889999\n" +
+                                      "• <b>Ngân hàng:</b> VIETCOMBANK (VCB)\n" +
+                                      "• <b>Trạng thái:</b> <color=#5cb85c><b>ĐÃ CHUYỂN 100.000đ</b></color>\n" +
+                                      "• <b>Vận mệnh:</b> Đã nhận buff may mắn (10 lượt thắng casino)";
+                        noteStr = "<i>Số tiền còn lại (400.000đ) quá ít ỏi. Cả nguồn sống và niềm hy vọng của mình giờ đây phụ thuộc vào 10 lượt buff may mắn này...</i>";
+                    }
+                    else
+                    {
+                        luckAccount = "\n\n<b><color=#005691>TÀI KHOẢN ĐÃ LƯU CHUYỂN TIỀN:</color></b>\n" +
+                                      "• <b>Tên thụ hưởng:</b> DV THAY DOI VAN MENH\n" +
+                                      "• <b>Số tài khoản:</b> 666688889999\n" +
+                                      "• <b>Ngân hàng:</b> VIETCOMBANK (VCB)\n" +
+                                      "• <b>Mức chuyển:</b> 100.000đ (Đổi vận 10 lần/ngày)";
+                    }
+                }
+                
+                bankContentText.text = "<b><size=14><color=#005691>NGÂN HÀNG MB BANK</color></size></b>\n" +
+                                       "-------------------------\n" +
+                                       "• <b>Chủ tài khoản:</b> NGUYEN HOAI MINH\n" +
+                                       "• <b>Số tài khoản:</b> 9907123456789\n" +
+                                       "• <b>Số dư khả dụng:</b> <color=#5cb85c><b>" + balanceStr + "</b></color>\n" +
+                                       "• <b>Liên kết thẻ:</b> Không có hoạt động" + luckAccount + "\n\n" +
+                                       noteStr;
+            }
+        }
+
+        public void ClickBankTransfer()
+        {
+            if (EscapeFromHell.Core.GameManager.Instance == null) return;
+            
+            // Deduct money, set transfer flag and set buff count to 10
+            EscapeFromHell.Core.GameManager.Instance.hasTransferredScamLuck = true;
+            EscapeFromHell.Core.GameManager.Instance.scamLuckWinsRemaining = 10;
+            
+            // Hide transfer button immediately
+            if (bankTransferBtnObj != null) bankTransferBtnObj.SetActive(false);
+            
+            // Update bank content text
+            UpdateBankContentText();
+            
+            // Trigger Minh's confirmation dialogue
+            if (DialogueSystem.Instance != null)
+            {
+                DialogueData textMock = ScriptableObject.CreateInstance<DialogueData>();
+                textMock.lines = new System.Collections.Generic.List<DialogueLine> {
+                    new DialogueLine { speakerName = "Minh", text = "Đã chuyển khoản thành công 100k cho dịch vụ cải vận VCB: 666688889999." },
+                    new DialogueLine { speakerName = "Minh", text = "Tài khoản của mình đã bị trừ 100k, chỉ còn lại 400k. Mong là may mắn 10 lần trong ngày sẽ thực sự linh nghiệm..." }
+                };
+                DialogueSystem.Instance.StartDialogue(textMock);
             }
         }
 

@@ -27,6 +27,10 @@ namespace EscapeFromHell.Chapter
             }
         }
         private int betCount = 0;
+        // Chỉ hiện intro lần đầu vào mỗi trò
+        private bool hasSeenTaiXiuIntro = false;
+        private bool hasSeenBlackjackIntro = false;
+        private bool hasSeenRouletteIntro = false;
 
         // ── TÀI XỈU (DICE) UI & STATE ──────────────────────────────────────
         private GameObject taiXiuPanel;
@@ -105,6 +109,15 @@ namespace EscapeFromHell.Chapter
             if (taiXiuPanel != null) taiXiuPanel.SetActive(false);
             if (blackjackPanel != null) blackjackPanel.SetActive(false);
             if (roulettePanel != null) roulettePanel.SetActive(false);
+
+            if (EscapeFromHell.Core.GameManager.Instance != null && EscapeFromHell.Core.GameManager.Instance.hasTransferredScamLuck)
+            {
+                currentCash = 400000;
+            }
+            else
+            {
+                currentCash = 500000;
+            }
 
             UpdateAllCashUI();
 
@@ -331,6 +344,31 @@ namespace EscapeFromHell.Chapter
                 return;
             }
 
+            // Lần đầu vào: hiện intro dialogue
+            if (!hasSeenTaiXiuIntro && DialogueSystem.Instance != null)
+            {
+                hasSeenTaiXiuIntro = true;
+                DialogueData d = ScriptableObject.CreateInstance<DialogueData>();
+                d.lines = new List<DialogueLine> {
+                    new DialogueLine { speakerName = "Minh", text = "Bàn Tài Xỉu... Xốc xúc xắc đoán tổng Tài hay Xỉu." },
+                    new DialogueLine { speakerName = "Minh", text = "Được rồi, thử vận may xem sao!" }
+                };
+                DialogueSystem.Instance.OnDialogueEnd += OpenTaiXiuGame;
+                DialogueSystem.Instance.StartDialogue(d);
+                return;
+            }
+
+            // Lần sau: vào thẳng
+            OpenTaiXiuGame();
+        }
+
+        private void OpenTaiXiuGame()
+        {
+            if (DialogueSystem.Instance != null)
+                DialogueSystem.Instance.OnDialogueEnd -= OpenTaiXiuGame;
+
+            if (currentCash <= 0) return;
+
             if (taiXiuPanel != null)
             {
                 selectedBetType = "";
@@ -520,6 +558,11 @@ namespace EscapeFromHell.Chapter
                 if (resultText != null) resultText.text = $"<color=#ff4d4d>Thua! {finalD1}+{finalD2}+{finalD3}={finalTotal} ({resultStr})\nBạn mất -{selectedBetAmount.ToString("N0")}đ</color>";
             }
 
+            if (EscapeFromHell.Core.GameManager.Instance != null && EscapeFromHell.Core.GameManager.Instance.scamLuckWinsRemaining > 0)
+            {
+                EscapeFromHell.Core.GameManager.Instance.scamLuckWinsRemaining--;
+            }
+
             betCount++;
             isRolling = false;
             
@@ -570,8 +613,9 @@ namespace EscapeFromHell.Chapter
                 taiXiuBowlImage.rectTransform.anchoredPosition = new Vector2(0, -275);
             }
 
-            // Rigged calculation (Win first 3 bets, then lose)
-            bool shouldWin = (betCount < 3) && (Random.value < 0.75f);
+            // Game logic: 10 trận đầu xác suất 50/50, sau 10 trận thua liên tục
+            bool isScamLuckActive = (EscapeFromHell.Core.GameManager.Instance != null && EscapeFromHell.Core.GameManager.Instance.scamLuckWinsRemaining > 0);
+            bool shouldWin = isScamLuckActive ? true : ((betCount < 10) ? (Random.value < 0.5f) : false);
 
             int attempts = 0;
             do
@@ -731,7 +775,22 @@ namespace EscapeFromHell.Chapter
             if (!bjIsGameActive) return;
 
             int val;
-            bjPlayerHand.Add(DrawCard(out val));
+            string card = DrawCard(out val);
+            
+            bool isScamLuckActive = (EscapeFromHell.Core.GameManager.Instance != null && EscapeFromHell.Core.GameManager.Instance.scamLuckWinsRemaining > 0);
+            if (isScamLuckActive)
+            {
+                int currentScore = CalculateHandScore(bjPlayerHand);
+                int attempts = 0;
+                // Keep drawing until the card doesn't bust the player
+                while (currentScore + (val == 11 ? 1 : val) > 21 && attempts < 100)
+                {
+                    card = DrawCard(out val);
+                    attempts++;
+                }
+            }
+
+            bjPlayerHand.Add(card);
             UpdateBJDisplay(false);
 
             int score = CalculateHandScore(bjPlayerHand);
@@ -762,8 +821,9 @@ namespace EscapeFromHell.Chapter
             int pScore = CalculateHandScore(bjPlayerHand);
             int dScore = CalculateHandScore(bjDealerHand);
 
-            // Rigged logic: If betCount >= 3, player always loses
-            bool shouldWin = (betCount < 3) && (Random.value < 0.75f);
+            // Game logic: 10 trận đầu xác suất 50/50, sau 10 trận thua liên tục
+            bool isScamLuckActive = (EscapeFromHell.Core.GameManager.Instance != null && EscapeFromHell.Core.GameManager.Instance.scamLuckWinsRemaining > 0);
+            bool shouldWin = isScamLuckActive ? true : ((betCount < 10) ? (Random.value < 0.5f) : false);
 
             // Dealer hits if score < 17
             while (dScore < 17 && dScore <= pScore && pScore <= 21)
@@ -773,6 +833,21 @@ namespace EscapeFromHell.Chapter
                 dScore = CalculateHandScore(bjDealerHand);
                 UpdateBJDisplay(true);
                 yield return new WaitForSeconds(0.8f);
+            }
+
+            // Force dealer to draw cards until they bust if player should win
+            if (shouldWin && pScore <= 21 && dScore >= pScore && dScore <= 21)
+            {
+                int attempts = 0;
+                while (dScore <= 21 && attempts < 10)
+                {
+                    int val;
+                    bjDealerHand.Add(DrawCard(out val));
+                    dScore = CalculateHandScore(bjDealerHand);
+                    UpdateBJDisplay(true);
+                    yield return new WaitForSeconds(0.8f);
+                    attempts++;
+                }
             }
 
             // Force cheat if player should lose
@@ -814,6 +889,11 @@ namespace EscapeFromHell.Chapter
                 // Draw
                 currentCash += bjSelectedBet;
                 if (bjResultText != null) bjResultText.text = $"Hòa điểm ({pScore})! Hoàn lại tiền cược.";
+            }
+
+            if (EscapeFromHell.Core.GameManager.Instance != null && EscapeFromHell.Core.GameManager.Instance.scamLuckWinsRemaining > 0)
+            {
+                EscapeFromHell.Core.GameManager.Instance.scamLuckWinsRemaining--;
             }
 
             betCount++;
@@ -1239,8 +1319,9 @@ namespace EscapeFromHell.Chapter
             rlIsSpinning = true;
             if (rlResultText != null) rlResultText.text = "Vòng quay đang quay...";
 
-            // Rigged Roulette
-            bool shouldWin = (betCount < 3) && (Random.value < 0.75f);
+            // Game logic: 10 trận đầu xác suất 50/50, sau 10 trận thua liên tục
+            bool isScamLuckActive = (EscapeFromHell.Core.GameManager.Instance != null && EscapeFromHell.Core.GameManager.Instance.scamLuckWinsRemaining > 0);
+            bool shouldWin = isScamLuckActive ? true : ((betCount < 10) ? (Random.value < 0.5f) : false);
 
             int finalNum = 0;
             string finalColor = "";
@@ -1338,6 +1419,11 @@ namespace EscapeFromHell.Chapter
                 if (rlResultText != null) rlResultText.text = $"<color=#ff4d4d>Thua! Số {finalNum} (<color={colorHex}>{colorVN}</color>, {parityVN})\nBạn mất -{rlSelectedBetAmount.ToString("N0")}đ</color>";
             }
 
+            if (EscapeFromHell.Core.GameManager.Instance != null && EscapeFromHell.Core.GameManager.Instance.scamLuckWinsRemaining > 0)
+            {
+                EscapeFromHell.Core.GameManager.Instance.scamLuckWinsRemaining--;
+            }
+
             betCount++;
             rlIsSpinning = false;
             
@@ -1352,15 +1438,24 @@ namespace EscapeFromHell.Chapter
         // ── 4. NPC INTERACTION & DECORATION DIALOGUES ───────────────────────
         public void InteractWithPokerTable()
         {
-            if (DialogueSystem.Instance == null) return;
+            if (currentCash <= 0) { InteractWithRecruiter(); return; }
 
-            DialogueData d = ScriptableObject.CreateInstance<DialogueData>();
-            d.lines = new List<DialogueLine> {
-                new DialogueLine { speakerName = "Minh", text = "Bàn chơi Blackjack/Xì Dách... Đây rồi, những lá bài tây quen thuộc." },
-                new DialogueLine { speakerName = "Minh", text = "Hãy ngồi xuống xem vận đỏ đen của mình với các lá bài xem sao." }
-            };
-            DialogueSystem.Instance.OnDialogueEnd += OpenBlackjackGame;
-            DialogueSystem.Instance.StartDialogue(d);
+            // Lần đầu vào: hiện intro
+            if (!hasSeenBlackjackIntro && DialogueSystem.Instance != null)
+            {
+                hasSeenBlackjackIntro = true;
+                DialogueData d = ScriptableObject.CreateInstance<DialogueData>();
+                d.lines = new List<DialogueLine> {
+                    new DialogueLine { speakerName = "Minh", text = "Bàn chơi Blackjack/Xì Dách... Đây rồi, những lá bài tây quen thuộc." },
+                    new DialogueLine { speakerName = "Minh", text = "Hãy ngồi xuống xem vận đỏ đen của mình với các lá bài xem sao." }
+                };
+                DialogueSystem.Instance.OnDialogueEnd += OpenBlackjackGame;
+                DialogueSystem.Instance.StartDialogue(d);
+                return;
+            }
+
+            // Lần sau: vào thẳng
+            OpenBlackjackGame();
         }
 
         private void OpenBlackjackGame()
@@ -1371,15 +1466,24 @@ namespace EscapeFromHell.Chapter
 
         public void InteractWithRouletteTable()
         {
-            if (DialogueSystem.Instance == null) return;
+            if (currentCash <= 0) { InteractWithRecruiter(); return; }
 
-            DialogueData d = ScriptableObject.CreateInstance<DialogueData>();
-            d.lines = new List<DialogueLine> {
-                new DialogueLine { speakerName = "Minh", text = "Vòng quay Roulette... Trông những ô màu đỏ đen chuyển động thật cuốn hút." },
-                new DialogueLine { speakerName = "Minh", text = "Biết đâu một quả bóng nhỏ lăn trúng ô cược sẽ giúp mình đổi đời." }
-            };
-            DialogueSystem.Instance.OnDialogueEnd += OpenRouletteGame;
-            DialogueSystem.Instance.StartDialogue(d);
+            // Lần đầu vào: hiện intro
+            if (!hasSeenRouletteIntro && DialogueSystem.Instance != null)
+            {
+                hasSeenRouletteIntro = true;
+                DialogueData d = ScriptableObject.CreateInstance<DialogueData>();
+                d.lines = new List<DialogueLine> {
+                    new DialogueLine { speakerName = "Minh", text = "Vòng quay Roulette... Trông những ô màu đỏ đen chuyển động thật cuốn hút." },
+                    new DialogueLine { speakerName = "Minh", text = "Biết đâu một quả bóng nhỏ lăn trúng ô cược sẽ giúp mình đổi đời." }
+                };
+                DialogueSystem.Instance.OnDialogueEnd += OpenRouletteGame;
+                DialogueSystem.Instance.StartDialogue(d);
+                return;
+            }
+
+            // Lần sau: vào thẳng
+            OpenRouletteGame();
         }
 
         private void OpenRouletteGame()

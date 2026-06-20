@@ -26,6 +26,10 @@ namespace EscapeFromHell.Core
         [SerializeField] private int maxHealth = 3;
         [SerializeField] private int currentHealth = 3;
 
+        [Header("Luck Buff State")]
+        public bool hasTransferredScamLuck = false;
+        public int scamLuckWinsRemaining = 0;
+
         [Header("Scene Names")]
         public string mainMenuScene = "MainMenu";
         public string chapter1Scene = "Chapter1_Room";

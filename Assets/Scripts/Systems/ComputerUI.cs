@@ -27,10 +27,11 @@ namespace EscapeFromHell.Systems
 
         private bool hasOpenedMail = false;
         private bool hasOpenedBills = false;
-        private int currentViewingJobIndex = 0; // 0: none, 1: Job 1, 2: Job 2, 3: Scam Job
+        private int currentViewingJobIndex = 0; // 0: none, 1: Job 1, 2: Job 2, 3: Scam Job, 4: Scam Luck
         private GameObject startMenuPanel;
         private bool hasViewedJob1 = false;
         private bool hasViewedJob2 = false;
+        private bool hasViewedScamLuck = false;
 
         private void Awake()
         {
@@ -272,16 +273,7 @@ namespace EscapeFromHell.Systems
         {
             if (chromeWindow == null) return;
 
-            // Find address text
-            Transform addrTextTransform = chromeWindow.transform.Find("HeaderBar/AddressBox/Text");
-            if (addrTextTransform != null)
-            {
-                TextMeshProUGUI addrt = addrTextTransform.GetComponent<TextMeshProUGUI>();
-                if (addrt != null)
-                {
-                    addrt.text = "<color=#5cb85c>• Secure</color> | https://topcv.vn/tim-kiem?q=unity+fresher";
-                }
-            }
+            SetAddressText("<color=#5cb85c>• Secure</color> | https://topcv.vn/tim-kiem?q=unity+fresher");
 
             // Find page text
             Transform pageTextTransform = chromeWindow.transform.Find("Content/PageText");
@@ -301,8 +293,11 @@ namespace EscapeFromHell.Systems
                                  "• Mức lương: 6.000.000đ - 8.000.000đ. Phỏng vấn kỹ thuật 3 vòng.<br><br>" +
                                  "<color=#33cc66><size=13><b>3. [HOT] Việc Làm Nước Ngoài Lương Cao - Tuyển Kỹ Thuật Viên Máy Tính (Campuchia)</b></size></color><br>" +
                                  "<color=#9aa0a6><size=10>https://vieclamnuocngoai.com/tuyen-dung/cambodia-tech</size></color><br>" +
-                                 "• Mức lương: 1.000.000đ - 1.500.000đ/ngày (Bao ăn ở toàn bộ, hỗ trợ xe đưa đón, không phí trung gian).<br>" +
-                                 "• Yêu cầu: Biết sử dụng máy tính cơ bản, gõ phím nhanh. Không yêu cầu bằng cấp hay kinh nghiệm.<br><br>" +
+                                 "• Mức lương: 1.000.000đ - 1.500.000đ/ngày (Bao ăn ở toàn bộ, xe đưa đón).<br><br>" +
+                                 "<color=#ff3366><size=13><b>4. [ĐỔI VẬN] Bạn Đang Gặp Xui Xẻo? Không Tìm Được Việc Làm? Click Ngay!</b></size></color><br>" +
+                                 "<color=#9aa0a6><size=10>https://thaydoivanmenh.com.vn/dich-vu-giai-han</size></color><br>" +
+                                 "• Bạn cảm thấy bế tắc vì thất nghiệp, nợ nần chồng chất? Chúng tôi có giải pháp thay đổi vận mệnh của bạn ngay lập tức.<br>" +
+                                 "• Đăng ký dịch vụ giải hạn tâm linh đặc biệt giúp tăng cơ hội trúng tuyển lên 100%.<br><br>" +
                                  "<color=#ffcc00><i>Cảnh báo thị trường:</i></color> <i>Thị trường tuyển dụng IT năm 2026 đang có mức độ cạnh tranh rất cao. Cảnh giác với các tin tuyển dụng việc nhẹ lương cao ở nước ngoài, nạp tiền cọc làm nhiệm vụ.</i>";
                 }
             }
@@ -316,6 +311,12 @@ namespace EscapeFromHell.Systems
 
             Transform scamBtn = chromeWindow.transform.Find("Content/ScamJobButton");
             if (scamBtn != null) scamBtn.gameObject.SetActive(true);
+
+            Transform scamLuckBtn = chromeWindow.transform.Find("Content/ScamLuckButton");
+            if (scamLuckBtn != null) scamLuckBtn.gameObject.SetActive(true);
+
+            Transform casinoSearchBtn = chromeWindow.transform.Find("Content/CasinoSearchButton");
+            if (casinoSearchBtn != null) casinoSearchBtn.gameObject.SetActive(false);
 
             Transform backBtn = chromeWindow.transform.Find("Content/ChromeBackButton");
             if (backBtn != null) backBtn.gameObject.SetActive(false);
@@ -336,6 +337,12 @@ namespace EscapeFromHell.Systems
 
             Transform scamBtn = chromeWindow.transform.Find("Content/ScamJobButton");
             if (scamBtn != null) scamBtn.gameObject.SetActive(false);
+
+            Transform scamLuckBtn = chromeWindow.transform.Find("Content/ScamLuckButton");
+            if (scamLuckBtn != null) scamLuckBtn.gameObject.SetActive(false);
+
+            Transform casinoSearchBtn = chromeWindow.transform.Find("Content/CasinoSearchButton");
+            if (casinoSearchBtn != null) casinoSearchBtn.gameObject.SetActive(false);
         }
 
         public void ClickJob1()
@@ -343,16 +350,7 @@ namespace EscapeFromHell.Systems
             currentViewingJobIndex = 1;
             if (chromeWindow == null) return;
 
-            // Find address text
-            Transform addrTextTransform = chromeWindow.transform.Find("HeaderBar/AddressBox/Text");
-            if (addrTextTransform != null)
-            {
-                TextMeshProUGUI addrt = addrTextTransform.GetComponent<TextMeshProUGUI>();
-                if (addrt != null)
-                {
-                    addrt.text = "<color=#5cb85c>• Secure</color> | https://joygamestudio.vn/tuyen-dung/intern-unity";
-                }
-            }
+            SetAddressText("<color=#5cb85c>• Secure</color> | https://joygamestudio.vn/tuyen-dung/intern-unity");
 
             // Find page text
             Transform pageTextTransform = chromeWindow.transform.Find("Content/PageText");
@@ -407,16 +405,7 @@ namespace EscapeFromHell.Systems
             currentViewingJobIndex = 2;
             if (chromeWindow == null) return;
 
-            // Find address text
-            Transform addrTextTransform = chromeWindow.transform.Find("HeaderBar/AddressBox/Text");
-            if (addrTextTransform != null)
-            {
-                TextMeshProUGUI addrt = addrTextTransform.GetComponent<TextMeshProUGUI>();
-                if (addrt != null)
-                {
-                    addrt.text = "<color=#5cb85c>• Secure</color> | https://novatech.com/careers/web-fresher";
-                }
-            }
+            SetAddressText("<color=#5cb85c>• Secure</color> | https://novatech.com/careers/web-fresher");
 
             // Find page text
             Transform pageTextTransform = chromeWindow.transform.Find("Content/PageText");
@@ -491,6 +480,58 @@ namespace EscapeFromHell.Systems
                 DialogueSystem.Instance.OnDialogueEnd -= OnScamJobDialogueEnd;
             }
             ShowChromeSearchResults();
+        }
+
+        public void ClickScamLuck()
+        {
+            currentViewingJobIndex = 4;
+            if (chromeWindow == null) return;
+
+            SetAddressText("<color=#ff9900>• Secure</color> | https://thaydoivanmenh.com.vn/dich-vu-giai-han");
+
+            // Find page text
+            Transform pageTextTransform = chromeWindow.transform.Find("Content/PageText");
+            if (pageTextTransform != null)
+            {
+                TextMeshProUGUI paget = pageTextTransform.GetComponent<TextMeshProUGUI>();
+                if (paget != null)
+                {
+                    paget.text = "<size=13><b>PHONG THỦY CẢI VẬN - CHỈ 100K CÓ NGAY MAY MẮN</b></size><br>" +
+                                 "<b>Dịch vụ:</b> Giải Hạn Phong Thủy Cải Vận Cấp Tốc<br>" +
+                                 "<b>Cam kết:</b> Đổi đời ngay lập tức, may mắn gõ cửa 10 lần/ngày<br>" +
+                                 "<b>Chi phí dịch vụ:</b> <color=#33cc66>100.000đ</color><br>" +
+                                 "------------------------------------------------------------------<br>" +
+                                 "<b>Mô tả dịch vụ:</b><br>" +
+                                 "• Bạn đang gặp xui xẻo? Nợ nần chồng chất? Tìm việc mãi không thành công?<br>" +
+                                 "• Chỉ cần chuyển 100k vào số tài khoản cải vận dưới đây, bạn sẽ được khai quang vận mệnh, loại bỏ toàn bộ năng lượng tiêu cực.<br>" +
+                                 "• Tiền tài, vận may và công việc như ý sẽ tự động tìm đến bạn ngay trong ngày!<br><br>" +
+                                 "<b>Thông tin chuyển khoản thụ hưởng:</b><br>" +
+                                 "• Số tài khoản: <color=#ff9900><b>666688889999</b></color><br>" +
+                                 "• Ngân hàng: VIETCOMBANK (VCB)<br>" +
+                                 "• Tên thụ hưởng: DV THAY DOI VAN MENH";
+                }
+            }
+
+            HideAllChromeJobButtons();
+
+            Transform backBtn = chromeWindow.transform.Find("Content/ChromeBackButton");
+            if (backBtn != null) backBtn.gameObject.SetActive(true);
+
+            UpdateSaveContactButtonState();
+
+            if (!hasViewedScamLuck)
+            {
+                hasViewedScamLuck = true;
+                if (DialogueSystem.Instance != null)
+                {
+                    DialogueData textMock = ScriptableObject.CreateInstance<DialogueData>();
+                    textMock.lines = new System.Collections.Generic.List<DialogueLine> {
+                        new DialogueLine { speakerName = "Minh", text = "Hóa giải vận xui bằng cách chuyển khoản 100k? Nghe có vẻ hoang đường quá..." },
+                        new DialogueLine { speakerName = "Minh", text = "Nhưng dạo này mình xui xẻo thật sự. Nợ nần ngập đầu, thất nghiệp. Hay là thử xem sao... Số tài khoản VCB: 666688889999." }
+                    };
+                    DialogueSystem.Instance.StartDialogue(textMock);
+                }
+            }
         }
 
         private void ShowEmail(int emailIndex)
@@ -639,8 +680,54 @@ namespace EscapeFromHell.Systems
             bind("Workspace/ChromeWindow/Content/Job1Button", () => ClickJob1());
             bind("Workspace/ChromeWindow/Content/Job2Button", () => ClickJob2());
             bind("Workspace/ChromeWindow/Content/ScamJobButton", () => ClickScamJob());
-            bind("Workspace/ChromeWindow/Content/ChromeBackButton", () => ShowChromeSearchResults());
+            bind("Workspace/ChromeWindow/Content/ScamLuckButton", () => ClickScamLuck());
+            bind("Workspace/ChromeWindow/Content/ChromeBackButton", () => OnChromeBackButtonClicked());
+            bind("Workspace/ChromeWindow/Content/CasinoSearchButton", () => OpenCasinoDetailsPage());
             bind("Workspace/ChromeWindow/Content/SaveContactButton", () => SaveCurrentJobContact());
+
+            // Bind Chrome Address Box input field
+            Transform addrBoxTrans = computerPanel.transform.Find("Workspace/ChromeWindow/UrlBar/AddressBox");
+            if (addrBoxTrans != null)
+            {
+                TMP_InputField inputField = addrBoxTrans.GetComponent<TMP_InputField>();
+                if (inputField != null)
+                {
+                    inputField.onSubmit.RemoveAllListeners();
+                    inputField.onSubmit.AddListener(OnAddressBarSubmit);
+
+                    inputField.onEndEdit.RemoveAllListeners();
+                    inputField.onEndEdit.AddListener((val) => {
+                        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKey(KeyCode.Return) || Input.GetKey(KeyCode.KeypadEnter))
+                        {
+                            OnAddressBarSubmit(val);
+                        }
+                    });
+
+                    inputField.onValueChanged.RemoveAllListeners();
+                    inputField.onValueChanged.AddListener((val) => {
+                        if (string.IsNullOrEmpty(val.Trim()))
+                        {
+                            ShowChromeSearchResults();
+                        }
+                    });
+
+                    inputField.onSelect.RemoveAllListeners();
+                    inputField.onSelect.AddListener((val) => {
+                        // When clicked/selected, strip out rich text and prefixes to make it easy to edit
+                        string cleanText = inputField.text;
+                        if (cleanText.Contains("|"))
+                        {
+                            int idx = cleanText.IndexOf('|');
+                            cleanText = cleanText.Substring(idx + 1).Trim();
+                        }
+                        cleanText = System.Text.RegularExpressions.Regex.Replace(cleanText, "<.*?>", "");
+                        inputField.text = cleanText;
+
+                        // Select all
+                        inputField.Select();
+                    });
+                }
+            }
 
             // Bind email buttons by name recursively
             bind("Thư từ chối 1", () => ShowEmail(1));
@@ -669,18 +756,19 @@ namespace EscapeFromHell.Systems
                 if (currentViewingJobIndex == 1) alreadySaved = PhoneUI.Instance.hasSeenJob1;
                 else if (currentViewingJobIndex == 2) alreadySaved = PhoneUI.Instance.hasSeenJob2;
                 else if (currentViewingJobIndex == 3) alreadySaved = PhoneUI.Instance.hasSeenScamJob;
+                else if (currentViewingJobIndex == 4) alreadySaved = PhoneUI.Instance.hasSavedScamLuck;
             }
 
             if (alreadySaved)
             {
                 btn.interactable = false;
-                if (txt != null) txt.text = "✓ Đã lưu số";
+                if (txt != null) txt.text = currentViewingJobIndex == 4 ? "✓ Đã lưu tài khoản" : "✓ Đã lưu số";
                 if (img != null) img.color = new Color(0.25f, 0.25f, 0.28f, 1f); // Grey
             }
             else
             {
                 btn.interactable = true;
-                if (txt != null) txt.text = "Lưu số điện thoại";
+                if (txt != null) txt.text = currentViewingJobIndex == 4 ? "Lưu vào ngân hàng điện thoại" : "Lưu số điện thoại";
                 if (img != null) img.color = new Color(0.1f, 0.45f, 0.8f, 1f); // Blue
             }
         }
@@ -690,6 +778,25 @@ namespace EscapeFromHell.Systems
             if (PhoneUI.Instance == null) return;
 
             string contactName = "";
+            bool isLuckScam = (currentViewingJobIndex == 4);
+
+            if (isLuckScam)
+            {
+                bool ready = (Chapter1Controller.Instance != null && Chapter1Controller.Instance.IsReadyToGoToCasino);
+                if (!ready)
+                {
+                    if (DialogueSystem.Instance != null)
+                    {
+                        DialogueData textMock = ScriptableObject.CreateInstance<DialogueData>();
+                        textMock.lines = new System.Collections.Generic.List<DialogueLine> {
+                            new DialogueLine { speakerName = "Minh", text = "Mấy cái trò phong thủy giải hạn online này toàn là mê tín dị đoan lừa đảo thôi, mình không nên lưu làm gì..." }
+                        };
+                        DialogueSystem.Instance.StartDialogue(textMock);
+                    }
+                    return;
+                }
+            }
+
             if (currentViewingJobIndex == 1)
             {
                 PhoneUI.Instance.hasSeenJob1 = true;
@@ -705,6 +812,11 @@ namespace EscapeFromHell.Systems
                 PhoneUI.Instance.hasSeenScamJob = true;
                 contactName = "Anh Hùng (Bavet Campuchia)";
             }
+            else if (currentViewingJobIndex == 4)
+            {
+                PhoneUI.Instance.hasSavedScamLuck = true;
+                contactName = "DV THAY DOI VAN MENH";
+            }
 
             if (!string.IsNullOrEmpty(contactName))
             {
@@ -715,8 +827,11 @@ namespace EscapeFromHell.Systems
                 if (DialogueSystem.Instance != null)
                 {
                     DialogueData textMock = ScriptableObject.CreateInstance<DialogueData>();
+                    string confirmText = isLuckScam
+                        ? "Đã lưu số tài khoản của dịch vụ cải vận VCB: 666688889999 vào danh sách thụ hưởng lưu sẵn của ứng dụng MB Bank."
+                        : $"Đã lưu số điện thoại của {contactName} vào danh bạ trên di động.";
                     textMock.lines = new System.Collections.Generic.List<DialogueLine> {
-                        new DialogueLine { speakerName = "Minh", text = $"Đã lưu số điện thoại của {contactName} vào danh bạ trên di động." }
+                        new DialogueLine { speakerName = "Minh", text = confirmText }
                     };
                     DialogueSystem.Instance.StartDialogue(textMock);
                 }
@@ -953,6 +1068,164 @@ namespace EscapeFromHell.Systems
                 if (nextState)
                 {
                     startMenuPanel.transform.SetAsLastSibling();
+                }
+            }
+        }
+
+        private void OnAddressBarSubmit(string text)
+        {
+            string cleanText = text.ToLower().Trim();
+            if (cleanText.Contains("hoanggiacacino") || 
+                cleanText.Contains("hoanggiacasino") || 
+                cleanText.Contains("hoanggia") || 
+                cleanText.Contains("hgcasino") || 
+                cleanText.Contains("sòng bạc hoàng gia") || 
+                cleanText.Contains("song bac hoang gia"))
+            {
+                ShowCasinoSearchResultPage();
+            }
+            else
+            {
+                ShowGenericSearchError(text);
+            }
+        }
+
+        public void ShowCasinoSearchResultPage()
+        {
+            if (chromeWindow == null) return;
+
+            SetAddressText("hoanggia.com");
+
+            // Find page text
+            Transform pageTextTransform = chromeWindow.transform.Find("Content/PageText");
+            if (pageTextTransform != null)
+            {
+                TextMeshProUGUI paget = pageTextTransform.GetComponent<TextMeshProUGUI>();
+                if (paget != null)
+                {
+                    paget.text = "<size=11><color=#9aa0a6>Khoảng 1 kết quả (0,15 giây)</color></size><br><br>" +
+                                 "<color=#8ab4f8><size=13><b>[ĐIỀU TRA ĐỘC QUYỀN] VẠCH TRẦN SỰ THẬT VỀ SÒNG BẠC HOÀNG GIA</b></size></color><br>" +
+                                 "<color=#9aa0a6><size=10>https://hoanggia.com/dieu-tra-doc-quyen</size></color><br>" +
+                                 "• Hoạt động dưới danh nghĩa giải trí hợp pháp, nhưng thực chất là một bẫy nợ khổng lồ được tổ chức tinh vi.<br>" +
+                                 "• Cảnh báo người chơi về các trò gian lận tinh vi và hình thức cho vay nóng lãi suất cắt cổ ngay tại sòng bạc.";
+                }
+            }
+
+            // Hide all other job buttons first
+            HideAllChromeJobButtons();
+
+            // Set Casino Search Button active
+            Transform casinoSearchBtn = chromeWindow.transform.Find("Content/CasinoSearchButton");
+            if (casinoSearchBtn != null) casinoSearchBtn.gameObject.SetActive(true);
+
+            // Hide save contact button
+            Transform saveContactBtn = chromeWindow.transform.Find("Content/SaveContactButton");
+            if (saveContactBtn != null) saveContactBtn.gameObject.SetActive(false);
+
+            // Show Back button
+            Transform backBtn = chromeWindow.transform.Find("Content/ChromeBackButton");
+            if (backBtn != null) backBtn.gameObject.SetActive(true);
+        }
+
+        public void OnChromeBackButtonClicked()
+        {
+            if (chromeWindow == null) return;
+
+            // Get current address text
+            Transform addrBoxTrans = chromeWindow.transform.Find("UrlBar/AddressBox");
+            string currentUrl = "";
+            if (addrBoxTrans != null)
+            {
+                TMP_InputField inputField = addrBoxTrans.GetComponent<TMP_InputField>();
+                if (inputField != null)
+                {
+                    currentUrl = inputField.text;
+                }
+            }
+
+            if (currentUrl.Contains("hoanggia.com/dieu-tra-doc-quyen"))
+            {
+                ShowCasinoSearchResultPage();
+            }
+            else
+            {
+                ShowChromeSearchResults();
+            }
+        }
+
+        public void OpenCasinoDetailsPage()
+        {
+            if (chromeWindow == null) return;
+            HideAllChromeJobButtons();
+            
+            // Set Address Bar Text
+            SetAddressText("https://hoanggia.com/dieu-tra-doc-quyen");
+            
+            // Set content text
+            Transform pageTextTransform = chromeWindow.transform.Find("Content/PageText");
+            if (pageTextTransform != null)
+            {
+                TextMeshProUGUI paget = pageTextTransform.GetComponent<TextMeshProUGUI>();
+                if (paget != null)
+                {
+                    paget.text = "<color=#ff3333><size=14><b>[ĐIỀU TRA ĐỘC QUYỀN] VẠCH TRẦN SỰ THẬT VỀ SÒNG BẠC HOÀNG GIA</b></size></color><br>" +
+                                 "<color=#9aa0a6><size=10>Thứ Năm, 18/06/2026 - Nhóm phóng viên điều tra</size></color><br><br>" +
+                                 "Sòng bạc Hoàng Gia hoạt động dưới danh nghĩa giải trí hợp pháp, nhưng thực chất là một <b>bẫy nợ khổng lồ</b> được tổ chức tinh vi. " +
+                                 "Theo tài liệu và lời kể của hàng chục nạn nhân, sòng bạc này sử dụng các thiết bị gian lận điện tử và thủ thuật của dealer trong mọi trò chơi (Tài Xỉu, Blackjack, Roulette) để kiểm soát kết quả, khiến người chơi chắc chắn thua sạch tiền.<br><br>" +
+                                 "Nguy hiểm hơn, tại sòng bạc luôn túc trực các đối tượng <b>'tay trong' chuyên cho vay nóng</b> với lãi suất cắt cổ. " +
+                                 "Khi người chơi thua hết tiền và hoảng luận, những kẻ này sẽ dụ dỗ ký giấy nợ để lấy tiền chơi tiếp. Kết quả là người chơi càng lún sâu, nợ chồng nợ dẫn đến khánh kiệt, mất nhà cửa và bị ép buộc làm việc phi pháp để trả nợ.<br><br>" +
+                                 "<color=#ffcc00><b>Khuyến cáo:</b> Tuyệt đối không tham gia, không tin lời các đối tượng dụ dỗ nạp tiền chơi thử.</color>";
+                }
+            }
+            
+            // Show Back button
+            Transform backBtn = chromeWindow.transform.Find("Content/ChromeBackButton");
+            if (backBtn != null) backBtn.gameObject.SetActive(true);
+        }
+
+        private void ShowGenericSearchError(string query)
+        {
+            if (chromeWindow == null) return;
+            HideAllChromeJobButtons();
+            
+            Transform pageTextTransform = chromeWindow.transform.Find("Content/PageText");
+            if (pageTextTransform != null)
+            {
+                TextMeshProUGUI paget = pageTextTransform.GetComponent<TextMeshProUGUI>();
+                if (paget != null)
+                {
+                    paget.text = $"<color=#ff3333>Không tìm thấy trang web hoặc kết quả tìm kiếm cho: <b>{query}</b></color><br><br>" +
+                                 "Gợi ý: Nhập chính xác địa chỉ website hoặc từ khóa từ tờ báo giấy để xem chi tiết điều tra sòng bạc:<br>" +
+                                 "• <b>hoanggia.com</b><br>" +
+                                 "• <b>sòng bạc hoàng gia</b>";
+                }
+            }
+            
+            Transform backBtn = chromeWindow.transform.Find("Content/ChromeBackButton");
+            if (backBtn != null) backBtn.gameObject.SetActive(true);
+        }
+
+        private void SetAddressText(string rawText)
+        {
+            if (chromeWindow == null) return;
+            Transform addrBoxTrans = chromeWindow.transform.Find("UrlBar/AddressBox");
+            if (addrBoxTrans != null)
+            {
+                TMP_InputField inputField = addrBoxTrans.GetComponent<TMP_InputField>();
+                if (inputField != null)
+                {
+                    inputField.text = rawText;
+                    return;
+                }
+            }
+
+            Transform addrTextTransform = chromeWindow.transform.Find("UrlBar/AddressBox/Text");
+            if (addrTextTransform != null)
+            {
+                TextMeshProUGUI addrt = addrTextTransform.GetComponent<TextMeshProUGUI>();
+                if (addrt != null)
+                {
+                    addrt.text = rawText;
                 }
             }
         }
